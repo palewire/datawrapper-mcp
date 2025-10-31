@@ -39,7 +39,7 @@ jobs:
 
       - id: upload-release-candidate
         name: Upload release candidate
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: release-candidate
           path: ./_build/html/
