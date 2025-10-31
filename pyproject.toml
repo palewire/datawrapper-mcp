@@ -1,0 +1,72 @@
+[build-system]
+requires = ["setuptools >= 61.0", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "your-package-name"
+dynamic = ["version"]
+requires-python = ">=3.10"
+dependencies = [
+    'exceptiongroup; python_version<"3.11"',
+]
+authors = [
+  { name="Ben Welsh", email="b@palewi.re" },
+]
+description = "Your package description"
+license = {text = "MIT"}
+readme = "README.md"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "License :: OSI Approved :: MIT License",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pre-commit",
+    "setuptools-scm",
+]
+test = [
+    "pytest-runner",
+    "pytest-cov",
+    "pytest-env",
+    "pytest-vcr",
+    "pytest-xdist",
+]
+docs = [
+    "sphinx",
+    "sphinx-autobuild",
+    "sphinxcontrib-mermaid",
+    "myst-parser",
+    "sphinx-palewire-theme",
+]
+mypy = [
+    "mypy",
+]
+notebooks = [
+    "jupyterlab",
+    "ipywidgets",
+    "rich",
+    "pandas",
+    "pyarrow",
+    "xlrd",
+    "openpyxl",
+    "altair",
+]
+
+[project.urls]
+Documentation = "https://palewi.re/docs/your-respository/"
+Maintainer = "https://github.com/palewire/"
+Source = "https://github.com/palewire/your-respository/"
+Issues = "https://github.com/palewire/your-respository/issues/"
+
+# [tool.setuptools]
+# packages = ["your_package_module"]
+
+[tool.setuptools_scm]

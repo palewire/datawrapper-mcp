@@ -1,0 +1,5 @@
+include LICENSE
+include README.md
+include CODE_OF_CONDUCT.md
+include CONTRIBUTING.md
+include SECURITY.md

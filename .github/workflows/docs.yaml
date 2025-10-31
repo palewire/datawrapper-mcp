@@ -1,0 +1,76 @@
+name: Documentation
+
+on:
+  push:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - id: checkout
+        name: Checkout
+        uses: actions/checkout@v4
+
+      - id: install-uv
+        name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          version: "latest"
+          enable-cache: true
+          cache-dependency-glob: '**/pyproject.toml'
+
+      - id: install-python
+        name: Install Python
+        run: uv python install 3.13
+
+      - id: install-python-dependencies
+        name: Install Python dependencies
+        run: uv sync --extra docs
+
+      - id: build-sphinx-documentation
+        name: Build Sphinx documentation
+        run: uv run sphinx-build -M html ./docs ./_build/
+
+      - id: upload-release-candidate
+        name: Upload release candidate
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-candidate
+          path: ./_build/html/
+
+  # deploy:
+  #   name: Deploy
+  #   runs-on: ubuntu-latest
+  #   needs: build
+  #   if: ${{ github.ref_name == 'main' }}
+  #   steps:
+  #     - name: Download release candidate
+  #       uses: actions/download-artifact@v4
+  #       with:
+  #         name: release-candidate
+  #         path: ./docs/
+
+  #     - id: configure-aws
+  #       name: Configure AWS Credentials
+  #       uses: aws-actions/configure-aws-credentials@v4
+  #       with:
+  #         aws-access-key-id: ${{ secrets.DOCS_AWS_ACCESS_KEY_ID }}
+  #         aws-secret-access-key: ${{ secrets.DOCS_AWS_SECRET_ACCESS_KEY }}
+  #         aws-region: ${{ secrets.DOCS_AWS_REGION }}
+
+  #     - id: upload-to-s3
+  #       name: Upload documentation to Amazon S3
+  #       uses: datadesk/delivery-deploy-action@v1
+  #       with:
+  #         bucket: ${{ secrets.DOCS_AWS_BUCKET }}
+  #         base-path: ${{ secrets.DOCS_AWS_BASE_PATH }}
+  #         dir: ./docs/
+  #         should-cache: false
+  #         use-accelerate-endpoint: false
+  #         public: true
