@@ -1,0 +1,169 @@
+# datawrapper-mcp Project Rules
+
+## Project Overview
+
+This is a Model Context Protocol (MCP) server that provides tools for creating Datawrapper charts through AI assistants. The server leverages Pydantic models from the datawrapper library for validation and schema generation.
+
+## Architecture
+
+### Two-Tier Tool Design
+
+1. **Chart Creation** (`create_chart`): Full control using Pydantic models
+   - Takes data, chart_type, and complete chart_config dict
+   - Validates config using Pydantic's model_validate()
+   - Allows specification of all chart properties (colors, axes, labels, etc.)
+   - Uses Pydantic class instance method: `chart.create(access_token)`
+
+2. **Schema Discovery** (`get_chart_schema`): Explore available options
+   - Returns Pydantic JSON schema for a chart type
+   - Shows all properties, types, defaults, and descriptions
+   - Enables AI to discover chart capabilities dynamically
+
+### Key Design Decisions
+
+- **Pydantic-Only**: Uses ONLY Pydantic class instance methods, never base Datawrapper client
+- **No Deprecated Methods**: Avoids dw.create_chart(), dw.publish_chart(), etc. which will be deprecated
+- **Instance Methods**: Uses chart.create(), chart.publish(), chart.update(), chart.delete()
+- **Factory Pattern**: Uses get_chart(chart_id, access_token) from datawrapper.chart_factory
+- **Type-Safe**: All configurations validated through Pydantic
+- **Flexible Data**: Supports JSON strings, list of dicts, or dict of arrays
+
+## File Structure
+
+```
+datawrapper_mcp/
+├── __init__.py          # Package initialization
+└── server.py            # Main MCP server implementation
+```
+
+## Dependencies
+
+- `datawrapper>=2.0.7`: Python wrapper for Datawrapper API with Pydantic models
+- `mcp[cli]>=1.20.0`: Model Context Protocol SDK
+- `pandas>=2.0.0`: Data manipulation for chart data
+
+## Environment Variables
+
+- `DATAWRAPPER_API_TOKEN`: Required. Get from https://app.datawrapper.de/account/api-tokens
+
+## Supported Chart Types
+
+The server supports 8 chart types from the datawrapper library:
+- `bar`: BarChart
+- `line`: LineChart
+- `area`: AreaChart
+- `arrow`: ArrowChart
+- `column`: ColumnChart
+- `multiple_column`: MultipleColumnChart
+- `scatter`: ScatterPlot
+- `stacked_bar`: StackedBarChart
+
+## Available Tools
+
+1. **create_chart**: Chart creation with full Pydantic config
+2. **get_chart_schema**: Get JSON schema for a chart type
+3. **publish_chart**: Publish chart to make it public
+4. **get_chart**: Retrieve chart information
+5. **update_chart**: Update chart data or configuration
+6. **delete_chart**: Delete a chart
+
+## MCP Resources
+
+- `datawrapper://chart-types`: Returns schemas for all chart types
+
+## Data Format
+
+The server accepts three data formats:
+
+1. **List of records** (recommended):
+   ```json
+   [{"year": 2020, "value": 100}, {"year": 2021, "value": 150}]
+   ```
+
+2. **Dict of arrays**:
+   ```json
+   {"year": [2020, 2021], "value": [100, 150]}
+   ```
+
+3. **JSON string**: String representation of either format above
+
+All formats are converted to pandas DataFrame internally.
+
+## Implementation Notes
+
+### Critical Implementation Rules
+
+**NEVER use these deprecated methods:**
+- `dw.create_chart()` - Use `chart.create(access_token)` instead
+- `dw.publish_chart()` - Use `chart.publish(access_token)` instead
+- `dw.add_data()` - Use `chart.data = df` then `chart.update(access_token)` instead
+- `dw.update_metadata()` - Use `setattr(chart, key, value)` then `chart.update(access_token)` instead
+- `dw.delete_chart()` - Use `chart.delete(access_token)` instead
+- `dw.get_chart()` - Use `get_chart(chart_id, access_token)` from datawrapper.chart_factory instead
+
+**Always use Pydantic class instance methods:**
+- Create: `chart.create(access_token=api_token)`
+- Publish: `chart.publish(access_token=api_token)`
+- Update: `chart.update(access_token=api_token)`
+- Delete: `chart.delete(access_token=api_token)`
+- Retrieve: `get_chart(chart_id, access_token=api_token)` (factory function)
+
+### Error Handling
+
+- Missing API token raises ValueError with helpful message
+- Invalid chart configs return TextContent with validation errors
+- All tool calls wrapped in try/except to return error messages
+
+### Chart Creation Flow
+
+1. Get API token from environment
+2. Convert JSON data to pandas DataFrame
+3. Get appropriate Pydantic chart class
+4. Validate configuration using model_validate()
+5. Set data on chart instance: `chart.data = df`
+6. Create chart using instance method: `chart.create(access_token)`
+7. Return chart ID and URLs using `chart.get_editor_url()`
+
+### Pydantic Integration
+
+- Uses `model_validate()` for config validation
+- Uses `model_json_schema()` for schema generation
+- Uses instance methods: `.create()`, `.publish()`, `.update()`, `.delete()`
+- Uses factory function: `get_chart(chart_id, access_token)` for retrieval
+- Uses helper methods: `.get_editor_url()`, `.get_public_url()`
+- Provides helpful validation errors from Pydantic
+
+## Testing Considerations
+
+To test the server:
+1. Set DATAWRAPPER_API_TOKEN environment variable
+2. Install package: `pip install -e .`
+3. Run server: `datawrapper-mcp`
+4. Configure MCP client to connect to server
+5. Test with AI assistant or MCP inspector
+
+## Future Enhancements
+
+Potential improvements:
+- Add more chart types as datawrapper library adds them
+- Support for map visualizations
+- Batch chart operations
+- Chart templates/presets
+- Data validation helpers
+- Export options (PNG, SVG, PDF)
+
+## Common Issues
+
+1. **Missing API token**: Set DATAWRAPPER_API_TOKEN environment variable
+2. **Invalid chart config**: Use get_chart_schema to see valid options
+3. **Data format errors**: Ensure data is JSON string, list of dicts, or dict of arrays
+4. **Type errors**: Check Pydantic validation messages for required fields
+
+## Development Workflow
+
+1. Make changes to src/datawrapper_mcp/server.py
+2. Test locally with `python -m datawrapper_mcp.server`
+3. Update README.md if adding features
+4. Update this .clinerules file with new information
+5. Run pre-commit hooks before committing
+6. Update version in src/datawrapper_mcp/__init__.py if needed

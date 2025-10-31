@@ -3,16 +3,19 @@ requires = ["setuptools >= 61.0", "setuptools_scm>=8"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "your-package-name"
+name = "datawrapper-mcp"
 dynamic = ["version"]
 requires-python = ">=3.10"
 dependencies = [
+    "datawrapper>=2.0.7",
     'exceptiongroup; python_version<"3.11"',
+    "mcp[cli]>=1.20.0",
+    "pandas>=2.0.0",
 ]
 authors = [
   { name="Ben Welsh", email="b@palewi.re" },
 ]
-description = "Your package description"
+description = "A Model Context Protocol server for creating Datawrapper charts"
 license = {text = "MIT"}
 readme = "README.md"
 classifiers = [
@@ -61,12 +64,15 @@ notebooks = [
 ]
 
 [project.urls]
-Documentation = "https://palewi.re/docs/your-respository/"
+Documentation = "https://palewi.re/docs/datawrapper-mcp/"
 Maintainer = "https://github.com/palewire/"
-Source = "https://github.com/palewire/your-respository/"
-Issues = "https://github.com/palewire/your-respository/issues/"
+Source = "https://github.com/palewire/datawrapper-mcp/"
+Issues = "https://github.com/palewire/datawrapper-mcp/issues/"
 
-# [tool.setuptools]
-# packages = ["your_package_module"]
+[project.scripts]
+datawrapper-mcp = "datawrapper_mcp.server:main"
+
+[tool.setuptools]
+packages = ["datawrapper_mcp"]
 
 [tool.setuptools_scm]
