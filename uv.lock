@@ -607,7 +607,6 @@ wheels = [
 name = "datawrapper-mcp"
 source = { editable = "." }
 dependencies = [
-    { name = "certifi" },
     { name = "datawrapper" },
     { name = "exceptiongroup", marker = "python_full_version < '3.11'" },
     { name = "mcp", extra = ["cli"] },
@@ -653,7 +652,6 @@ test = [
 [package.metadata]
 requires-dist = [
     { name = "altair", marker = "extra == 'notebooks'" },
-    { name = "certifi", specifier = ">=2025.1.31" },
     { name = "datawrapper", specifier = ">=2.0.7" },
     { name = "exceptiongroup", marker = "python_full_version < '3.11'" },
     { name = "ipywidgets", marker = "extra == 'notebooks'" },

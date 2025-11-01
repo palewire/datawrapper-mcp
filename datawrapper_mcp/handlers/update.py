@@ -26,8 +26,9 @@ async def update_chart(arguments: dict) -> list[TextContent]:
         # Get the chart's Pydantic class directly from the instance
         chart_class = type(chart)
 
-        # Get current chart state as dict
-        current_config = chart.model_dump()
+        # Get current chart state as dict using Python field names (not API aliases)
+        # Exclude chart_type since it can't be changed after creation
+        current_config = chart.model_dump(by_alias=False, exclude={"chart_type"})
 
         # Merge the new config with current config
         merged_config = {**current_config, **arguments["chart_config"]}
