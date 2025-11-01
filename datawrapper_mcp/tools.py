@@ -71,7 +71,9 @@ async def list_tools() -> list[Tool]:
             name="publish_chart",
             description=(
                 "Publish a Datawrapper chart to make it publicly accessible. "
-                "Returns the public URL of the published chart."
+                "Returns the public URL of the published chart. "
+                "IMPORTANT: Only use this tool when the user explicitly requests to publish the chart. "
+                "Do not automatically publish charts after creation unless specifically asked."
             ),
             inputSchema={
                 "type": "object",
@@ -159,9 +161,10 @@ async def list_tools() -> list[Tool]:
             name="export_chart_png",
             description=(
                 "Export a Datawrapper chart as PNG and display it inline. "
-                "This is the recommended method for viewing charts directly in the conversation. "
                 "The chart must be created first using create_chart. "
-                "Supports high-resolution output via the zoom parameter."
+                "Supports high-resolution output via the zoom parameter. "
+                "IMPORTANT: Only use this tool when the user explicitly requests to see the chart image "
+                "or export it as PNG. Do not automatically export charts after creation unless specifically asked."
             ),
             inputSchema={
                 "type": "object",
