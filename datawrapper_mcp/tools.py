@@ -1,0 +1,209 @@
+"""Tool definitions for the Datawrapper MCP server."""
+
+from mcp.types import Tool
+
+from .config import CHART_CLASSES
+
+
+async def list_tools() -> list[Tool]:
+    """List available tools."""
+    return [
+        Tool(
+            name="create_chart",
+            description=(
+                "Create a Datawrapper chart with full control using Pydantic models. "
+                "This allows you to specify all chart properties including title, description, "
+                "visualization settings, axes, colors, and more. The chart_config should "
+                "be a complete Pydantic model dict matching the schema for the chosen chart type. "
+                "Use get_chart_schema to see available options for each chart type.\n\n"
+                'Example data format: [{"date": "2024-01", "value": 100}, {"date": "2024-02", "value": 150}]'
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": ["string", "array", "object"],
+                        "description": (
+                            "Chart data in one of three formats:\n"
+                            '1. List of records (RECOMMENDED): [{"col1": val1, "col2": val2}, ...]\n'
+                            '2. Dict of arrays: {"col1": [val1, val2], "col2": [val3, val4]}\n'
+                            "3. JSON string in either format above"
+                        ),
+                    },
+                    "chart_type": {
+                        "type": "string",
+                        "enum": list(CHART_CLASSES.keys()),
+                        "description": "Type of chart to create",
+                    },
+                    "chart_config": {
+                        "type": "object",
+                        "description": (
+                            "Complete chart configuration as a Pydantic model dict. "
+                            "Must match the schema for the chosen chart_type. "
+                            "Use get_chart_schema to see the full schema."
+                        ),
+                    },
+                },
+                "required": ["data", "chart_type", "chart_config"],
+            },
+        ),
+        Tool(
+            name="get_chart_schema",
+            description=(
+                "Get the Pydantic JSON schema for a specific chart type. "
+                "This shows all available properties, their types, defaults, and descriptions. "
+                "Use this to understand what options are available when creating charts "
+                "with create_chart_advanced."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "chart_type": {
+                        "type": "string",
+                        "enum": list(CHART_CLASSES.keys()),
+                        "description": "Chart type to get schema for",
+                    },
+                },
+                "required": ["chart_type"],
+            },
+        ),
+        Tool(
+            name="publish_chart",
+            description=(
+                "Publish a Datawrapper chart to make it publicly accessible. "
+                "Returns the public URL of the published chart."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "chart_id": {
+                        "type": "string",
+                        "description": "ID of the chart to publish",
+                    },
+                },
+                "required": ["chart_id"],
+            },
+        ),
+        Tool(
+            name="get_chart",
+            description=(
+                "Get information about an existing Datawrapper chart, "
+                "including its metadata, data, and public URL if published."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "chart_id": {
+                        "type": "string",
+                        "description": "ID of the chart to retrieve",
+                    },
+                },
+                "required": ["chart_id"],
+            },
+        ),
+        Tool(
+            name="update_chart",
+            description=(
+                "Update an existing Datawrapper chart's data or configuration using Pydantic models. "
+                "IMPORTANT: The chart_config must use high-level Pydantic fields only (title, intro, "
+                "byline, source_name, source_url, etc.). Do NOT use low-level serialized structures "
+                "like 'metadata', 'visualize', or other internal API fields. Use get_chart_schema to "
+                "see the available Pydantic fields for the chart type. The provided config will be "
+                "validated through Pydantic and merged with the existing chart configuration."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "chart_id": {
+                        "type": "string",
+                        "description": "ID of the chart to update",
+                    },
+                    "data": {
+                        "type": ["string", "array", "object"],
+                        "description": (
+                            "Chart data in one of three formats:\n"
+                            '1. List of records (RECOMMENDED): [{"col1": val1, "col2": val2}, ...]\n'
+                            '2. Dict of arrays: {"col1": [val1, val2], "col2": [val3, val4]}\n'
+                            "3. JSON string in either format above"
+                        ),
+                    },
+                    "chart_config": {
+                        "type": "object",
+                        "description": (
+                            "Updated chart configuration using high-level Pydantic fields (optional). "
+                            "Must use Pydantic model fields like 'title', 'intro', 'byline', etc. "
+                            "Do NOT use raw API structures like 'metadata' or 'visualize'. "
+                            "Use get_chart_schema to see valid fields. Will be validated and merged "
+                            "with existing config."
+                        ),
+                    },
+                },
+                "required": ["chart_id"],
+            },
+        ),
+        Tool(
+            name="delete_chart",
+            description="Delete a Datawrapper chart permanently.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "chart_id": {
+                        "type": "string",
+                        "description": "ID of the chart to delete",
+                    },
+                },
+                "required": ["chart_id"],
+            },
+        ),
+        Tool(
+            name="export_chart_png",
+            description=(
+                "Export a Datawrapper chart as PNG and display it inline. "
+                "This is the recommended method for viewing charts directly in the conversation. "
+                "The chart must be created first using create_chart. "
+                "Supports high-resolution output via the zoom parameter."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "chart_id": {
+                        "type": "string",
+                        "description": "ID of the chart to export",
+                    },
+                    "width": {
+                        "type": "integer",
+                        "description": "Width of the image in pixels (optional, uses chart width if not specified)",
+                    },
+                    "height": {
+                        "type": "integer",
+                        "description": "Height of the image in pixels (optional, uses chart height if not specified)",
+                    },
+                    "plain": {
+                        "type": "boolean",
+                        "description": "If true, exports only the visualization without header/footer (default: false)",
+                        "default": False,
+                    },
+                    "zoom": {
+                        "type": "integer",
+                        "description": "Scale multiplier for resolution, e.g., 2 = 2x resolution (default: 2)",
+                        "default": 2,
+                    },
+                    "transparent": {
+                        "type": "boolean",
+                        "description": "If true, exports with transparent background (default: false)",
+                        "default": False,
+                    },
+                    "border_width": {
+                        "type": "integer",
+                        "description": "Margin around visualization in pixels (default: 0)",
+                        "default": 0,
+                    },
+                    "border_color": {
+                        "type": "string",
+                        "description": "Color of the border, e.g., '#FFFFFF' (optional, uses chart background if not specified)",
+                    },
+                },
+                "required": ["chart_id"],
+            },
+        ),
+    ]

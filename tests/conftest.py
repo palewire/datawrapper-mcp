@@ -55,15 +55,31 @@ def mock_chart():
 
 @pytest.fixture
 def mock_get_chart(mock_chart):
-    """Mock the get_chart factory function."""
-    with patch("datawrapper_mcp.server.get_chart", return_value=mock_chart) as mock:
-        yield mock
+    """Mock the get_chart factory function in all handler modules."""
+    # Patch get_chart in all handler modules that import it
+    patches = [
+        patch("datawrapper_mcp.handlers.publish.get_chart", return_value=mock_chart),
+        patch("datawrapper_mcp.handlers.retrieve.get_chart", return_value=mock_chart),
+        patch("datawrapper_mcp.handlers.update.get_chart", return_value=mock_chart),
+        patch("datawrapper_mcp.handlers.delete.get_chart", return_value=mock_chart),
+        patch("datawrapper_mcp.handlers.export.get_chart", return_value=mock_chart),
+    ]
+
+    # Start all patches
+    mocks = [p.start() for p in patches]
+
+    # Yield the first mock (they all return the same mock_chart)
+    yield mocks[0]
+
+    # Stop all patches
+    for p in patches:
+        p.stop()
 
 
 @pytest.fixture
 def mock_bar_chart_class():
     """Mock the BarChart class for validation."""
-    with patch("datawrapper_mcp.server.BarChart") as mock_class:
+    with patch("datawrapper_mcp.config.BarChart") as mock_class:
         # Create a mock instance that will be returned by model_validate
         mock_instance = MagicMock(spec=BarChart)
         mock_instance.chart_id = None

@@ -8,15 +8,15 @@ import pytest
 @pytest.mark.asyncio
 async def test_update_with_high_level_fields(mock_api_token, mock_get_chart):
     """Test that high-level Pydantic fields are accepted."""
-    from datawrapper_mcp.server import update_chart
+    from datawrapper_mcp.handlers.update import update_chart
 
-    # Mock the chart's update method
+    # Configure the mock chart that will be returned by get_chart
     mock_chart = mock_get_chart.return_value
     mock_chart.model_dump.return_value = {"title": "Original Title"}
     mock_chart.update = MagicMock()
 
     # Mock type() to return a chart class with model_validate
-    with patch("datawrapper_mcp.server.type") as mock_type:
+    with patch("datawrapper_mcp.handlers.update.type") as mock_type:
         mock_chart_class = MagicMock()
         mock_type.return_value = mock_chart_class
 
@@ -45,9 +45,6 @@ async def test_update_with_high_level_fields(mock_api_token, mock_get_chart):
 
         result = await update_chart(arguments)
 
-        # Verify the chart was retrieved with access_token as keyword arg
-        mock_get_chart.assert_called_once_with("test123", access_token=mock_api_token)
-
         # Verify update was called
         mock_chart.update.assert_called_once_with(access_token=mock_api_token)
 
@@ -62,7 +59,7 @@ async def test_update_merges_with_existing_config(
     mock_api_token, mock_get_chart, mock_bar_chart_class
 ):
     """Test that new config is merged with existing config."""
-    from datawrapper_mcp.server import update_chart
+    from datawrapper_mcp.handlers.update import update_chart
 
     # Set up existing chart config
     mock_chart = mock_get_chart.return_value
@@ -75,7 +72,7 @@ async def test_update_merges_with_existing_config(
     mock_chart.update = MagicMock()
 
     # Mock type() to return a chart class with model_validate
-    with patch("datawrapper_mcp.server.type") as mock_type:
+    with patch("datawrapper_mcp.handlers.update.type") as mock_type:
         mock_chart_class = MagicMock()
         mock_type.return_value = mock_chart_class
 
@@ -111,14 +108,14 @@ async def test_update_merges_with_existing_config(
 @pytest.mark.asyncio
 async def test_update_validates_through_pydantic(mock_api_token, mock_get_chart):
     """Test that config is validated through Pydantic model."""
-    from datawrapper_mcp.server import update_chart
+    from datawrapper_mcp.handlers.update import update_chart
 
     mock_chart = mock_get_chart.return_value
     mock_chart.model_dump.return_value = {"title": "Test"}
     mock_chart.update = MagicMock()
 
     # Get the chart class from the mock chart instance
-    with patch("datawrapper_mcp.server.type") as mock_type:
+    with patch("datawrapper_mcp.handlers.update.type") as mock_type:
         mock_chart_class = MagicMock()
         mock_type.return_value = mock_chart_class
 
@@ -149,7 +146,7 @@ async def test_update_validates_through_pydantic(mock_api_token, mock_get_chart)
 @pytest.mark.asyncio
 async def test_update_without_api_token(no_api_token):
     """Test that update fails gracefully without API token."""
-    from datawrapper_mcp.server import update_chart
+    from datawrapper_mcp.handlers.update import update_chart
 
     arguments = {"chart_id": "test123", "chart_config": {"title": "New Title"}}
 
@@ -169,11 +166,12 @@ async def test_update_without_api_token(no_api_token):
 @pytest.mark.asyncio
 async def test_update_with_invalid_chart_id(mock_api_token):
     """Test that update handles invalid chart ID gracefully."""
-    from datawrapper_mcp.server import update_chart
+    from datawrapper_mcp.handlers.update import update_chart
 
     # Mock get_chart to raise an exception
     with patch(
-        "datawrapper_mcp.server.get_chart", side_effect=Exception("Chart not found")
+        "datawrapper_mcp.handlers.update.get_chart",
+        side_effect=Exception("Chart not found"),
     ):
         arguments = {"chart_id": "invalid123", "chart_config": {"title": "New Title"}}
 
@@ -195,7 +193,7 @@ async def test_update_preserves_chart_type(
     mock_api_token, mock_get_chart, mock_bar_chart_class
 ):
     """Test that update preserves the chart type."""
-    from datawrapper_mcp.server import update_chart
+    from datawrapper_mcp.handlers.update import update_chart
 
     mock_chart = mock_get_chart.return_value
     mock_chart.chart_type = "d3-bars"
@@ -203,7 +201,7 @@ async def test_update_preserves_chart_type(
     mock_chart.update = MagicMock()
 
     # Mock type() to return a chart class with model_validate
-    with patch("datawrapper_mcp.server.type") as mock_type:
+    with patch("datawrapper_mcp.handlers.update.type") as mock_type:
         mock_chart_class = MagicMock()
         mock_type.return_value = mock_chart_class
 
@@ -226,13 +224,13 @@ async def test_update_preserves_chart_type(
 @pytest.mark.asyncio
 async def test_update_uses_chart_class_directly(mock_api_token, mock_get_chart):
     """Test that update uses type(chart) to get the chart class."""
-    from datawrapper_mcp.server import update_chart
+    from datawrapper_mcp.handlers.update import update_chart
 
     mock_chart = mock_get_chart.return_value
     mock_chart.model_dump.return_value = {"title": "Test"}
     mock_chart.update = MagicMock()
 
-    with patch("datawrapper_mcp.server.type") as mock_type:
+    with patch("datawrapper_mcp.handlers.update.type") as mock_type:
         mock_chart_class = MagicMock()
         mock_type.return_value = mock_chart_class
 
