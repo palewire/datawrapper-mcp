@@ -67,7 +67,6 @@ notebooks = [
 ]
 
 [project.urls]
-Documentation = "https://palewi.re/docs/datawrapper-mcp/"
 Maintainer = "https://github.com/palewire/"
 Source = "https://github.com/palewire/datawrapper-mcp/"
 Issues = "https://github.com/palewire/datawrapper-mcp/issues/"
