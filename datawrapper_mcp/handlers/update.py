@@ -26,8 +26,19 @@ async def update_chart(arguments: dict) -> list[TextContent]:
         # Directly set attributes on the chart instance
         # Pydantic will validate each assignment automatically due to validate_assignment=True
         try:
+            # Build a mapping of aliases to field names
+            alias_to_field = {}
+            for field_name, field_info in chart.model_fields.items():
+                # Add the field name itself
+                alias_to_field[field_name] = field_name
+                # Add any aliases
+                if field_info.alias:
+                    alias_to_field[field_info.alias] = field_name
+
             for key, value in arguments["chart_config"].items():
-                setattr(chart, key, value)
+                # Convert alias to field name if needed
+                field_name = alias_to_field.get(key, key)
+                setattr(chart, field_name, value)
         except Exception as e:
             return [
                 TextContent(
