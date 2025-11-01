@@ -10,7 +10,7 @@ A Model Context Protocol (MCP) server that enables AI assistants to create Dataw
 
 ### Installation
 
-###3 Using uvx (Recommended)
+#### 3 Using uvx (Recommended)
 
 Configure your MCP client to run the server with `uvx` in `claude_desktop_config.json`:
 
@@ -28,7 +28,7 @@ Configure your MCP client to run the server with `uvx` in `claude_desktop_config
 }
 ```
 
-##3# Using pip
+#### Using pip
 
 ```bash
 pip install datawrapper-mcp
