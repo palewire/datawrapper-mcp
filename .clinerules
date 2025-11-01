@@ -64,8 +64,9 @@ The server supports 8 chart types from the datawrapper library:
 2. **get_chart_schema**: Get JSON schema for a chart type
 3. **publish_chart**: Publish chart to make it public
 4. **get_chart**: Retrieve chart information
-5. **update_chart**: Update chart data or configuration
+5. **update_chart**: Update chart data or configuration (Pydantic-validated)
 6. **delete_chart**: Delete a chart
+7. **export_chart_png**: Export chart as PNG image
 
 ## MCP Resources
 
@@ -113,6 +114,24 @@ All formats are converted to pandas DataFrame internally.
 - Missing API token raises ValueError with helpful message
 - Invalid chart configs return TextContent with validation errors
 - All tool calls wrapped in try/except to return error messages
+- Chart type mapping errors provide clear feedback on supported types
+
+### Update Chart Implementation
+
+The `update_chart` tool strictly enforces Pydantic validation:
+
+1. **Retrieves existing chart** using `get_chart()` factory function (returns correct Pydantic class instance)
+2. **Gets chart class directly** from instance using `type(chart)` - no manual type mapping needed
+3. **Gets current config** using `chart.model_dump()`
+4. **Merges new config** with existing config
+5. **Validates through Pydantic** using `model_validate()` on the chart's class
+6. **Updates chart attributes** from validated model
+7. **Rejects low-level structures** like 'metadata' or 'visualize' - only accepts high-level Pydantic fields
+
+This simplified approach:
+- Eliminates manual type mapping dictionary (no exposure of low-level API types like "d3-bars-stacked")
+- Uses the chart class directly from the `get_chart()` factory function
+- Ensures chatbots cannot bypass the Pydantic abstraction layer and must use the intended API surface (title, intro, byline, source_name, etc.)
 
 ### Chart Creation Flow
 

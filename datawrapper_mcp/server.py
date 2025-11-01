@@ -213,8 +213,12 @@ async def list_tools() -> list[Tool]:
         Tool(
             name="update_chart",
             description=(
-                "Update an existing Datawrapper chart's data or configuration. "
-                "You can update the data, metadata, or both."
+                "Update an existing Datawrapper chart's data or configuration using Pydantic models. "
+                "IMPORTANT: The chart_config must use high-level Pydantic fields only (title, intro, "
+                "byline, source_name, source_url, etc.). Do NOT use low-level serialized structures "
+                "like 'metadata', 'visualize', or other internal API fields. Use get_chart_schema to "
+                "see the available Pydantic fields for the chart type. The provided config will be "
+                "validated through Pydantic and merged with the existing chart configuration."
             ),
             inputSchema={
                 "type": "object",
@@ -235,8 +239,11 @@ async def list_tools() -> list[Tool]:
                     "chart_config": {
                         "type": "object",
                         "description": (
-                            "Updated chart configuration (optional). "
-                            "Will be merged with existing config."
+                            "Updated chart configuration using high-level Pydantic fields (optional). "
+                            "Must use Pydantic model fields like 'title', 'intro', 'byline', etc. "
+                            "Do NOT use raw API structures like 'metadata' or 'visualize'. "
+                            "Use get_chart_schema to see valid fields. Will be validated and merged "
+                            "with existing config."
                         ),
                     },
                 },
@@ -441,7 +448,7 @@ async def update_chart(arguments: dict) -> list[TextContent]:
     api_token = get_api_token()
     chart_id = arguments["chart_id"]
     
-    # Get chart using factory function
+    # Get chart using factory function - returns correct Pydantic class instance
     chart = get_chart(chart_id, access_token=api_token)
     
     # Update data if provided
@@ -451,8 +458,30 @@ async def update_chart(arguments: dict) -> list[TextContent]:
     
     # Update config if provided
     if "chart_config" in arguments:
-        # Merge config into chart instance
-        for key, value in arguments["chart_config"].items():
+        # Get the chart's Pydantic class directly from the instance
+        chart_class = type(chart)
+        
+        # Get current chart state as dict
+        current_config = chart.model_dump()
+        
+        # Merge the new config with current config
+        merged_config = {**current_config, **arguments["chart_config"]}
+        
+        # Validate the merged config through Pydantic
+        try:
+            validated_chart = chart_class.model_validate(merged_config)
+        except Exception as e:
+            return [
+                TextContent(
+                    type="text",
+                    text=f"Invalid chart configuration: {str(e)}\n\n"
+                    f"Use get_chart_schema to see the valid schema for this chart type. "
+                    f"Only high-level Pydantic fields are accepted.",
+                )
+            ]
+        
+        # Update chart attributes from validated model
+        for key, value in validated_chart.model_dump(exclude={"data"}).items():
             setattr(chart, key, value)
     
     # Update using Pydantic instance method
