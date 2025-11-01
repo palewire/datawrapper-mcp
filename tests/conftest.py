@@ -1,6 +1,5 @@
 """Shared pytest fixtures for datawrapper-mcp tests."""
 
-import os
 from unittest.mock import MagicMock, patch
 
 import pandas as pd
@@ -74,10 +73,10 @@ def mock_bar_chart_class():
             "intro": "",
             "byline": "",
         }
-        
+
         # Make model_validate return the mock instance
         mock_class.model_validate.return_value = mock_instance
-        
+
         yield mock_class
 
 

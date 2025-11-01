@@ -15,7 +15,7 @@ from datawrapper import (
     MultipleColumnChart,
     ScatterPlot,
     StackedBarChart,
-    get_chart
+    get_chart,
 )
 from mcp.server import Server
 from mcp.types import ImageContent, Resource, TextContent, Tool
@@ -49,16 +49,16 @@ def get_api_token() -> str:
 
 def json_to_dataframe(data: str | list | dict) -> pd.DataFrame:
     """Convert JSON data to a pandas DataFrame.
-    
+
     Args:
         data: One of:
             - List of records: [{"col1": val1, "col2": val2}, ...]
             - Dict of arrays: {"col1": [val1, val2], "col2": [val3, val4]}
             - JSON string in either format above
-        
+
     Returns:
         pandas DataFrame
-        
+
     Examples:
         >>> json_to_dataframe([{"a": 1, "b": 2}, {"a": 3, "b": 4}])
         >>> json_to_dataframe({"a": [1, 3], "b": [2, 4]})
@@ -69,7 +69,7 @@ def json_to_dataframe(data: str | list | dict) -> pd.DataFrame:
             data = json.loads(data)
         except json.JSONDecodeError as e:
             raise ValueError(f"Invalid JSON string: {e}")
-    
+
     if isinstance(data, list):
         # List of records: [{"col1": val1, "col2": val2}, ...]
         return pd.DataFrame(data)
@@ -79,8 +79,8 @@ def json_to_dataframe(data: str | list | dict) -> pd.DataFrame:
     else:
         raise ValueError(
             "Data must be one of:\n"
-            "  - List of dicts: [{\"col\": val}, ...]\n"
-            "  - Dict of arrays: {\"col\": [vals]}\n"
+            '  - List of dicts: [{"col": val}, ...]\n'
+            '  - Dict of arrays: {"col": [vals]}\n'
             "  - JSON string in either format"
         )
 
@@ -109,7 +109,7 @@ async def read_resource(uri: str) -> str:
                 "schema": chart_class.model_json_schema(),
             }
         return json.dumps(chart_info, indent=2)
-    
+
     raise ValueError(f"Unknown resource URI: {uri}")
 
 
@@ -125,7 +125,7 @@ async def list_tools() -> list[Tool]:
                 "visualization settings, axes, colors, and more. The chart_config should "
                 "be a complete Pydantic model dict matching the schema for the chosen chart type. "
                 "Use get_chart_schema to see available options for each chart type.\n\n"
-                "Example data format: [{\"date\": \"2024-01\", \"value\": 100}, {\"date\": \"2024-02\", \"value\": 150}]"
+                'Example data format: [{"date": "2024-01", "value": 100}, {"date": "2024-02", "value": 150}]'
             ),
             inputSchema={
                 "type": "object",
@@ -134,8 +134,8 @@ async def list_tools() -> list[Tool]:
                         "type": ["string", "array", "object"],
                         "description": (
                             "Chart data in one of three formats:\n"
-                            "1. List of records (RECOMMENDED): [{\"col1\": val1, \"col2\": val2}, ...]\n"
-                            "2. Dict of arrays: {\"col1\": [val1, val2], \"col2\": [val3, val4]}\n"
+                            '1. List of records (RECOMMENDED): [{"col1": val1, "col2": val2}, ...]\n'
+                            '2. Dict of arrays: {"col1": [val1, val2], "col2": [val3, val4]}\n'
                             "3. JSON string in either format above"
                         ),
                     },
@@ -231,8 +231,8 @@ async def list_tools() -> list[Tool]:
                         "type": ["string", "array", "object"],
                         "description": (
                             "Chart data in one of three formats:\n"
-                            "1. List of records (RECOMMENDED): [{\"col1\": val1, \"col2\": val2}, ...]\n"
-                            "2. Dict of arrays: {\"col1\": [val1, val2], \"col2\": [val3, val4]}\n"
+                            '1. List of records (RECOMMENDED): [{"col1": val1, "col2": val2}, ...]\n'
+                            '2. Dict of arrays: {"col1": [val1, val2], "col2": [val3, val4]}\n'
                             "3. JSON string in either format above"
                         ),
                     },
@@ -345,14 +345,14 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent | ImageConten
 async def create_chart(arguments: dict) -> list[TextContent]:
     """Create a chart with full Pydantic model configuration."""
     api_token = get_api_token()
-    
+
     # Convert data to DataFrame
     df = json_to_dataframe(arguments["data"])
-    
+
     # Get chart class and validate config
     chart_type = arguments["chart_type"]
     chart_class = CHART_CLASSES[chart_type]
-    
+
     # Validate and create chart using Pydantic model
     try:
         chart = chart_class.model_validate(arguments["chart_config"])
@@ -365,13 +365,13 @@ async def create_chart(arguments: dict) -> list[TextContent]:
                 f"to see the valid schema.",
             )
         ]
-    
+
     # Set data on chart instance
     chart.data = df
-    
+
     # Create chart using Pydantic instance method
     chart.create(access_token=api_token)
-    
+
     result = {
         "chart_id": chart.chart_id,
         "chart_type": chart_type,
@@ -382,7 +382,7 @@ async def create_chart(arguments: dict) -> list[TextContent]:
             f"Use publish_chart with chart_id '{chart.chart_id}' to make it public."
         ),
     }
-    
+
     return [TextContent(type="text", text=json.dumps(result, indent=2))]
 
 
@@ -390,19 +390,19 @@ async def get_chart_schema(arguments: dict) -> list[TextContent]:
     """Get the Pydantic schema for a chart type."""
     chart_type = arguments["chart_type"]
     chart_class = CHART_CLASSES[chart_type]
-    
+
     schema = chart_class.model_json_schema()
-    
+
     result = {
         "chart_type": chart_type,
         "class_name": chart_class.__name__,
         "schema": schema,
         "usage": (
-            f"Use this schema to construct a chart_config dict for create_chart_advanced. "
-            f"The schema shows all available properties, their types, and descriptions."
+            "Use this schema to construct a chart_config dict for create_chart_advanced. "
+            "The schema shows all available properties, their types, and descriptions."
         ),
     }
-    
+
     return [TextContent(type="text", text=json.dumps(result, indent=2))]
 
 
@@ -410,17 +410,17 @@ async def publish_chart(arguments: dict) -> list[TextContent]:
     """Publish a chart to make it publicly accessible."""
     api_token = get_api_token()
     chart_id = arguments["chart_id"]
-    
+
     # Get chart and publish using Pydantic instance method
     chart = get_chart(chart_id, access_token=api_token)
     chart.publish(access_token=api_token)
-    
+
     result = {
         "chart_id": chart_id,
         "public_url": chart.get_public_url(),
         "message": "Chart published successfully!",
     }
-    
+
     return [TextContent(type="text", text=json.dumps(result, indent=2))]
 
 
@@ -428,10 +428,10 @@ async def get_chart_info(arguments: dict) -> list[TextContent]:
     """Get information about an existing chart."""
     api_token = get_api_token()
     chart_id = arguments["chart_id"]
-    
+
     # Get chart using factory function
     chart = get_chart(chart_id, access_token=api_token)
-    
+
     result = {
         "chart_id": chart.chart_id,
         "title": chart.title,
@@ -439,7 +439,7 @@ async def get_chart_info(arguments: dict) -> list[TextContent]:
         "public_url": chart.get_public_url(),
         "edit_url": chart.get_editor_url(),
     }
-    
+
     return [TextContent(type="text", text=json.dumps(result, indent=2))]
 
 
@@ -447,26 +447,26 @@ async def update_chart(arguments: dict) -> list[TextContent]:
     """Update an existing chart's data or configuration."""
     api_token = get_api_token()
     chart_id = arguments["chart_id"]
-    
+
     # Get chart using factory function - returns correct Pydantic class instance
     chart = get_chart(chart_id, access_token=api_token)
-    
+
     # Update data if provided
     if "data" in arguments:
         df = json_to_dataframe(arguments["data"])
         chart.data = df
-    
+
     # Update config if provided
     if "chart_config" in arguments:
         # Get the chart's Pydantic class directly from the instance
         chart_class = type(chart)
-        
+
         # Get current chart state as dict
         current_config = chart.model_dump()
-        
+
         # Merge the new config with current config
         merged_config = {**current_config, **arguments["chart_config"]}
-        
+
         # Validate the merged config through Pydantic
         try:
             validated_chart = chart_class.model_validate(merged_config)
@@ -479,20 +479,20 @@ async def update_chart(arguments: dict) -> list[TextContent]:
                     f"Only high-level Pydantic fields are accepted.",
                 )
             ]
-        
+
         # Update chart attributes from validated model
         for key, value in validated_chart.model_dump(exclude={"data"}).items():
             setattr(chart, key, value)
-    
+
     # Update using Pydantic instance method
     chart.update(access_token=api_token)
-    
+
     result = {
         "chart_id": chart.chart_id,
         "message": "Chart updated successfully!",
         "edit_url": chart.get_editor_url(),
     }
-    
+
     return [TextContent(type="text", text=json.dumps(result, indent=2))]
 
 
@@ -500,16 +500,16 @@ async def delete_chart(arguments: dict) -> list[TextContent]:
     """Delete a chart permanently."""
     api_token = get_api_token()
     chart_id = arguments["chart_id"]
-    
+
     # Get chart and delete using Pydantic instance method
     chart = get_chart(chart_id, access_token=api_token)
     chart.delete(access_token=api_token)
-    
+
     result = {
         "chart_id": chart_id,
         "message": "Chart deleted successfully!",
     }
-    
+
     return [TextContent(type="text", text=json.dumps(result, indent=2))]
 
 
@@ -517,10 +517,10 @@ async def export_chart_png(arguments: dict) -> list[ImageContent]:
     """Export a chart as PNG and return it as inline image."""
     api_token = get_api_token()
     chart_id = arguments["chart_id"]
-    
+
     # Get chart using factory function
     chart = get_chart(chart_id, access_token=api_token)
-    
+
     # Build export parameters
     export_params = {}
     if "width" in arguments:
@@ -537,13 +537,13 @@ async def export_chart_png(arguments: dict) -> list[ImageContent]:
         export_params["borderWidth"] = arguments["border_width"]
     if "border_color" in arguments:
         export_params["borderColor"] = arguments["border_color"]
-    
+
     # Export PNG using Pydantic instance method
     png_bytes = chart.export_png(access_token=api_token, **export_params)
-    
+
     # Encode to base64
     base64_data = base64.b64encode(png_bytes).decode("utf-8")
-    
+
     return [
         ImageContent(
             type="image",
@@ -557,7 +557,7 @@ def main():
     """Run the MCP server."""
     import asyncio
     from mcp.server.stdio import stdio_server
-    
+
     async def run():
         async with stdio_server() as (read_stream, write_stream):
             await app.run(
@@ -565,7 +565,7 @@ def main():
                 write_stream,
                 app.create_initialization_options(),
             )
-    
+
     asyncio.run(run())
 
 
