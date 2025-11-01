@@ -95,46 +95,75 @@ The server supports 8 chart types from the datawrapper library:
 
 ## Data Format
 
-The server accepts three data formats:
+The server accepts four data formats:
 
-1. **List of records** (recommended):
+1. **File paths** (recommended for large datasets):
+   ```
+   "/path/to/data.csv"
+   "/path/to/data.json"
+   ```
+
+2. **List of records**:
    ```json
    [{"year": 2020, "value": 100}, {"year": 2021, "value": 150}]
    ```
 
-2. **Dict of arrays**:
+3. **Dict of arrays**:
    ```json
    {"year": [2020, 2021], "value": [100, 150]}
    ```
 
-3. **JSON string**: String representation of either format above
+4. **JSON string**: String representation of formats 2 or 3
 
 All formats are converted to pandas DataFrame internally.
 
 ### Important Data Guidelines for AI Assistants
 
 **What to pass:**
-- Python data structures (lists, dicts) as shown above
+- **File paths to CSV or JSON files** (best for large datasets, 1000+ rows)
+- Python data structures (lists, dicts) for small to medium datasets
 - JSON strings representing those structures
-- Datasets with thousands of rows are supported
+- Datasets with thousands of rows are fully supported
 
 **What NOT to pass:**
-- File paths (e.g., "/path/to/data.csv")
 - Raw CSV strings (e.g., "col1,col2\nval1,val2")
 - File objects or file handles
 
-**CSV Workflow:**
-When users provide CSV files:
-1. Read the CSV file first (using appropriate file reading tools)
-2. Convert to list of dicts format: `[{"col": val}, ...]`
-3. Pass the converted data structure to create_chart or update_chart
+**Handling Large Datasets (1000+ rows):**
+When working with large datasets:
+1. Save the data to a temporary file (CSV or JSON format)
+2. Pass the file path directly to create_chart or update_chart
+3. The server will read and process the file automatically
+
+Example workflow for large datasets:
+```python
+# AI assistant saves large dataset to file
+import json
+with open('/tmp/chart_data.json', 'w') as f:
+    json.dump(large_dataset, f)
+
+# Then pass the file path to the MCP tool
+# data parameter: "/tmp/chart_data.json"
+```
+
+**CSV File Support:**
+- CSV files are read directly using pandas.read_csv()
+- First row is treated as column headers
+- All standard CSV formats are supported
+
+**JSON File Support:**
+- JSON files must contain either:
+  - List of dicts: `[{"col": val}, ...]`
+  - Dict of arrays: `{"col": [vals]}`
+- Null values are preserved as NaN in the DataFrame
 
 **Error Handling:**
 The `json_to_dataframe()` utility provides helpful error messages that:
-- Detect file paths and suggest reading the file first
-- Detect CSV strings and suggest parsing them first
+- Accept file paths and read them automatically
+- Detect CSV strings and suggest saving to file first
 - Show examples of correct formats
 - Validate data structure (non-empty, correct types)
+- Support files with null/None values
 
 ## Implementation Notes
 

@@ -44,41 +44,40 @@ class TestValidDataFormats:
 
 
 class TestFilePathDetection:
-    """Test that file paths are detected and rejected with helpful messages."""
+    """Test that non-existent file paths are handled gracefully."""
 
-    def test_csv_file_path(self):
-        """Test that CSV file paths are rejected."""
+    def test_nonexistent_csv_file_path(self):
+        """Test that non-existent CSV file paths fall through to JSON parsing."""
         with pytest.raises(ValueError) as exc_info:
             json_to_dataframe("data.csv")
 
         error_msg = str(exc_info.value)
-        assert "File paths are not supported" in error_msg
-        assert "read the file first" in error_msg.lower()
-        assert "Example:" in error_msg
+        # Non-existent file paths are treated as invalid JSON strings
+        assert "Invalid JSON string" in error_msg
 
-    def test_json_file_path(self):
-        """Test that JSON file paths are rejected."""
+    def test_nonexistent_json_file_path(self):
+        """Test that non-existent JSON file paths fall through to JSON parsing."""
         with pytest.raises(ValueError) as exc_info:
             json_to_dataframe("data.json")
 
         error_msg = str(exc_info.value)
-        assert "File paths are not supported" in error_msg
+        assert "Invalid JSON string" in error_msg
 
-    def test_absolute_path(self):
-        """Test that absolute paths are rejected."""
+    def test_nonexistent_absolute_path(self):
+        """Test that non-existent absolute paths fall through to JSON parsing."""
         with pytest.raises(ValueError) as exc_info:
             json_to_dataframe("/path/to/data.csv")
 
         error_msg = str(exc_info.value)
-        assert "File paths are not supported" in error_msg
+        assert "Invalid JSON string" in error_msg
 
-    def test_windows_path(self):
-        """Test that Windows paths are rejected."""
+    def test_nonexistent_windows_path(self):
+        """Test that non-existent Windows paths fall through to JSON parsing."""
         with pytest.raises(ValueError) as exc_info:
             json_to_dataframe("C:\\Users\\data.csv")
 
         error_msg = str(exc_info.value)
-        assert "File paths are not supported" in error_msg
+        assert "Invalid JSON string" in error_msg
 
 
 class TestCSVStringDetection:
@@ -92,7 +91,7 @@ class TestCSVStringDetection:
 
         error_msg = str(exc_info.value)
         assert "CSV strings are not supported" in error_msg
-        assert "parse the CSV first" in error_msg
+        assert "save to a file first" in error_msg
         assert "Example:" in error_msg
 
     def test_tab_separated(self):
@@ -116,7 +115,7 @@ class TestInvalidJSON:
 
         error_msg = str(exc_info.value)
         assert "Invalid JSON string" in error_msg
-        assert "Expected JSON in one of these formats" in error_msg
+        assert "Expected one of" in error_msg
 
     def test_invalid_json_syntax(self):
         """Test that invalid JSON syntax is rejected."""
@@ -187,10 +186,11 @@ class TestErrorMessageQuality:
     def test_error_includes_examples(self):
         """Test that error messages include examples."""
         with pytest.raises(ValueError) as exc_info:
-            json_to_dataframe("data.csv")
+            json_to_dataframe([1, 2, 3])  # Use invalid list instead of file path
 
         error_msg = str(exc_info.value)
-        assert "Example:" in error_msg or "example" in error_msg.lower()
+        # Check for "Expected format:" which shows examples
+        assert "Expected format:" in error_msg or "example" in error_msg.lower()
 
     def test_error_suggests_solution(self):
         """Test that error messages suggest solutions."""

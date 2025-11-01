@@ -22,6 +22,7 @@ def json_to_dataframe(data: str | list | dict) -> pd.DataFrame:
 
     Args:
         data: One of:
+            - File path to CSV or JSON file (e.g., "/path/to/data.csv")
             - List of records: [{"col1": val1, "col2": val2}, ...]
             - Dict of arrays: {"col1": [val1, val2], "col2": [val3, val4]}
             - JSON string in either format above
@@ -30,41 +31,52 @@ def json_to_dataframe(data: str | list | dict) -> pd.DataFrame:
         pandas DataFrame
 
     Examples:
+        >>> json_to_dataframe("/tmp/data.csv")
+        >>> json_to_dataframe("/tmp/data.json")
         >>> json_to_dataframe([{"a": 1, "b": 2}, {"a": 3, "b": 4}])
         >>> json_to_dataframe({"a": [1, 3], "b": [2, 4]})
         >>> json_to_dataframe('[{"a": 1, "b": 2}]')
     """
     if isinstance(data, str):
-        # Check if it looks like a file path
-        if data.endswith((".csv", ".json", ".txt")) or "/" in data or "\\" in data:
-            raise ValueError(
-                "File paths are not supported. Please read the file first and pass the data.\n\n"
-                "For CSV files:\n"
-                "  1. Read the file into a list of dicts or dict of arrays\n"
-                "  2. Pass that data structure to this tool\n\n"
-                "Example:\n"
-                '  data = [{"year": 2020, "value": 100}, {"year": 2021, "value": 150}]'
-            )
+        # Check if it's a file path that exists
+        if os.path.isfile(data):
+            if data.endswith(".csv"):
+                return pd.read_csv(data)
+            elif data.endswith(".json"):
+                with open(data) as f:
+                    file_data = json.load(f)
+                # Recursively process the loaded JSON data
+                return json_to_dataframe(file_data)
+            else:
+                raise ValueError(
+                    f"Unsupported file type: {data}\n\n"
+                    "Supported file types:\n"
+                    "  - .csv (CSV files)\n"
+                    "  - .json (JSON files containing list of dicts or dict of arrays)"
+                )
 
-        # Check if it looks like CSV content
+        # Check if it looks like CSV content (not a file path)
         if "\n" in data and "," in data and not data.strip().startswith(("[", "{")):
             raise ValueError(
-                "CSV strings are not supported. Please parse the CSV first.\n\n"
-                "Convert CSV to one of these formats:\n"
-                '  1. List of dicts: [{"col": val}, ...]\n'
-                '  2. Dict of arrays: {"col": [vals]}\n\n'
+                "CSV strings are not supported. Please save to a file first.\n\n"
+                "Options:\n"
+                "  1. Save CSV to a file and pass the file path\n"
+                '  2. Parse CSV to list of dicts: [{"col": val}, ...]\n'
+                '  3. Parse CSV to dict of arrays: {"col": [vals]}\n\n'
                 "Example:\n"
                 '  data = [{"year": 2020, "value": 100}, {"year": 2021, "value": 150}]'
             )
 
+        # Try to parse as JSON string
         try:
             data = json.loads(data)
         except json.JSONDecodeError as e:
             raise ValueError(
                 f"Invalid JSON string: {e}\n\n"
-                "Expected JSON in one of these formats:\n"
-                '  1. \'[{"year": 2020, "value": 100}, {"year": 2021, "value": 150}]\'\n'
-                '  2. \'{"year": [2020, 2021], "value": [100, 150]}\''
+                "Expected one of:\n"
+                "  1. File path: '/path/to/data.csv' or '/path/to/data.json'\n"
+                '  2. JSON string: \'[{"year": 2020, "value": 100}, ...]\'\n'
+                '  3. JSON string: \'{"year": [2020, 2021], "value": [100, 150]}\''
             )
 
     if isinstance(data, list):
