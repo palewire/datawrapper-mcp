@@ -37,6 +37,8 @@ dev = [
     "setuptools-scm",
 ]
 test = [
+    "pytest>=7.0.0",
+    "pytest-asyncio>=0.21.0",
     "pytest-runner",
     "pytest-cov",
     "pytest-env",
@@ -77,3 +79,18 @@ datawrapper-mcp = "datawrapper_mcp.server:main"
 packages = ["datawrapper_mcp"]
 
 [tool.setuptools_scm]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--tb=short",
+]
+markers = [
+    "asyncio: mark test as async",
+]
+asyncio_mode = "auto"

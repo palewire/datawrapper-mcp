@@ -82,12 +82,10 @@ jobs:
       - id: install-python-dependencies
         name: Install Python dependencies
         run: uv sync --extra test --python ${{ matrix.python }}
-        shell: bash
 
       - id: tests
         name: Run tests
         run: uv run pytest --cov -sv
-        shell: bash
 
   build:
     name: Build release candidate
@@ -112,7 +110,6 @@ jobs:
       - id: build
         name: Build releases
         run: uv build --sdist --wheel
-        shell: bash
 
       - id: save
         name: Save artifact
