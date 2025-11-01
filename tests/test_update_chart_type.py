@@ -6,12 +6,12 @@ import pytest
 
 
 @pytest.mark.asyncio
-async def test_update_includes_chart_type_in_validation(mock_api_token):
-    """Test that chart_type is included when validating merged config.
+async def test_update_validates_via_setattr(mock_api_token):
+    """Test that Pydantic validates attributes via validate_assignment.
 
-    This test verifies the fix for the issue where Pydantic validation
-    would fail with "Object has no attribute 'type'" because chart_type
-    was excluded from the merged config but is required for validation.
+    The new implementation uses direct attribute assignment with setattr(),
+    which triggers Pydantic's validate_assignment=True automatically.
+    This is simpler and avoids the model_dump/model_validate cycle.
     """
     from datawrapper_mcp.handlers.update import update_chart
 
@@ -20,13 +20,6 @@ async def test_update_includes_chart_type_in_validation(mock_api_token):
         mock_chart = MagicMock()
         mock_chart.chart_id = "test123"
         mock_chart.chart_type = "column-chart"
-
-        # Mock model_dump to return current config without chart_type
-        mock_chart.model_dump.return_value = {
-            "title": "Original Title",
-            "intro": "Original intro",
-        }
-
         mock_chart.update = MagicMock()
         mock_chart.get_editor_url.return_value = (
             "https://app.datawrapper.de/edit/test123/visualize#refine"
@@ -34,53 +27,33 @@ async def test_update_includes_chart_type_in_validation(mock_api_token):
 
         mock_get_chart.return_value = mock_chart
 
-        # Mock type() to return a chart class
-        with patch("datawrapper_mcp.handlers.update.type") as mock_type:
-            mock_chart_class = MagicMock()
-            mock_type.return_value = mock_chart_class
-
-            # Mock model_validate to verify chart_type is included
-            validated_chart = MagicMock()
-            validated_chart.model_dump.return_value = {
+        arguments = {
+            "chart_id": "test123",
+            "chart_config": {
                 "title": "Updated Title",
-                "intro": "Original intro",
-            }
-            mock_chart_class.model_validate.return_value = validated_chart
+            },
+        }
 
-            arguments = {
-                "chart_id": "test123",
-                "chart_config": {
-                    "title": "Updated Title",
-                },
-            }
+        result = await update_chart(arguments)
 
-            result = await update_chart(arguments)
+        # Verify attribute was set directly (Pydantic validates automatically)
+        assert mock_chart.title == "Updated Title"
 
-            # Verify model_validate was called
-            mock_chart_class.model_validate.assert_called_once()
+        # Verify chart_type was NOT changed
+        assert mock_chart.chart_type == "column-chart"
 
-            # Verify chart_type was included in the merged config passed to model_validate
-            call_args = mock_chart_class.model_validate.call_args[0][0]
-            assert "chart_type" in call_args, (
-                "chart_type must be included in validation"
-            )
-            assert call_args["chart_type"] == "column-chart", (
-                "chart_type value must match original"
-            )
-
-            # Verify update was successful
-            assert len(result) > 0
-            assert result[0].type == "text"
-            assert "updated successfully" in result[0].text.lower()
+        # Verify update was successful
+        assert len(result) > 0
+        assert result[0].type == "text"
+        assert "updated successfully" in result[0].text.lower()
 
 
 @pytest.mark.asyncio
-async def test_update_excludes_chart_type_from_setattr(mock_api_token):
-    """Test that chart_type is not updated via setattr after validation.
+async def test_update_only_sets_provided_fields(mock_api_token):
+    """Test that only fields in chart_config are updated via setattr.
 
-    Even though chart_type is included for validation, it should not be
-    set on the chart instance since it cannot be changed after creation.
-    This test verifies that the exclude parameter in model_dump() works correctly.
+    The new implementation directly sets attributes from chart_config,
+    so only the fields provided should be updated.
     """
     from datawrapper_mcp.handlers.update import update_chart
 
@@ -88,7 +61,8 @@ async def test_update_excludes_chart_type_from_setattr(mock_api_token):
         mock_chart = MagicMock()
         mock_chart.chart_id = "test123"
         mock_chart.chart_type = "column-chart"
-        mock_chart.model_dump.return_value = {"title": "Test"}
+        mock_chart.title = "Original Title"
+        mock_chart.intro = "Original Intro"
         mock_chart.update = MagicMock()
         mock_chart.get_editor_url.return_value = (
             "https://app.datawrapper.de/edit/test123/visualize#refine"
@@ -96,50 +70,23 @@ async def test_update_excludes_chart_type_from_setattr(mock_api_token):
 
         mock_get_chart.return_value = mock_chart
 
-        with patch("datawrapper_mcp.handlers.update.type") as mock_type:
-            mock_chart_class = MagicMock()
-            mock_type.return_value = mock_chart_class
+        arguments = {
+            "chart_id": "test123",
+            "chart_config": {"title": "New Title"},
+        }
 
-            validated_chart = MagicMock()
+        result = await update_chart(arguments)
 
-            # Mock model_dump to respect the exclude parameter
-            # When called with exclude={"data", "chart_type", "chart_id"},
-            # it should NOT include chart_type (matching Pydantic's actual behavior)
-            def mock_model_dump(exclude=None, **kwargs):
-                result = {
-                    "title": "New Title",
-                    "chart_type": "column-chart",
-                }
-                if exclude:
-                    for key in exclude:
-                        result.pop(key, None)
-                return result
+        # Verify only title was updated
+        assert mock_chart.title == "New Title"
 
-            validated_chart.model_dump = mock_model_dump
-            mock_chart_class.model_validate.return_value = validated_chart
+        # Verify intro was NOT changed (not in chart_config)
+        assert mock_chart.intro == "Original Intro"
 
-            # Track setattr calls
-            setattr_calls = []
-            original_setattr = setattr
+        # Verify chart_type was NOT changed (never in chart_config)
+        assert mock_chart.chart_type == "column-chart"
 
-            def track_setattr(obj, name, value):
-                if obj is mock_chart:
-                    setattr_calls.append((name, value))
-                return original_setattr(obj, name, value)
-
-            with patch("builtins.setattr", side_effect=track_setattr):
-                arguments = {
-                    "chart_id": "test123",
-                    "chart_config": {"title": "New Title"},
-                }
-
-                await update_chart(arguments)
-
-            # Verify chart_type was NOT set via setattr
-            setattr_names = [name for name, _ in setattr_calls]
-            assert "chart_type" not in setattr_names, (
-                "chart_type should not be updated via setattr"
-            )
-
-            # Verify title WAS set
-            assert "title" in setattr_names, "title should be updated via setattr"
+        # Verify update was successful
+        assert len(result) > 0
+        assert result[0].type == "text"
+        assert "updated successfully" in result[0].text.lower()

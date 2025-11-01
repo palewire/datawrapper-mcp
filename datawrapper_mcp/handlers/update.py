@@ -23,24 +23,11 @@ async def update_chart(arguments: dict) -> list[TextContent]:
 
     # Update config if provided
     if "chart_config" in arguments:
-        # Get the chart's Pydantic class directly from the instance
-        chart_class = type(chart)
-
-        # Get current chart state as dict using Python field names (not API aliases)
-        # Exclude chart_type and data since they can't/shouldn't be changed via config
-        current_config = chart.model_dump(
-            by_alias=False, exclude={"chart_type", "data", "chart_id"}
-        )
-
-        # Merge the new config with current config
-        merged_config = {**current_config, **arguments["chart_config"]}
-
-        # Add back the chart_type since it's required for validation
-        merged_config["chart_type"] = chart.chart_type
-
-        # Validate the merged config through Pydantic
+        # Directly set attributes on the chart instance
+        # Pydantic will validate each assignment automatically due to validate_assignment=True
         try:
-            validated_chart = chart_class.model_validate(merged_config)
+            for key, value in arguments["chart_config"].items():
+                setattr(chart, key, value)
         except Exception as e:
             return [
                 TextContent(
@@ -50,12 +37,6 @@ async def update_chart(arguments: dict) -> list[TextContent]:
                     f"Only high-level Pydantic fields are accepted.",
                 )
             ]
-
-        # Update chart attributes from validated model (excluding data and chart_type)
-        for key, value in validated_chart.model_dump(
-            exclude={"data", "chart_type", "chart_id"}
-        ).items():
-            setattr(chart, key, value)
 
     # Update using Pydantic instance method
     chart.update(access_token=api_token)

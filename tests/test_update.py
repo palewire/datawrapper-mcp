@@ -107,40 +107,31 @@ async def test_update_merges_with_existing_config(
 
 @pytest.mark.asyncio
 async def test_update_validates_through_pydantic(mock_api_token, mock_get_chart):
-    """Test that config is validated through Pydantic model."""
+    """Test that config is validated through Pydantic's validate_assignment."""
     from datawrapper_mcp.handlers.update import update_chart
 
     mock_chart = mock_get_chart.return_value
-    mock_chart.model_dump.return_value = {"title": "Test"}
     mock_chart.update = MagicMock()
 
-    # Get the chart class from the mock chart instance
-    with patch("datawrapper_mcp.handlers.update.type") as mock_type:
-        mock_chart_class = MagicMock()
-        mock_type.return_value = mock_chart_class
+    arguments = {
+        "chart_id": "test123",
+        "chart_config": {"title": "Updated Title", "intro": "Test intro"},
+    }
 
-        # Mock model_validate to return a validated instance
-        validated_chart = MagicMock()
-        validated_chart.model_dump.return_value = {
-            "title": "Updated Title",
-            "intro": "Test intro",
-        }
-        mock_chart_class.model_validate.return_value = validated_chart
+    result = await update_chart(arguments)
 
-        arguments = {
-            "chart_id": "test123",
-            "chart_config": {"title": "Updated Title", "intro": "Test intro"},
-        }
+    # Verify setattr was called for each config item
+    # (Pydantic validates automatically due to validate_assignment=True)
+    assert mock_chart.title == "Updated Title"
+    assert mock_chart.intro == "Test intro"
 
-        _result = await update_chart(arguments)
+    # Verify update was called
+    mock_chart.update.assert_called_once_with(access_token=mock_api_token)
 
-        # Verify model_validate was called
-        mock_chart_class.model_validate.assert_called_once()
-
-        # Verify the merged config was passed to model_validate
-        call_args = mock_chart_class.model_validate.call_args[0][0]
-        assert "title" in call_args
-        assert call_args["title"] == "Updated Title"
+    # Verify result indicates success
+    assert len(result) > 0
+    assert result[0].type == "text"
+    assert "updated successfully" in result[0].text.lower()
 
 
 @pytest.mark.asyncio
@@ -222,28 +213,24 @@ async def test_update_preserves_chart_type(
 
 
 @pytest.mark.asyncio
-async def test_update_uses_chart_class_directly(mock_api_token, mock_get_chart):
-    """Test that update uses type(chart) to get the chart class."""
+async def test_update_uses_direct_attribute_assignment(mock_api_token, mock_get_chart):
+    """Test that update uses direct attribute assignment with setattr."""
     from datawrapper_mcp.handlers.update import update_chart
 
     mock_chart = mock_get_chart.return_value
-    mock_chart.model_dump.return_value = {"title": "Test"}
     mock_chart.update = MagicMock()
 
-    with patch("datawrapper_mcp.handlers.update.type") as mock_type:
-        mock_chart_class = MagicMock()
-        mock_type.return_value = mock_chart_class
+    arguments = {"chart_id": "test123", "chart_config": {"title": "New Title"}}
 
-        validated_chart = MagicMock()
-        validated_chart.model_dump.return_value = {"title": "New Title"}
-        mock_chart_class.model_validate.return_value = validated_chart
+    result = await update_chart(arguments)
 
-        arguments = {"chart_id": "test123", "chart_config": {"title": "New Title"}}
+    # Verify attribute was set directly (no type() or model_validate calls)
+    assert mock_chart.title == "New Title"
 
-        await update_chart(arguments)
+    # Verify update was called
+    mock_chart.update.assert_called_once_with(access_token=mock_api_token)
 
-        # Verify type() was called with the chart instance
-        mock_type.assert_called_once_with(mock_chart)
-
-        # Verify model_validate was called on the chart class
-        mock_chart_class.model_validate.assert_called_once()
+    # Verify result indicates success
+    assert len(result) > 0
+    assert result[0].type == "text"
+    assert "updated successfully" in result[0].text.lower()
