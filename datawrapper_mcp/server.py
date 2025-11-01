@@ -50,13 +50,24 @@ def json_to_dataframe(data: str | list | dict) -> pd.DataFrame:
     """Convert JSON data to a pandas DataFrame.
     
     Args:
-        data: JSON string, list of dicts, or dict with column arrays
+        data: One of:
+            - List of records: [{"col1": val1, "col2": val2}, ...]
+            - Dict of arrays: {"col1": [val1, val2], "col2": [val3, val4]}
+            - JSON string in either format above
         
     Returns:
         pandas DataFrame
+        
+    Examples:
+        >>> json_to_dataframe([{"a": 1, "b": 2}, {"a": 3, "b": 4}])
+        >>> json_to_dataframe({"a": [1, 3], "b": [2, 4]})
+        >>> json_to_dataframe('[{"a": 1, "b": 2}]')
     """
     if isinstance(data, str):
-        data = json.loads(data)
+        try:
+            data = json.loads(data)
+        except json.JSONDecodeError as e:
+            raise ValueError(f"Invalid JSON string: {e}")
     
     if isinstance(data, list):
         # List of records: [{"col1": val1, "col2": val2}, ...]
@@ -65,7 +76,12 @@ def json_to_dataframe(data: str | list | dict) -> pd.DataFrame:
         # Dict of arrays: {"col1": [val1, val2], "col2": [val3, val4]}
         return pd.DataFrame(data)
     else:
-        raise ValueError("Data must be a JSON string, list of dicts, or dict of arrays")
+        raise ValueError(
+            "Data must be one of:\n"
+            "  - List of dicts: [{\"col\": val}, ...]\n"
+            "  - Dict of arrays: {\"col\": [vals]}\n"
+            "  - JSON string in either format"
+        )
 
 
 @app.list_resources()
@@ -107,7 +123,8 @@ async def list_tools() -> list[Tool]:
                 "This allows you to specify all chart properties including title, description, "
                 "visualization settings, axes, colors, and more. The chart_config should "
                 "be a complete Pydantic model dict matching the schema for the chosen chart type. "
-                "Use get_chart_schema to see available options for each chart type."
+                "Use get_chart_schema to see available options for each chart type.\n\n"
+                "Example data format: [{\"date\": \"2024-01\", \"value\": 100}, {\"date\": \"2024-02\", \"value\": 150}]"
             ),
             inputSchema={
                 "type": "object",
@@ -115,8 +132,10 @@ async def list_tools() -> list[Tool]:
                     "data": {
                         "type": ["string", "array", "object"],
                         "description": (
-                            "Chart data as JSON string, list of dicts (records), "
-                            "or dict of arrays (columns)"
+                            "Chart data in one of three formats:\n"
+                            "1. List of records (RECOMMENDED): [{\"col1\": val1, \"col2\": val2}, ...]\n"
+                            "2. Dict of arrays: {\"col1\": [val1, val2], \"col2\": [val3, val4]}\n"
+                            "3. JSON string in either format above"
                         ),
                     },
                     "chart_type": {
@@ -206,7 +225,10 @@ async def list_tools() -> list[Tool]:
                     "data": {
                         "type": ["string", "array", "object"],
                         "description": (
-                            "New chart data (optional). Same format as create_chart."
+                            "Chart data in one of three formats:\n"
+                            "1. List of records (RECOMMENDED): [{\"col1\": val1, \"col2\": val2}, ...]\n"
+                            "2. Dict of arrays: {\"col1\": [val1, val2], \"col2\": [val3, val4]}\n"
+                            "3. JSON string in either format above"
                         ),
                     },
                     "chart_config": {
