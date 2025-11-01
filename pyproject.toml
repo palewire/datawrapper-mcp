@@ -15,7 +15,7 @@ dependencies = [
 authors = [
   { name="Ben Welsh", email="b@palewi.re" },
 ]
-description = "A Model Context Protocol server for creating Datawrapper charts"
+description = "A Model Context Protocol (MCP) server for creating Datawrapper charts using AI assistants"
 license = {text = "MIT"}
 readme = "README.md"
 classifiers = [

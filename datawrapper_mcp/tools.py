@@ -14,8 +14,19 @@ async def list_tools() -> list[Tool]:
                 "Create a Datawrapper chart with full control using Pydantic models. "
                 "This allows you to specify all chart properties including title, description, "
                 "visualization settings, axes, colors, and more. The chart_config should "
-                "be a complete Pydantic model dict matching the schema for the chosen chart type. "
-                "Use get_chart_schema to see available options for each chart type.\n\n"
+                "be a complete Pydantic model dict matching the schema for the chosen chart type.\n\n"
+                "STYLING WORKFLOW:\n"
+                "1. Use get_chart_schema to explore all available options for your chart type\n"
+                "2. Refer to https://datawrapper.readthedocs.io/en/latest/ for detailed examples\n"
+                "3. Build your chart_config with the desired styling properties\n\n"
+                "Common styling patterns:\n"
+                '- Colors: {"color_category": {"sales": "#1d81a2", "profit": "#15607a"}}\n'
+                '- Line styling: {"lines": [{"column": "sales", "width": "style1", "interpolation": "curved"}]}\n'
+                '- Axis ranges: {"custom_range_y": [0, 100], "custom_range_x": [2020, 2024]}\n'
+                '- Grid formatting: {"y_grid_format": "0", "x_grid": "on", "y_grid": "on"}\n'
+                '- Tooltips: {"tooltip_number_format": "00.00", "tooltip_x_format": "YYYY"}\n'
+                '- Annotations: {"text_annotations": [{"x": "2023", "y": 50, "text": "Peak"}]}\n\n'
+                "See the documentation for chart-type specific examples and advanced patterns.\n\n"
                 'Example data format: [{"date": "2024-01", "value": 100}, {"date": "2024-02", "value": 150}]'
             ),
             inputSchema={
@@ -50,10 +61,16 @@ async def list_tools() -> list[Tool]:
         Tool(
             name="get_chart_schema",
             description=(
-                "Get the Pydantic JSON schema for a specific chart type. "
-                "This shows all available properties, their types, defaults, and descriptions. "
-                "Use this to understand what options are available when creating charts "
-                "with create_chart_advanced."
+                "Get the Pydantic JSON schema for a specific chart type. This is your primary tool "
+                "for discovering styling and configuration options.\n\n"
+                "The schema shows:\n"
+                "- All available properties and their types\n"
+                "- Enum values (e.g., line widths, interpolation methods)\n"
+                "- Default values\n"
+                "- Detailed descriptions for each property\n\n"
+                "WORKFLOW: Use this tool first to explore options, then refer to "
+                "https://datawrapper.readthedocs.io/en/latest/ for detailed examples and patterns "
+                "showing how to use these properties in practice."
             ),
             inputSchema={
                 "type": "object",
@@ -109,9 +126,16 @@ async def list_tools() -> list[Tool]:
                 "Update an existing Datawrapper chart's data or configuration using Pydantic models. "
                 "IMPORTANT: The chart_config must use high-level Pydantic fields only (title, intro, "
                 "byline, source_name, source_url, etc.). Do NOT use low-level serialized structures "
-                "like 'metadata', 'visualize', or other internal API fields. Use get_chart_schema to "
-                "see the available Pydantic fields for the chart type. The provided config will be "
-                "validated through Pydantic and merged with the existing chart configuration."
+                "like 'metadata', 'visualize', or other internal API fields.\n\n"
+                "STYLING UPDATES:\n"
+                "Use get_chart_schema to see available fields, then apply styling changes:\n"
+                '- Colors: {"color_category": {"sales": "#ff0000"}}\n'
+                '- Line properties: {"lines": [{"column": "sales", "width": "style2"}]}\n'
+                '- Axis settings: {"custom_range_y": [0, 200], "y_grid_format": "0,0"}\n'
+                '- Tooltips: {"tooltip_number_format": "0.0"}\n\n'
+                "See https://datawrapper.readthedocs.io/en/latest/ for detailed examples. "
+                "The provided config will be validated through Pydantic and merged with the existing "
+                "chart configuration."
             ),
             inputSchema={
                 "type": "object",

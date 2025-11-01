@@ -1,5 +1,3 @@
-# datawrapper-mcp
-
 A Model Context Protocol (MCP) server that enables AI assistants to create Datawrapper charts. Built on the [datawrapper Python library](https://github.com/chekos/datawrapper) with Pydantic validation.
 
 ## Getting Started

@@ -175,12 +175,36 @@ Potential improvements:
 - Data validation helpers
 - Export options (PNG, SVG, PDF)
 
+## Chart Styling Guidelines
+
+When users ask about styling charts (colors, line widths, axes, tooltips, etc.):
+
+1. **Always suggest `get_chart_schema` first**: This tool shows all available styling options, enum values, and defaults for the specific chart type
+2. **Reference the documentation**: Point users to https://datawrapper.readthedocs.io/en/latest/ for detailed examples and patterns
+3. **Use high-level Pydantic fields**: Never use low-level API structures like 'metadata' or 'visualize'
+4. **Common styling patterns**:
+   - Colors: `color_category={"column_name": "#hex_color"}`
+   - Line styling: `lines=[{"column": "name", "width": "style1", "interpolation": "curved"}]`
+   - Axis ranges: `custom_range_y=[min, max]`
+   - Grid formatting: `y_grid_format="0"`, `x_grid="on"`
+   - Tooltips: `tooltip_number_format="00.00"`
+5. **Don't hardcode enum values**: Enum values (like LineWidth.THIN) are defined in the datawrapper library and may change. Always refer users to `get_chart_schema` for current values.
+
+### Styling Workflow for AI Assistants
+
+1. User asks about styling → Suggest `get_chart_schema` to explore options
+2. Show relevant schema properties and their types
+3. Reference documentation for detailed examples: https://datawrapper.readthedocs.io/en/latest/
+4. Provide chart_config dict using high-level Pydantic fields
+5. Use `create_chart` or `update_chart` with the validated config
+
 ## Common Issues
 
 1. **Missing API token**: Set DATAWRAPPER_API_TOKEN environment variable
 2. **Invalid chart config**: Use get_chart_schema to see valid options
 3. **Data format errors**: Ensure data is JSON string, list of dicts, or dict of arrays
 4. **Type errors**: Check Pydantic validation messages for required fields
+5. **Styling questions**: Always start with get_chart_schema, then refer to documentation
 
 ## Development Workflow
 
