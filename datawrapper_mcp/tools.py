@@ -45,20 +45,20 @@ async def list_tools() -> list[Tool]:
                     "data": {
                         "type": ["string", "array", "object"],
                         "description": (
-                            "Chart data in one of the following formats:\n\n"
-                            "1. FILE PATH (RECOMMENDED for large datasets 1000+ rows):\n"
-                            '   "/path/to/data.csv" or "/path/to/data.json"\n'
-                            "   - CSV files are read directly\n"
-                            "   - JSON files must contain list of dicts or dict of arrays\n\n"
-                            "2. List of records:\n"
+                            "Chart data. RECOMMENDED: Pass data inline as a list or dict.\n\n"
+                            "PREFERRED FORMATS (use these first):\n\n"
+                            "1. List of records (RECOMMENDED):\n"
                             '   [{"year": 2020, "sales": 100}, {"year": 2021, "sales": 150}]\n\n'
-                            "3. Dict of arrays:\n"
+                            "2. Dict of arrays:\n"
                             '   {"year": [2020, 2021], "sales": [100, 150]}\n\n'
-                            "4. JSON string of format 2 or 3:\n"
+                            "3. JSON string of format 1 or 2:\n"
                             '   \'[{"year": 2020, "sales": 100}]\'\n\n'
-                            "For large datasets: Save to a temporary CSV or JSON file, then pass the file path.\n"
-                            "Example: Save data to /tmp/chart_data.json, then pass that path as a string.\n"
-                            "Supports datasets with thousands of rows."
+                            "ALTERNATIVE (only for extremely large datasets where inline data is impractical):\n\n"
+                            "4. File path to CSV or JSON:\n"
+                            '   "/path/to/data.csv" or "/path/to/data.json"\n'
+                            "   - Use only when inline data would be too large to pass directly\n"
+                            "   - CSV files are read directly\n"
+                            "   - JSON files must contain list of dicts or dict of arrays"
                         ),
                     },
                     "chart_type": {
@@ -179,20 +179,20 @@ async def list_tools() -> list[Tool]:
                     "data": {
                         "type": ["string", "array", "object"],
                         "description": (
-                            "Chart data in one of the following formats:\n\n"
-                            "1. FILE PATH (RECOMMENDED for large datasets 1000+ rows):\n"
-                            '   "/path/to/data.csv" or "/path/to/data.json"\n'
-                            "   - CSV files are read directly\n"
-                            "   - JSON files must contain list of dicts or dict of arrays\n\n"
-                            "2. List of records:\n"
+                            "Chart data. RECOMMENDED: Pass data inline as a list or dict.\n\n"
+                            "PREFERRED FORMATS (use these first):\n\n"
+                            "1. List of records (RECOMMENDED):\n"
                             '   [{"year": 2020, "sales": 100}, {"year": 2021, "sales": 150}]\n\n'
-                            "3. Dict of arrays:\n"
+                            "2. Dict of arrays:\n"
                             '   {"year": [2020, 2021], "sales": [100, 150]}\n\n'
-                            "4. JSON string of format 2 or 3:\n"
+                            "3. JSON string of format 1 or 2:\n"
                             '   \'[{"year": 2020, "sales": 100}]\'\n\n'
-                            "For large datasets: Save to a temporary CSV or JSON file, then pass the file path.\n"
-                            "Example: Save data to /tmp/chart_data.json, then pass that path as a string.\n"
-                            "Supports datasets with thousands of rows."
+                            "ALTERNATIVE (only for extremely large datasets where inline data is impractical):\n\n"
+                            "4. File path to CSV or JSON:\n"
+                            '   "/path/to/data.csv" or "/path/to/data.json"\n'
+                            "   - Use only when inline data would be too large to pass directly\n"
+                            "   - CSV files are read directly\n"
+                            "   - JSON files must contain list of dicts or dict of arrays"
                         ),
                     },
                     "chart_config": {

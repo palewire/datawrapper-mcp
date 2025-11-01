@@ -97,47 +97,51 @@ The server supports 8 chart types from the datawrapper library:
 
 The server accepts four data formats:
 
-1. **File paths** (recommended for large datasets):
+1. **List of records** (RECOMMENDED):
+   ```json
+   [{"year": 2020, "value": 100}, {"year": 2021, "value": 150}]
+   ```
+
+2. **Dict of arrays**:
+   ```json
+   {"year": [2020, 2021], "value": [100, 150]}
+   ```
+
+3. **JSON string**: String representation of formats 1 or 2
+
+4. **File paths** (only for extremely large datasets):
    ```
    "/path/to/data.csv"
    "/path/to/data.json"
    ```
 
-2. **List of records**:
-   ```json
-   [{"year": 2020, "value": 100}, {"year": 2021, "value": 150}]
-   ```
-
-3. **Dict of arrays**:
-   ```json
-   {"year": [2020, 2021], "value": [100, 150]}
-   ```
-
-4. **JSON string**: String representation of formats 2 or 3
-
 All formats are converted to pandas DataFrame internally.
 
 ### Important Data Guidelines for AI Assistants
 
+**RECOMMENDED: Pass data inline as lists or dicts**
+- Use list of records format for most use cases
+- Use dict of arrays format when appropriate
+- JSON strings are also supported
+
 **What to pass:**
-- **File paths to CSV or JSON files** (best for large datasets, 1000+ rows)
-- Python data structures (lists, dicts) for small to medium datasets
+- Python data structures (lists, dicts) - PREFERRED
 - JSON strings representing those structures
-- Datasets with thousands of rows are fully supported
+- File paths to CSV or JSON files (ONLY for extremely large datasets where inline data is impractical)
 
 **What NOT to pass:**
 - Raw CSV strings (e.g., "col1,col2\nval1,val2")
 - File objects or file handles
 
-**Handling Large Datasets (1000+ rows):**
-When working with large datasets:
+**Handling Extremely Large Datasets:**
+Only when inline data would be too large to pass directly:
 1. Save the data to a temporary file (CSV or JSON format)
 2. Pass the file path directly to create_chart or update_chart
 3. The server will read and process the file automatically
 
-Example workflow for large datasets:
+Example workflow for extremely large datasets:
 ```python
-# AI assistant saves large dataset to file
+# AI assistant saves extremely large dataset to file
 import json
 with open('/tmp/chart_data.json', 'w') as f:
     json.dump(large_dataset, f)
