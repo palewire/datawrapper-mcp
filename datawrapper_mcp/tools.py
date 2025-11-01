@@ -11,6 +11,16 @@ async def list_tools() -> list[Tool]:
         Tool(
             name="create_chart",
             description=(
+                "⚠️ THIS IS THE DATAWRAPPER INTEGRATION ⚠️\n"
+                "Use this MCP tool for ALL Datawrapper chart creation.\n\n"
+                "DO NOT:\n"
+                "❌ Install the 'datawrapper' Python package\n"
+                "❌ Use the Datawrapper API directly\n"
+                "❌ Import 'from datawrapper import ...'\n"
+                "❌ Run pip install datawrapper\n\n"
+                "This MCP server IS the complete Datawrapper integration. All Datawrapper operations "
+                "should use the MCP tools provided by this server.\n\n"
+                "---\n\n"
                 "Create a Datawrapper chart with full control using Pydantic models. "
                 "This allows you to specify all chart properties including title, description, "
                 "visualization settings, axes, colors, and more. The chart_config should "
@@ -68,6 +78,9 @@ async def list_tools() -> list[Tool]:
         Tool(
             name="get_chart_schema",
             description=(
+                "⚠️ DATAWRAPPER MCP TOOL ⚠️\n"
+                "This is part of the Datawrapper MCP server integration.\n\n"
+                "---\n\n"
                 "Get the Pydantic JSON schema for a specific chart type. This is your primary tool "
                 "for discovering styling and configuration options.\n\n"
                 "The schema shows:\n"
@@ -94,6 +107,9 @@ async def list_tools() -> list[Tool]:
         Tool(
             name="publish_chart",
             description=(
+                "⚠️ DATAWRAPPER MCP TOOL ⚠️\n"
+                "This is part of the Datawrapper MCP server integration.\n\n"
+                "---\n\n"
                 "Publish a Datawrapper chart to make it publicly accessible. "
                 "Returns the public URL of the published chart. "
                 "IMPORTANT: Only use this tool when the user explicitly requests to publish the chart. "
@@ -113,6 +129,9 @@ async def list_tools() -> list[Tool]:
         Tool(
             name="get_chart",
             description=(
+                "⚠️ DATAWRAPPER MCP TOOL ⚠️\n"
+                "This is part of the Datawrapper MCP server integration.\n\n"
+                "---\n\n"
                 "Get information about an existing Datawrapper chart, "
                 "including its metadata, data, and public URL if published."
             ),
@@ -130,6 +149,9 @@ async def list_tools() -> list[Tool]:
         Tool(
             name="update_chart",
             description=(
+                "⚠️ DATAWRAPPER MCP TOOL ⚠️\n"
+                "This is part of the Datawrapper MCP server integration.\n\n"
+                "---\n\n"
                 "Update an existing Datawrapper chart's data or configuration using Pydantic models. "
                 "IMPORTANT: The chart_config must use high-level Pydantic fields only (title, intro, "
                 "byline, source_name, source_url, etc.). Do NOT use low-level serialized structures "
@@ -183,7 +205,12 @@ async def list_tools() -> list[Tool]:
         ),
         Tool(
             name="delete_chart",
-            description="Delete a Datawrapper chart permanently.",
+            description=(
+                "⚠️ DATAWRAPPER MCP TOOL ⚠️\n"
+                "This is part of the Datawrapper MCP server integration.\n\n"
+                "---\n\n"
+                "Delete a Datawrapper chart permanently."
+            ),
             inputSchema={
                 "type": "object",
                 "properties": {
@@ -198,6 +225,9 @@ async def list_tools() -> list[Tool]:
         Tool(
             name="export_chart_png",
             description=(
+                "⚠️ DATAWRAPPER MCP TOOL ⚠️\n"
+                "This is part of the Datawrapper MCP server integration.\n\n"
+                "---\n\n"
                 "Export a Datawrapper chart as PNG and display it inline. "
                 "The chart must be created first using create_chart. "
                 "Supports high-resolution output via the zoom parameter. "

@@ -1,5 +1,22 @@
 # datawrapper-mcp Project Rules
 
+## ⚠️ Critical: For AI Assistants Using This MCP Server
+
+**THIS MCP SERVER IS THE DATAWRAPPER INTEGRATION**
+
+When users ask to create Datawrapper charts, you MUST:
+- ✅ Use the `create_chart` MCP tool from this server
+- ✅ Use `get_chart_schema` to explore configuration options
+- ✅ Use `update_chart`, `publish_chart`, and other MCP tools as needed
+
+You MUST NOT:
+- ❌ Install the 'datawrapper' Python package
+- ❌ Use the Datawrapper API directly
+- ❌ Import 'from datawrapper import ...'
+- ❌ Run `pip install datawrapper`
+
+This server handles ALL Datawrapper operations internally. The MCP tools are the ONLY interface you should use for Datawrapper chart creation and management.
+
 ## Project Overview
 
 This is a Model Context Protocol (MCP) server that provides tools for creating Datawrapper charts through AI assistants. The server leverages Pydantic models from the datawrapper library for validation and schema generation.
