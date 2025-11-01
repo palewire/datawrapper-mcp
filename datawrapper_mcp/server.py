@@ -1,12 +1,12 @@
 """Main MCP server implementation for Datawrapper chart creation."""
 
+import base64
 import json
 import os
 from typing import Any
 
 import pandas as pd
-from datawrapper.chart_factory import get_chart
-from datawrapper.charts import (
+from datawrapper import (
     AreaChart,
     ArrowChart,
     BarChart,
@@ -15,9 +15,10 @@ from datawrapper.charts import (
     MultipleColumnChart,
     ScatterPlot,
     StackedBarChart,
+    get_chart
 )
 from mcp.server import Server
-from mcp.types import Resource, TextContent, Tool
+from mcp.types import ImageContent, Resource, TextContent, Tool
 
 # Initialize the MCP server
 app = Server("datawrapper-mcp")
@@ -256,11 +257,62 @@ async def list_tools() -> list[Tool]:
                 "required": ["chart_id"],
             },
         ),
+        Tool(
+            name="export_chart_png",
+            description=(
+                "Export a Datawrapper chart as PNG and display it inline. "
+                "This is the recommended method for viewing charts directly in the conversation. "
+                "The chart must be created first using create_chart. "
+                "Supports high-resolution output via the zoom parameter."
+            ),
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "chart_id": {
+                        "type": "string",
+                        "description": "ID of the chart to export",
+                    },
+                    "width": {
+                        "type": "integer",
+                        "description": "Width of the image in pixels (optional, uses chart width if not specified)",
+                    },
+                    "height": {
+                        "type": "integer",
+                        "description": "Height of the image in pixels (optional, uses chart height if not specified)",
+                    },
+                    "plain": {
+                        "type": "boolean",
+                        "description": "If true, exports only the visualization without header/footer (default: false)",
+                        "default": False,
+                    },
+                    "zoom": {
+                        "type": "integer",
+                        "description": "Scale multiplier for resolution, e.g., 2 = 2x resolution (default: 2)",
+                        "default": 2,
+                    },
+                    "transparent": {
+                        "type": "boolean",
+                        "description": "If true, exports with transparent background (default: false)",
+                        "default": False,
+                    },
+                    "border_width": {
+                        "type": "integer",
+                        "description": "Margin around visualization in pixels (default: 0)",
+                        "default": 0,
+                    },
+                    "border_color": {
+                        "type": "string",
+                        "description": "Color of the border, e.g., '#FFFFFF' (optional, uses chart background if not specified)",
+                    },
+                },
+                "required": ["chart_id"],
+            },
+        ),
     ]
 
 
 @app.call_tool()
-async def call_tool(name: str, arguments: Any) -> list[TextContent]:
+async def call_tool(name: str, arguments: Any) -> list[TextContent | ImageContent]:
     """Handle tool calls."""
     try:
         if name == "create_chart":
@@ -275,6 +327,8 @@ async def call_tool(name: str, arguments: Any) -> list[TextContent]:
             return await update_chart(arguments)
         elif name == "delete_chart":
             return await delete_chart(arguments)
+        elif name == "export_chart_png":
+            return await export_chart_png(arguments)
         else:
             raise ValueError(f"Unknown tool: {name}")
     except Exception as e:
@@ -428,6 +482,46 @@ async def delete_chart(arguments: dict) -> list[TextContent]:
     }
     
     return [TextContent(type="text", text=json.dumps(result, indent=2))]
+
+
+async def export_chart_png(arguments: dict) -> list[ImageContent]:
+    """Export a chart as PNG and return it as inline image."""
+    api_token = get_api_token()
+    chart_id = arguments["chart_id"]
+    
+    # Get chart using factory function
+    chart = get_chart(chart_id, access_token=api_token)
+    
+    # Build export parameters
+    export_params = {}
+    if "width" in arguments:
+        export_params["width"] = arguments["width"]
+    if "height" in arguments:
+        export_params["height"] = arguments["height"]
+    if "plain" in arguments:
+        export_params["plain"] = arguments["plain"]
+    if "zoom" in arguments:
+        export_params["zoom"] = arguments["zoom"]
+    if "transparent" in arguments:
+        export_params["transparent"] = arguments["transparent"]
+    if "border_width" in arguments:
+        export_params["borderWidth"] = arguments["border_width"]
+    if "border_color" in arguments:
+        export_params["borderColor"] = arguments["border_color"]
+    
+    # Export PNG using Pydantic instance method
+    png_bytes = chart.export_png(access_token=api_token, **export_params)
+    
+    # Encode to base64
+    base64_data = base64.b64encode(png_bytes).decode("utf-8")
+    
+    return [
+        ImageContent(
+            type="image",
+            data=base64_data,
+            mimeType="image/png",
+        )
+    ]
 
 
 def main():
