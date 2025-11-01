@@ -35,10 +35,17 @@ async def list_tools() -> list[Tool]:
                     "data": {
                         "type": ["string", "array", "object"],
                         "description": (
-                            "Chart data in one of three formats:\n"
-                            '1. List of records (RECOMMENDED): [{"col1": val1, "col2": val2}, ...]\n'
-                            '2. Dict of arrays: {"col1": [val1, val2], "col2": [val3, val4]}\n'
-                            "3. JSON string in either format above"
+                            "Chart data as a Python data structure (NOT a file path or CSV string).\n\n"
+                            "Supported formats:\n"
+                            "1. List of records (RECOMMENDED):\n"
+                            '   [{"year": 2020, "sales": 100}, {"year": 2021, "sales": 150}]\n\n'
+                            "2. Dict of arrays:\n"
+                            '   {"year": [2020, 2021], "sales": [100, 150]}\n\n'
+                            "3. JSON string of either format above:\n"
+                            '   \'[{"year": 2020, "sales": 100}]\'\n\n'
+                            "For CSV files: Read the file first, then convert to format 1 or 2.\n"
+                            "Example: If you have CSV data, parse it into a list of dicts before passing.\n"
+                            "Supports datasets with thousands of rows."
                         ),
                     },
                     "chart_type": {
@@ -147,10 +154,17 @@ async def list_tools() -> list[Tool]:
                     "data": {
                         "type": ["string", "array", "object"],
                         "description": (
-                            "Chart data in one of three formats:\n"
-                            '1. List of records (RECOMMENDED): [{"col1": val1, "col2": val2}, ...]\n'
-                            '2. Dict of arrays: {"col1": [val1, val2], "col2": [val3, val4]}\n'
-                            "3. JSON string in either format above"
+                            "Chart data as a Python data structure (NOT a file path or CSV string).\n\n"
+                            "Supported formats:\n"
+                            "1. List of records (RECOMMENDED):\n"
+                            '   [{"year": 2020, "sales": 100}, {"year": 2021, "sales": 150}]\n\n'
+                            "2. Dict of arrays:\n"
+                            '   {"year": [2020, 2021], "sales": [100, 150]}\n\n'
+                            "3. JSON string of either format above:\n"
+                            '   \'[{"year": 2020, "sales": 100}]\'\n\n'
+                            "For CSV files: Read the file first, then convert to format 1 or 2.\n"
+                            "Example: If you have CSV data, parse it into a list of dicts before passing.\n"
+                            "Supports datasets with thousands of rows."
                         ),
                     },
                     "chart_config": {

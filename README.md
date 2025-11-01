@@ -76,3 +76,38 @@ Here's a complete example showing how to create, publish, update, and display a 
 "Show me the PNG."
 # The assistant embeds the PNG image of the chart in its contained response.
 ```
+
+### Working with CSV Files
+
+If you have data in a CSV file, the AI assistant will read it and convert it to the proper format:
+
+```
+"Create a bar chart from sales_data.csv showing revenue by region"
+# The assistant will:
+# 1. Read the CSV file
+# 2. Convert it to a list of dicts format
+# 3. Create the chart with the data
+```
+
+The data is passed to the MCP server in one of these formats:
+
+**List of records (recommended):**
+```python
+[
+    {"year": 2020, "sales": 100, "profit": 20},
+    {"year": 2021, "sales": 150, "profit": 30},
+    {"year": 2022, "sales": 200, "profit": 45},
+]
+```
+
+**Dict of arrays:**
+```python
+{"year": [2020, 2021, 2022], "sales": [100, 150, 200], "profit": [20, 30, 45]}
+```
+
+**JSON string:**
+```python
+'[{"year": 2020, "sales": 100}, {"year": 2021, "sales": 150}]'
+```
+
+The server supports datasets with thousands of rows. File paths and raw CSV strings are not accepted - data must be in one of the formats above.
