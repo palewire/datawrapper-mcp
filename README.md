@@ -75,4 +75,7 @@ Here's a complete example showing how to create, publish, update, and display a 
 
 "Show me the PNG."
 # The assistant embeds the PNG image of the chart in its contained response.
+
+"Suggest five ways to improve the chart."
+# See what happens!
 ```
