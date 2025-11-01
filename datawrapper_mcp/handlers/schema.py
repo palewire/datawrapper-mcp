@@ -14,6 +14,10 @@ async def get_chart_schema(arguments: dict) -> list[TextContent]:
 
     schema = chart_class.model_json_schema()
 
+    # Remove examples that contain DataFrames (not JSON serializable)
+    if "examples" in schema:
+        del schema["examples"]
+
     result = {
         "chart_type": chart_type,
         "class_name": chart_class.__name__,
