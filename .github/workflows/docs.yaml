@@ -33,16 +33,16 @@ jobs:
         name: Install Python dependencies
         run: uv sync --extra docs
 
-      - id: build-sphinx-documentation
-        name: Build Sphinx documentation
-        run: uv run sphinx-build -M html ./docs ./_build/
+      # - id: build-sphinx-documentation
+      #   name: Build Sphinx documentation
+      #   run: uv run sphinx-build -M html ./docs ./_build/
 
-      - id: upload-release-candidate
-        name: Upload release candidate
-        uses: actions/upload-artifact@v5
-        with:
-          name: release-candidate
-          path: ./_build/html/
+      # - id: upload-release-candidate
+      #   name: Upload release candidate
+      #   uses: actions/upload-artifact@v5
+      #   with:
+      #     name: release-candidate
+      #     path: ./_build/html/
 
   # deploy:
   #   name: Deploy
