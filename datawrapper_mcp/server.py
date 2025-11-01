@@ -1,10 +1,11 @@
 """Main MCP server implementation for Datawrapper chart creation."""
 
 import json
-from typing import Any
+from typing import Any, Sequence
 
 from mcp.server import Server
 from mcp.types import ImageContent, Resource, TextContent
+from pydantic import AnyUrl
 
 from .config import CHART_CLASSES
 from .handlers import (
@@ -27,7 +28,7 @@ async def list_resources() -> list[Resource]:
     """List available resources."""
     return [
         Resource(
-            uri="datawrapper://chart-types",
+            uri=AnyUrl("datawrapper://chart-types"),
             name="Available Chart Types",
             mimeType="application/json",
             description="List of available Datawrapper chart types and their Pydantic schemas",
@@ -36,9 +37,9 @@ async def list_resources() -> list[Resource]:
 
 
 @app.read_resource()
-async def read_resource(uri: str) -> str:
+async def read_resource(uri: AnyUrl) -> str:
     """Read a resource by URI."""
-    if uri == "datawrapper://chart-types":
+    if str(uri) == "datawrapper://chart-types":
         chart_info = {}
         for name, chart_class in CHART_CLASSES.items():
             chart_info[name] = {
@@ -57,7 +58,7 @@ async def list_tools():
 
 
 @app.call_tool()
-async def call_tool(name: str, arguments: Any) -> list[TextContent | ImageContent]:
+async def call_tool(name: str, arguments: Any) -> Sequence[TextContent | ImageContent]:
     """Handle tool calls."""
     try:
         if name == "create_chart":
