@@ -45,16 +45,19 @@ async def list_tools() -> list[Tool]:
                     "data": {
                         "type": ["string", "array", "object"],
                         "description": (
-                            "Chart data as a Python data structure (NOT a file path or CSV string).\n\n"
-                            "Supported formats:\n"
-                            "1. List of records (RECOMMENDED):\n"
+                            "Chart data in one of the following formats:\n\n"
+                            "1. FILE PATH (RECOMMENDED for large datasets 1000+ rows):\n"
+                            '   "/path/to/data.csv" or "/path/to/data.json"\n'
+                            "   - CSV files are read directly\n"
+                            "   - JSON files must contain list of dicts or dict of arrays\n\n"
+                            "2. List of records:\n"
                             '   [{"year": 2020, "sales": 100}, {"year": 2021, "sales": 150}]\n\n'
-                            "2. Dict of arrays:\n"
+                            "3. Dict of arrays:\n"
                             '   {"year": [2020, 2021], "sales": [100, 150]}\n\n'
-                            "3. JSON string of either format above:\n"
+                            "4. JSON string of format 2 or 3:\n"
                             '   \'[{"year": 2020, "sales": 100}]\'\n\n'
-                            "For CSV files: Read the file first, then convert to format 1 or 2.\n"
-                            "Example: If you have CSV data, parse it into a list of dicts before passing.\n"
+                            "For large datasets: Save to a temporary CSV or JSON file, then pass the file path.\n"
+                            "Example: Save data to /tmp/chart_data.json, then pass that path as a string.\n"
                             "Supports datasets with thousands of rows."
                         ),
                     },
@@ -176,16 +179,19 @@ async def list_tools() -> list[Tool]:
                     "data": {
                         "type": ["string", "array", "object"],
                         "description": (
-                            "Chart data as a Python data structure (NOT a file path or CSV string).\n\n"
-                            "Supported formats:\n"
-                            "1. List of records (RECOMMENDED):\n"
+                            "Chart data in one of the following formats:\n\n"
+                            "1. FILE PATH (RECOMMENDED for large datasets 1000+ rows):\n"
+                            '   "/path/to/data.csv" or "/path/to/data.json"\n'
+                            "   - CSV files are read directly\n"
+                            "   - JSON files must contain list of dicts or dict of arrays\n\n"
+                            "2. List of records:\n"
                             '   [{"year": 2020, "sales": 100}, {"year": 2021, "sales": 150}]\n\n'
-                            "2. Dict of arrays:\n"
+                            "3. Dict of arrays:\n"
                             '   {"year": [2020, 2021], "sales": [100, 150]}\n\n'
-                            "3. JSON string of either format above:\n"
+                            "4. JSON string of format 2 or 3:\n"
                             '   \'[{"year": 2020, "sales": 100}]\'\n\n'
-                            "For CSV files: Read the file first, then convert to format 1 or 2.\n"
-                            "Example: If you have CSV data, parse it into a list of dicts before passing.\n"
+                            "For large datasets: Save to a temporary CSV or JSON file, then pass the file path.\n"
+                            "Example: Save data to /tmp/chart_data.json, then pass that path as a string.\n"
                             "Supports datasets with thousands of rows."
                         ),
                     },
