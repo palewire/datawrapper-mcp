@@ -1,13 +1,8 @@
 {
   "mcpServers": {
     "datawrapper": {
-      "command": "/Users/U6122976/.local/bin/uv",
-      "args": [
-        "--directory",
-        "/Users/U6122976/Code/datawrapper-mcp",
-        "run",
-        "datawrapper-mcp"
-      ],
+      "command": "uvx",
+      "args": ["datawrapper-mcp"],
       "env": {
         "DATAWRAPPER_API_TOKEN": "your-token-here"
       }
