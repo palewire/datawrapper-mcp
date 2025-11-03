@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/palewire-datawrapper-mcp-badge.png)](https://mseep.ai/app/palewire-datawrapper-mcp)
+
 A Model Context Protocol (MCP) server that enables AI assistants to create Datawrapper charts. Built on the [datawrapper Python library](https://github.com/chekos/datawrapper) with Pydantic validation.
 
 ## Getting Started
