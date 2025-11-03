@@ -21,7 +21,7 @@ Configure your MCP client to run the server with `uvx` in `claude_desktop_config
       "command": "uvx",
       "args": ["datawrapper-mcp"],
       "env": {
-        "DATAWRAPPER_API_TOKEN": "your-token-here"
+        "DATAWRAPPER_ACCESS_TOKEN": "your-token-here"
       }
     }
   }
@@ -42,7 +42,7 @@ Then configure your MCP client:
     "datawrapper": {
       "command": "datawrapper-mcp",
       "env": {
-        "DATAWRAPPER_API_TOKEN": "your-token-here"
+        "DATAWRAPPER_ACCESS_TOKEN": "your-token-here"
       }
     }
   }

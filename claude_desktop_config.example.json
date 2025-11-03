@@ -4,7 +4,7 @@
       "command": "uvx",
       "args": ["datawrapper-mcp"],
       "env": {
-        "DATAWRAPPER_API_TOKEN": "your-token-here"
+        "DATAWRAPPER_ACCESS_TOKEN": "your-token-here"
       }
     }
   }

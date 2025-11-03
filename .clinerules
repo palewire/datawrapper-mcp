@@ -61,7 +61,7 @@ datawrapper_mcp/
 
 ## Environment Variables
 
-- `DATAWRAPPER_API_TOKEN`: Required. Get from https://app.datawrapper.de/account/api-tokens
+- `DATAWRAPPER_ACCESS_TOKEN`: Required. Get from https://app.datawrapper.de/account/api-tokens
 
 ## Supported Chart Types
 
@@ -234,7 +234,7 @@ This simplified approach:
 ## Testing Considerations
 
 To test the server:
-1. Set DATAWRAPPER_API_TOKEN environment variable
+1. Set DATAWRAPPER_ACCESS_TOKEN environment variable
 2. Install package: `pip install -e .`
 3. Run server: `datawrapper-mcp`
 4. Configure MCP client to connect to server
@@ -275,7 +275,7 @@ When users ask about styling charts (colors, line widths, axes, tooltips, etc.):
 
 ## Common Issues
 
-1. **Missing API token**: Set DATAWRAPPER_API_TOKEN environment variable
+1. **Missing API token**: Set DATAWRAPPER_ACCESS_TOKEN environment variable
 2. **Invalid chart config**: Use get_chart_schema to see valid options
 3. **Data format errors**: Ensure data is JSON string, list of dicts, or dict of arrays
 4. **Type errors**: Check Pydantic validation messages for required fields

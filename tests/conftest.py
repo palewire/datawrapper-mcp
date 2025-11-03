@@ -10,7 +10,7 @@ from datawrapper import BarChart
 @pytest.fixture
 def mock_api_token(monkeypatch):
     """Mock the API token environment variable."""
-    monkeypatch.setenv("DATAWRAPPER_API_TOKEN", "test_token_12345")
+    monkeypatch.setenv("DATAWRAPPER_ACCESS_TOKEN", "test_token_12345")
     return "test_token_12345"
 
 
@@ -99,4 +99,4 @@ def mock_bar_chart_class():
 @pytest.fixture
 def no_api_token(monkeypatch):
     """Remove the API token environment variable."""
-    monkeypatch.delenv("DATAWRAPPER_API_TOKEN", raising=False)
+    monkeypatch.delenv("DATAWRAPPER_ACCESS_TOKEN", raising=False)

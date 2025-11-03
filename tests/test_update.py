@@ -151,7 +151,7 @@ async def test_update_without_api_token(no_api_token):
         assert "error" in result[0].text.lower() or "token" in result[0].text.lower()
     except ValueError as e:
         # This is expected - the function raises ValueError when no token
-        assert "DATAWRAPPER_API_TOKEN" in str(e)
+        assert "DATAWRAPPER_ACCESS_TOKEN" in str(e)
 
 
 @pytest.mark.asyncio
