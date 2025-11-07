@@ -1,0 +1,12 @@
+# Core MCP server dependencies
+mcp[cli]>=1.20.0
+
+# Datawrapper API integration
+datawrapper>=2.0.7
+
+# Data manipulation
+pandas>=2.0.0
+
+# HTTP server dependencies (included with mcp[cli] but explicit for clarity)
+starlette>=0.27.0
+uvicorn>=0.23.0

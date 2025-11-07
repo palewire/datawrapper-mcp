@@ -49,6 +49,141 @@ Then configure your MCP client:
 }
 ```
 
+### Kubernetes Deployment
+
+For enterprise deployments, this server can be deployed to Kubernetes using HTTP transport:
+
+#### Building the Docker Image
+
+```bash
+docker build -t datawrapper-mcp:latest .
+```
+
+#### Running with Docker
+
+```bash
+docker run -p 8501:8501 \
+  -e DATAWRAPPER_ACCESS_TOKEN=your-token-here \
+  -e MCP_SERVER_HOST=0.0.0.0 \
+  -e MCP_SERVER_PORT=8501 \
+  datawrapper-mcp:latest
+```
+
+#### Environment Variables
+
+- `DATAWRAPPER_ACCESS_TOKEN`: Your Datawrapper API token (required)
+- `MCP_SERVER_HOST`: Server host (default: `0.0.0.0`)
+- `MCP_SERVER_PORT`: Server port (default: `8501`)
+- `MCP_SERVER_NAME`: Server name (default: `datawrapper-mcp`)
+
+#### Health Check Endpoint
+
+The HTTP server includes a `/healthz` endpoint for Kubernetes liveness and readiness probes:
+
+```bash
+curl http://localhost:8501/healthz
+# Returns: {"status": "healthy", "service": "datawrapper-mcp"}
+```
+
+#### Kubernetes Configuration Example
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: datawrapper-mcp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: datawrapper-mcp
+  template:
+    metadata:
+      labels:
+        app: datawrapper-mcp
+    spec:
+      containers:
+      - name: datawrapper-mcp
+        image: datawrapper-mcp:latest
+        ports:
+        - containerPort: 8501
+        env:
+        - name: DATAWRAPPER_ACCESS_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: datawrapper-secrets
+              key: access-token
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8501
+          initialDelaySeconds: 5
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8501
+          initialDelaySeconds: 5
+          periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: datawrapper-mcp
+spec:
+  selector:
+    app: datawrapper-mcp
+  ports:
+  - protocol: TCP
+    port: 8501
+    targetPort: 8501
+```
+
+## Testing
+
+For detailed testing instructions, see [TESTING.md](TESTING.md).
+
+### Quick Test
+
+Test the stdio transport locally:
+```bash
+export DATAWRAPPER_ACCESS_TOKEN=your-token-here
+python -m datawrapper_mcp
+```
+
+Test the HTTP transport with Docker:
+```bash
+docker run -p 8501:8501 \
+  -e DATAWRAPPER_ACCESS_TOKEN=your-token-here \
+  datawrapper-mcp:latest
+
+# Verify health check
+curl http://localhost:8501/healthz
+```
+
+### MCP Inspector
+
+For HTTP deployments, use [MCP Inspector](https://github.com/modelcontextprotocol/inspector) to test the server:
+
+```bash
+# Install and run
+npx @modelcontextprotocol/inspector
+
+# Connect to: http://localhost:8501/sse
+```
+
+See [TESTING.md](TESTING.md) for complete testing workflows and troubleshooting.
+
+## CI/CD
+
+This repository includes automated testing and deployment via GitHub Actions. See [.github/workflows/README.md](.github/workflows/README.md) for details on:
+
+- Automated unit and integration testing
+- Docker image building and testing
+- Code quality checks (linting, type checking)
+- Security scanning
+- Setting up repository secrets
+
 ## Example Usage
 
 Here's a complete example showing how to create, publish, update, and display a chart by chatting with the assistant:
