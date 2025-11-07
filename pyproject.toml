@@ -56,16 +56,6 @@ mypy = [
     "mypy",
     "types-requests",
 ]
-notebooks = [
-    "jupyterlab",
-    "ipywidgets",
-    "rich",
-    "pandas",
-    "pyarrow",
-    "xlrd",
-    "openpyxl",
-    "altair",
-]
 
 [project.urls]
 Maintainer = "https://github.com/palewire/"
