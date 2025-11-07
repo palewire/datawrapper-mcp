@@ -1,5 +1,36 @@
 A Model Context Protocol (MCP) server that enables AI assistants to create Datawrapper charts. Built on the [datawrapper Python library](https://github.com/chekos/datawrapper) with Pydantic validation.
 
+## Example Usage
+
+Here's a complete example showing how to create, publish, update, and display a chart by chatting with the assistant:
+
+```
+"Create a datawrapper line chart showing temperature trends with this data:
+2020, 15.5
+2021, 16.0
+2022, 16.5
+2023, 17.0"
+# The assistant creates the chart and returns the chart ID, e.g., "abc123"
+
+"Publish it."
+# The assistant publishes it and returns the public URL
+
+"Update chart with new data for 2024: 17.2°C"
+# The assistant updates the chart with the new data point
+
+"Make the line color dodger blue."
+# The assistant updates the chart configuration to set the line color
+
+"Show me the editor URL."
+# The assistant returns the Datawrapper editor URL where you can view/edit the chart
+
+"Show me the PNG."
+# The assistant embeds the PNG image of the chart in its contained response.
+
+"Suggest five ways to improve the chart."
+# See what happens!
+```
+
 ## Getting Started
 
 ### Get Your API Token
@@ -159,35 +190,4 @@ docker run -p 8501:8501 \
 
 # Verify health check
 curl http://localhost:8501/healthz
-```
-
-## Example Usage
-
-Here's a complete example showing how to create, publish, update, and display a chart by chatting with the assistant:
-
-```
-"Create a datawrapper line chart showing temperature trends with this data:
-2020, 15.5
-2021, 16.0
-2022, 16.5
-2023, 17.0"
-# The assistant creates the chart and returns the chart ID, e.g., "abc123"
-
-"Publish it."
-# The assistant publishes it and returns the public URL
-
-"Update chart with new data for 2024: 17.2°C"
-# The assistant updates the chart with the new data point
-
-"Make the line color dodger blue."
-# The assistant updates the chart configuration to set the line color
-
-"Show me the editor URL."
-# The assistant returns the Datawrapper editor URL where you can view/edit the chart
-
-"Show me the PNG."
-# The assistant embeds the PNG image of the chart in its contained response.
-
-"Suggest five ways to improve the chart."
-# See what happens!
 ```
