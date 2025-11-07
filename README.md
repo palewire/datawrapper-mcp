@@ -161,29 +161,6 @@ docker run -p 8501:8501 \
 curl http://localhost:8501/healthz
 ```
 
-### MCP Inspector
-
-For HTTP deployments, use [MCP Inspector](https://github.com/modelcontextprotocol/inspector) to test the server:
-
-```bash
-# Install and run
-npx @modelcontextprotocol/inspector
-
-# Connect to: http://localhost:8501/sse
-```
-
-See [TESTING.md](TESTING.md) for complete testing workflows and troubleshooting.
-
-## CI/CD
-
-This repository includes automated testing and deployment via GitHub Actions. See [.github/workflows/README.md](.github/workflows/README.md) for details on:
-
-- Automated unit and integration testing
-- Docker image building and testing
-- Code quality checks (linting, type checking)
-- Security scanning
-- Setting up repository secrets
-
 ## Example Usage
 
 Here's a complete example showing how to create, publish, update, and display a chart by chatting with the assistant:
