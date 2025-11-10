@@ -45,8 +45,8 @@ async def test_update_with_high_level_fields(mock_api_token, mock_get_chart):
 
         result = await update_chart(arguments)
 
-        # Verify update was called
-        mock_chart.update.assert_called_once_with(access_token=mock_api_token)
+        # Verify update was called without access_token (library auto-retrieves from env)
+        mock_chart.update.assert_called_once_with()
 
         # Verify result contains success message
         assert len(result) > 0
@@ -97,8 +97,8 @@ async def test_update_merges_with_existing_config(
 
         result = await update_chart(arguments)
 
-        # Verify update was called
-        mock_chart.update.assert_called_once_with(access_token=mock_api_token)
+        # Verify update was called without access_token (library auto-retrieves from env)
+        mock_chart.update.assert_called_once_with()
 
         # Verify result indicates success
         assert len(result) > 0
@@ -125,8 +125,8 @@ async def test_update_validates_through_pydantic(mock_api_token, mock_get_chart)
     assert mock_chart.title == "Updated Title"
     assert mock_chart.intro == "Test intro"
 
-    # Verify update was called
-    mock_chart.update.assert_called_once_with(access_token=mock_api_token)
+    # Verify update was called without access_token (library auto-retrieves from env)
+    mock_chart.update.assert_called_once_with()
 
     # Verify result indicates success
     assert len(result) > 0
@@ -139,19 +139,29 @@ async def test_update_without_api_token(no_api_token):
     """Test that update fails gracefully without API token."""
     from datawrapper_mcp.handlers.update import update_chart
 
-    arguments = {"chart_id": "test123", "chart_config": {"title": "New Title"}}
+    # Mock get_chart to raise the error that datawrapper library raises without token
+    with patch("datawrapper_mcp.handlers.update.get_chart") as mock_get_chart:
+        from datawrapper.exceptions import FailedRequestError
 
-    # The call_tool wrapper catches exceptions and returns error text
-    # But we're calling update_chart directly, so we expect the ValueError
-    try:
-        result = await update_chart(arguments)
-        # If we get here, check for error in result
-        assert len(result) > 0
-        assert result[0].type == "text"
-        assert "error" in result[0].text.lower() or "token" in result[0].text.lower()
-    except ValueError as e:
-        # This is expected - the function raises ValueError when no token
-        assert "DATAWRAPPER_ACCESS_TOKEN" in str(e)
+        # Simulate the 401 error that datawrapper raises when token is missing
+        mock_get_chart.side_effect = FailedRequestError(
+            "401 Unauthorized: DATAWRAPPER_ACCESS_TOKEN environment variable not set"
+        )
+
+        arguments = {"chart_id": "test123", "chart_config": {"title": "New Title"}}
+
+        # The library will raise FailedRequestError when no token is available
+        try:
+            result = await update_chart(arguments)
+            # If we get here, check for error in result
+            assert len(result) > 0
+            assert result[0].type == "text"
+            assert (
+                "error" in result[0].text.lower() or "token" in result[0].text.lower()
+            )
+        except FailedRequestError as e:
+            # This is expected - the library raises FailedRequestError when no token
+            assert "401" in str(e) or "Unauthorized" in str(e)
 
 
 @pytest.mark.asyncio
@@ -227,8 +237,8 @@ async def test_update_uses_direct_attribute_assignment(mock_api_token, mock_get_
     # Verify attribute was set directly (no type() or model_validate calls)
     assert mock_chart.title == "New Title"
 
-    # Verify update was called
-    mock_chart.update.assert_called_once_with(access_token=mock_api_token)
+    # Verify update was called without access_token (library auto-retrieves from env)
+    mock_chart.update.assert_called_once_with()
 
     # Verify result indicates success
     assert len(result) > 0

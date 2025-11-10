@@ -43,8 +43,8 @@ async def test_update_with_alias_field_names(mock_api_token):
         assert mock_chart.base_color == "#FF5733"
         assert mock_chart.title == "Test Chart"
 
-        # Verify update was called
-        mock_chart.update.assert_called_once_with(access_token=mock_api_token)
+        # Verify update was called without access_token (library auto-retrieves from env)
+        mock_chart.update.assert_called_once_with()
 
         # Verify success message
         assert len(result) > 0
@@ -90,8 +90,8 @@ async def test_update_with_python_field_names(mock_api_token):
         assert mock_chart.base_color == "#FF5733"
         assert mock_chart.title == "Test Chart"
 
-        # Verify update was called
-        mock_chart.update.assert_called_once_with(access_token=mock_api_token)
+        # Verify update was called without access_token (library auto-retrieves from env)
+        mock_chart.update.assert_called_once_with()
 
         # Verify success message
         assert len(result) > 0
@@ -138,8 +138,8 @@ async def test_update_with_mixed_alias_and_python_names(mock_api_token):
         assert mock_chart.source_name == "Test Source"
         assert mock_chart.title == "Test Chart"
 
-        # Verify update was called
-        mock_chart.update.assert_called_once_with(access_token=mock_api_token)
+        # Verify update was called without access_token (library auto-retrieves from env)
+        mock_chart.update.assert_called_once_with()
 
         # Verify success message
         assert len(result) > 0
