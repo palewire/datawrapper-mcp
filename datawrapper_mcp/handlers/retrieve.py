@@ -6,16 +6,14 @@ from mcp.types import TextContent
 from datawrapper import get_chart
 
 from ..types import GetChartArgs
-from ..utils import get_api_token
 
 
 async def get_chart_info(arguments: GetChartArgs) -> list[TextContent]:
     """Get information about an existing chart."""
     chart_id = arguments["chart_id"]
-    api_token = get_api_token()
 
     # Get chart using factory function
-    chart = get_chart(chart_id, access_token=api_token)
+    chart = get_chart(chart_id)
 
     result = {
         "chart_id": chart.chart_id,

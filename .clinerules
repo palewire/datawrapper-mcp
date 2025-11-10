@@ -209,11 +209,17 @@ The `json_to_dataframe()` utility provides helpful error messages that:
 - `dw.get_chart()` - Use `get_chart(chart_id, access_token)` from datawrapper.chart_factory instead
 
 **Always use Pydantic class instance methods:**
-- Create: `chart.create(access_token=api_token)`
-- Publish: `chart.publish(access_token=api_token)`
-- Update: `chart.update(access_token=api_token)`
-- Delete: `chart.delete(access_token=api_token)`
-- Retrieve: `get_chart(chart_id, access_token=api_token)` (factory function)
+- Create: `chart.create()` (no access_token parameter needed)
+- Publish: `chart.publish()` (no access_token parameter needed)
+- Update: `chart.update()` (no access_token parameter needed)
+- Delete: `chart.delete()` (no access_token parameter needed)
+- Retrieve: `get_chart(chart_id)` (factory function, no access_token parameter needed)
+
+**API Token Handling:**
+- The datawrapper library automatically retrieves `DATAWRAPPER_ACCESS_TOKEN` from the environment
+- All methods have `access_token: str | None = None` parameters that default to environment lookup
+- **DO NOT** manually call `get_api_token()` or pass `access_token` parameters
+- Let the library handle token retrieval automatically - this is simpler and follows the library's intended usage
 
 ### Return Types and Error Handling
 
@@ -248,13 +254,12 @@ This simplified approach:
 
 ### Chart Creation Flow
 
-1. Get API token from environment
-2. Convert JSON data to pandas DataFrame
-3. Get appropriate Pydantic chart class
-4. Validate configuration using model_validate()
-5. Set data on chart instance: `chart.data = df`
-6. Create chart using instance method: `chart.create(access_token)`
-7. Return chart ID and URLs using `chart.get_editor_url()`
+1. Convert JSON data to pandas DataFrame
+2. Get appropriate Pydantic chart class
+3. Validate configuration using model_validate()
+4. Set data on chart instance: `chart.data = df`
+5. Create chart using instance method: `chart.create()` (library auto-retrieves token from environment)
+6. Return chart ID and URLs using `chart.get_editor_url()`
 
 ### Pydantic Integration
 

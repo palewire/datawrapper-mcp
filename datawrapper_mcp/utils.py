@@ -6,17 +6,6 @@ import os
 import pandas as pd
 
 
-def get_api_token() -> str:
-    """Get the Datawrapper API token from environment."""
-    api_token = os.environ.get("DATAWRAPPER_ACCESS_TOKEN")
-    if not api_token:
-        raise ValueError(
-            "DATAWRAPPER_ACCESS_TOKEN environment variable is required. "
-            "Get your token from https://app.datawrapper.de/account/api-tokens"
-        )
-    return api_token
-
-
 def json_to_dataframe(data: str | list | dict) -> pd.DataFrame:
     """Convert JSON data to a pandas DataFrame.
 

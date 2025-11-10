@@ -6,17 +6,15 @@ from mcp.types import TextContent
 from datawrapper import get_chart
 
 from ..types import UpdateChartArgs
-from ..utils import get_api_token, json_to_dataframe
+from ..utils import json_to_dataframe
 
 
 async def update_chart(arguments: UpdateChartArgs) -> list[TextContent]:
     """Update an existing chart's data or configuration."""
     chart_id = arguments["chart_id"]
 
-    api_token = get_api_token()
-
     # Get chart using factory function - returns correct Pydantic class instance
-    chart = get_chart(chart_id, access_token=api_token)
+    chart = get_chart(chart_id)
 
     # Update data if provided
     if "data" in arguments:
@@ -50,7 +48,7 @@ async def update_chart(arguments: UpdateChartArgs) -> list[TextContent]:
             )
 
     # Update using Pydantic instance method
-    chart.update(access_token=api_token)
+    chart.update()
 
     result = {
         "chart_id": chart.chart_id,

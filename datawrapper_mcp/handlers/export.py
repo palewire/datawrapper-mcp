@@ -7,7 +7,6 @@ from datawrapper import get_chart
 from mcp.types import ImageContent
 
 from ..types import ExportChartPngArgs
-from ..utils import get_api_token
 
 
 async def export_chart_png(arguments: ExportChartPngArgs) -> list[ImageContent]:
@@ -33,15 +32,11 @@ async def export_chart_png(arguments: ExportChartPngArgs) -> list[ImageContent]:
     if "border_color" in arguments:
         export_params["borderColor"] = arguments["border_color"]
 
-    api_token = get_api_token()
-
     # Get chart using factory function
-    chart = get_chart(chart_id, access_token=api_token)
+    chart = get_chart(chart_id)
 
     # Export PNG using Pydantic instance method
-    png_bytes = chart.export_png(
-        access_token=api_token, **cast(dict[str, Any], export_params)
-    )
+    png_bytes = chart.export_png(**cast(dict[str, Any], export_params))
 
     # Encode to base64
     base64_data = base64.b64encode(png_bytes).decode("utf-8")

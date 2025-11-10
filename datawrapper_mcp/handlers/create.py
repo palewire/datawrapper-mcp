@@ -7,12 +7,11 @@ from mcp.types import TextContent
 
 from ..config import CHART_CLASSES
 from ..types import CreateChartArgs
-from ..utils import get_api_token, json_to_dataframe
+from ..utils import json_to_dataframe
 
 
 async def create_chart(arguments: CreateChartArgs) -> list[TextContent]:
     """Create a chart with full Pydantic model configuration."""
-    api_token = get_api_token()
     chart_type = arguments["chart_type"]
 
     # Convert data to DataFrame
@@ -35,7 +34,7 @@ async def create_chart(arguments: CreateChartArgs) -> list[TextContent]:
     chart.data = df
 
     # Create chart using Pydantic instance method
-    chart.create(access_token=api_token)
+    chart.create()
 
     result = {
         "chart_id": chart.chart_id,
