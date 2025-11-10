@@ -46,15 +46,43 @@ def create_chart(...) -> Sequence[TextContent | ImageContent]:
 
 ---
 
-### 2. Add Structured Logging Infrastructure
+### 2. ✅ Add Structured Logging Infrastructure (COMPLETED)
+
+**Status**: ✅ Completed on 2025-01-10
+
+**What Was Done**:
+- Created `datawrapper_mcp/logging.py` with comprehensive logging infrastructure
+  * JsonFormatter class for structured JSON logging
+  * correlation_id ContextVar for tracking async operations
+  * setup_logging() function with environment variable configuration
+  * Helper functions: get_correlation_id(), get_logger(), log_duration()
+- Initialized logging in `server.py` main() function
+- Added logging to `utils.py` (get_api_token and json_to_dataframe)
+- Instrumented all 7 handlers with consistent logging pattern:
+  * create.py, update.py, delete.py, publish.py, export.py, retrieve.py, schema.py
+  * Operation start logging with correlation_id and parameters
+  * Success logging with results and duration_ms
+  * Error logging with full exception details (exc_info=True)
+- Created comprehensive test suite in `tests/test_logging.py`
+- Updated README.md with dedicated Logging section
+- Updated .clinerules with logging infrastructure documentation
+- Environment variables: DATAWRAPPER_MCP_LOG_LEVEL (default: INFO), DATAWRAPPER_MCP_LOG_FORMAT (default: text)
+- Security: API tokens are NEVER logged (explicit comment in get_api_token)
+
+**Impact**: High - Enables production operations, debugging, and performance monitoring
+
+**Original Requirements**:
+- Console-only logging (no file logging) ✅
+- Environment variables prefixed with DATAWRAPPER_MCP_ ✅
+- API tokens never logged ✅
+- Support both text and JSON formats ✅
+- Correlation IDs for async operations ✅
 
 **Current Issue**: No logging infrastructure
 - Cannot trace operations in production
 - No audit trail for chart operations
 - Difficult to debug issues
 - No performance monitoring
-
-**Impact**: High - Critical for production operations and debugging
 
 **Proposed Solution**:
 ```python
