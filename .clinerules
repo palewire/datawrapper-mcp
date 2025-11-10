@@ -66,7 +66,19 @@ The server uses a handler/tool separation pattern:
 ```
 datawrapper_mcp/
 ├── __init__.py          # Package initialization
-└── server.py            # Main MCP server implementation
+├── server.py            # Main MCP server implementation
+├── config.py            # Configuration and chart type mappings
+├── utils.py             # Utility functions (data conversion, API token)
+├── logging.py           # Logging infrastructure
+└── handlers/            # Handler modules for each operation
+    ├── __init__.py
+    ├── create.py        # Chart creation handler
+    ├── update.py        # Chart update handler
+    ├── delete.py        # Chart deletion handler
+    ├── publish.py       # Chart publishing handler
+    ├── export.py        # Chart export handler
+    ├── retrieve.py      # Chart retrieval handler
+    └── schema.py        # Schema retrieval handler
 ```
 
 ## Dependencies
@@ -78,6 +90,8 @@ datawrapper_mcp/
 ## Environment Variables
 
 - `DATAWRAPPER_ACCESS_TOKEN`: Required. Get from https://app.datawrapper.de/account/api-tokens
+- `DATAWRAPPER_MCP_LOG_LEVEL`: Optional. Logging level (default: INFO, options: DEBUG, INFO, WARNING, ERROR, CRITICAL)
+- `DATAWRAPPER_MCP_LOG_FORMAT`: Optional. Log format (default: text, options: text, json)
 
 ## Supported Chart Types
 
@@ -304,11 +318,81 @@ When users ask about styling charts (colors, line widths, axes, tooltips, etc.):
 4. **Type errors**: Check Pydantic validation messages for required fields
 5. **Styling questions**: Always start with get_chart_schema, then refer to documentation
 
+## Logging Infrastructure
+
+The project includes comprehensive structured logging:
+
+### Key Components
+
+1. **datawrapper_mcp/logging.py**: Core logging infrastructure
+   - `JsonFormatter`: Custom formatter for structured JSON logs
+   - `correlation_id`: ContextVar for tracking async operations
+   - `setup_logging()`: Configures logging based on environment variables
+   - `get_correlation_id()`: Returns/creates correlation ID for current context
+   - `get_logger(name)`: Returns logger with 'datawrapper_mcp.' prefix
+   - `log_duration(start_time)`: Calculates duration in milliseconds
+
+2. **Handler Instrumentation**: All 7 handlers include logging
+   - Operation start logging with correlation_id and operation parameters
+   - Success logging with results and duration_ms
+   - Error logging with full exception details (exc_info=True)
+   - Pattern: import time, get_logger, track start_time, log at key points
+
+3. **Security**: API tokens are NEVER logged
+   - Explicit comment in get_api_token(): "# SECURITY: Never log the actual token value"
+   - Only log that token was retrieved, never the value itself
+
+4. **Configuration**:
+   - Console-only logging (no file logging)
+   - Environment variables prefixed with DATAWRAPPER_MCP_
+   - Supports both text and JSON formats
+   - Default: INFO level, text format
+
+### Usage Pattern
+
+```python
+import time
+from ..logging import get_correlation_id, get_logger, log_duration
+
+logger = get_logger("handlers.operation_name")
+
+async def handler_function(arguments: dict) -> list[TextContent]:
+    start_time = time.time()
+    
+    logger.info(
+        "Starting operation",
+        extra={
+            "correlation_id": get_correlation_id(),
+            "param1": value1,
+        },
+    )
+    
+    try:
+        # ... operation logic ...
+        
+        logger.info(
+            "Operation completed successfully",
+            extra={
+                "correlation_id": get_correlation_id(),
+                "result_field": result_value,
+                "duration_ms": log_duration(start_time),
+            },
+        )
+    except Exception as e:
+        logger.error(
+            "Operation failed",
+            extra={"correlation_id": get_correlation_id()},
+            exc_info=True,
+        )
+        raise
+```
+
 ## Development Workflow
 
-1. Make changes to src/datawrapper_mcp/server.py
-2. Test locally with `python -m datawrapper_mcp.server`
-3. Update README.md if adding features
-4. Update this .clinerules file with new information
-5. Run pre-commit hooks before committing
-6. Update version in src/datawrapper_mcp/__init__.py if needed
+1. Make changes to datawrapper_mcp/ files
+2. Test locally with `python -m datawrapper_mcp`
+3. Run tests with `pytest tests/`
+4. Update README.md if adding features
+5. Update this .clinerules file with new information
+6. Run pre-commit hooks before committing
+7. Update version in datawrapper_mcp/__init__.py if needed

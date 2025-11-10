@@ -7,6 +7,7 @@ from mcp.server.fastmcp import FastMCP
 from mcp.types import ImageContent, TextContent
 
 from .config import CHART_CLASSES
+from .logging import setup_logging
 from .handlers import (
     create_chart as create_chart_handler,
     delete_chart as delete_chart_handler,
@@ -381,6 +382,8 @@ async def export_chart_png(
 
 def main():
     """Run the MCP server with stdio transport."""
+    # Initialize logging before starting server
+    setup_logging()
     mcp.run(transport="stdio")
 
 
