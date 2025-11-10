@@ -2,8 +2,8 @@
 
 import json
 
-from datawrapper import get_chart
 from mcp.types import TextContent
+from datawrapper import get_chart
 
 from ..types import GetChartArgs
 from ..utils import get_api_token

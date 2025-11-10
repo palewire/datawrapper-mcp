@@ -25,14 +25,11 @@ async def create_chart(arguments: CreateChartArgs) -> list[TextContent]:
     try:
         chart = chart_class.model_validate(arguments["chart_config"])
     except Exception as e:
-        return [
-            TextContent(
-                type="text",
-                text=f"Invalid chart configuration: {str(e)}\n\n"
-                f"Use get_chart_schema with chart_type '{chart_type}' "
-                f"to see the valid schema.",
-            )
-        ]
+        raise ValueError(
+            f"Invalid chart configuration: {str(e)}\n\n"
+            f"Use get_chart_schema with chart_type '{chart_type}' "
+            f"to see the valid schema."
+        )
 
     # Set data on chart instance
     chart.data = df

@@ -2,8 +2,8 @@
 
 import json
 
-from datawrapper import get_chart
 from mcp.types import TextContent
+from datawrapper import get_chart
 
 from ..types import UpdateChartArgs
 from ..utils import get_api_token, json_to_dataframe
@@ -43,14 +43,11 @@ async def update_chart(arguments: UpdateChartArgs) -> list[TextContent]:
                 setattr(chart, field_name, value)
 
         except Exception as e:
-            return [
-                TextContent(
-                    type="text",
-                    text=f"Invalid chart configuration: {str(e)}\n\n"
-                    f"Use get_chart_schema to see the valid schema for this chart type. "
-                    f"Only high-level Pydantic fields are accepted.",
-                )
-            ]
+            raise ValueError(
+                f"Invalid chart configuration: {str(e)}\n\n"
+                f"Use get_chart_schema to see the valid schema for this chart type. "
+                f"Only high-level Pydantic fields are accepted."
+            )
 
     # Update using Pydantic instance method
     chart.update(access_token=api_token)
