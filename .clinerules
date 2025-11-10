@@ -268,6 +268,21 @@ This simplified approach:
 - Uses helper methods: `.get_editor_url()`, `.get_public_url()`
 - Provides helpful validation errors from Pydantic
 
+### Type Annotations for Mypy
+
+**Critical for mypy type checking:**
+- `CHART_CLASSES` dictionary in `config.py` is annotated as `dict[str, type[Any]]`
+- When retrieving chart classes from `CHART_CLASSES`, annotate the variable as `type[Any]`
+- This tells mypy that these are class objects (not instances) with Pydantic methods
+- Example: `chart_class: type[Any] = CHART_CLASSES[chart_type]`
+- Required in: `config.py`, `handlers/schema.py`, `handlers/create.py`, `server.py`
+- Without these annotations, mypy infers `ModelMetaclass` which lacks Pydantic method signatures
+
+**Dependencies for mypy:**
+- `pandas-stubs` must be installed for pandas type checking
+- Added to `[project.optional-dependencies]` mypy section in `pyproject.toml`
+- Install with: `uv pip install pandas-stubs` or `pip install pandas-stubs`
+
 ## Testing Considerations
 
 To test the server:
@@ -317,6 +332,7 @@ When users ask about styling charts (colors, line widths, axes, tooltips, etc.):
 3. **Data format errors**: Ensure data is JSON string, list of dicts, or dict of arrays
 4. **Type errors**: Check Pydantic validation messages for required fields
 5. **Styling questions**: Always start with get_chart_schema, then refer to documentation
+6. **Mypy errors**: Ensure pandas-stubs is installed and type annotations use `type[Any]`
 
 ## Logging Infrastructure
 
@@ -333,66 +349,4 @@ The project includes comprehensive structured logging:
    - `log_duration(start_time)`: Calculates duration in milliseconds
 
 2. **Handler Instrumentation**: All 7 handlers include logging
-   - Operation start logging with correlation_id and operation parameters
-   - Success logging with results and duration_ms
-   - Error logging with full exception details (exc_info=True)
-   - Pattern: import time, get_logger, track start_time, log at key points
-
-3. **Security**: API tokens are NEVER logged
-   - Explicit comment in get_api_token(): "# SECURITY: Never log the actual token value"
-   - Only log that token was retrieved, never the value itself
-
-4. **Configuration**:
-   - Console-only logging (no file logging)
-   - Environment variables prefixed with DATAWRAPPER_MCP_
-   - Supports both text and JSON formats
-   - Default: INFO level, text format
-
-### Usage Pattern
-
-```python
-import time
-from ..logging import get_correlation_id, get_logger, log_duration
-
-logger = get_logger("handlers.operation_name")
-
-async def handler_function(arguments: dict) -> list[TextContent]:
-    start_time = time.time()
-
-    logger.info(
-        "Starting operation",
-        extra={
-            "correlation_id": get_correlation_id(),
-            "param1": value1,
-        },
-    )
-
-    try:
-        # ... operation logic ...
-
-        logger.info(
-            "Operation completed successfully",
-            extra={
-                "correlation_id": get_correlation_id(),
-                "result_field": result_value,
-                "duration_ms": log_duration(start_time),
-            },
-        )
-    except Exception as e:
-        logger.error(
-            "Operation failed",
-            extra={"correlation_id": get_correlation_id()},
-            exc_info=True,
-        )
-        raise
-```
-
-## Development Workflow
-
-1. Make changes to datawrapper_mcp/ files
-2. Test locally with `python -m datawrapper_mcp`
-3. Run tests with `pytest tests/`
-4. Update README.md if adding features
-5. Update this .clinerules file with new information
-6. Run pre-commit hooks before committing
-7. Update version in datawrapper_mcp/__init__.py if needed
+   - Operation start logging with correlation

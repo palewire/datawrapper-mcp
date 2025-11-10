@@ -38,3 +38,4 @@ repos:
       - id: mypy
         additional_dependencies:
           - types-requests
+          - pandas-stubs

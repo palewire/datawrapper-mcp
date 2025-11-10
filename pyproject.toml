@@ -49,6 +49,7 @@ test = [
 ]
 mypy = [
     "mypy",
+    "pandas-stubs",
     "types-requests",
 ]
 

@@ -1,5 +1,7 @@
 """Configuration and constants for the Datawrapper MCP server."""
 
+from typing import Any
+
 from datawrapper import (
     AreaChart,
     ArrowChart,
@@ -12,7 +14,7 @@ from datawrapper import (
 )
 
 # Map of chart type names to their Pydantic classes
-CHART_CLASSES = {
+CHART_CLASSES: dict[str, type[Any]] = {
     "bar": BarChart,
     "line": LineChart,
     "area": AreaChart,

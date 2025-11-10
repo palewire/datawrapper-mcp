@@ -36,9 +36,10 @@ async def chart_types_resource() -> str:
     """List of available Datawrapper chart types and their Pydantic schemas."""
     chart_info = {}
     for name, chart_class in CHART_CLASSES.items():
+        chart_class_typed: type[Any] = chart_class
         chart_info[name] = {
-            "class_name": chart_class.__name__,
-            "schema": chart_class.model_json_schema(),
+            "class_name": chart_class_typed.__name__,
+            "schema": chart_class_typed.model_json_schema(),
         }
     return json.dumps(chart_info, indent=2)
 

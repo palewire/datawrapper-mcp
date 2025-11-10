@@ -2,6 +2,7 @@
 
 import json
 import time
+from typing import Any
 
 from mcp.types import TextContent
 
@@ -25,7 +26,7 @@ async def get_chart_schema(arguments: GetChartSchemaArgs) -> list[TextContent]:
         },
     )
 
-    chart_class = CHART_CLASSES[chart_type]
+    chart_class: type[Any] = CHART_CLASSES[chart_type]
 
     schema = chart_class.model_json_schema()
 

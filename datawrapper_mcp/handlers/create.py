@@ -2,6 +2,7 @@
 
 import json
 import time
+from typing import Any
 
 from mcp.types import TextContent
 
@@ -40,7 +41,7 @@ async def create_chart(arguments: CreateChartArgs) -> list[TextContent]:
     df = json_to_dataframe(arguments["data"])
 
     # Get chart class and validate config
-    chart_class = CHART_CLASSES[chart_type]
+    chart_class: type[Any] = CHART_CLASSES[chart_type]
 
     # Validate and create chart using Pydantic model
     try:
