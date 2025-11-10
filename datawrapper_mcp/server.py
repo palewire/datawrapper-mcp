@@ -1,13 +1,22 @@
 """Main MCP server implementation for Datawrapper chart creation."""
 
 import json
-from typing import Any, Sequence
+from typing import Any, Sequence, cast
 
 from mcp.server.fastmcp import FastMCP
 from mcp.types import ImageContent, TextContent
 
 from .config import CHART_CLASSES
 from .logging import setup_logging
+from .types import (
+    CreateChartArgs,
+    DeleteChartArgs,
+    ExportChartPngArgs,
+    GetChartArgs,
+    GetChartSchemaArgs,
+    PublishChartArgs,
+    UpdateChartArgs,
+)
 from .handlers import (
     create_chart as create_chart_handler,
     delete_chart as delete_chart_handler,
@@ -154,11 +163,14 @@ async def create_chart(
     """
     try:
         return await create_chart_handler(
-            {
-                "data": data,
-                "chart_type": chart_type,
-                "chart_config": chart_config,
-            }
+            cast(
+                CreateChartArgs,
+                {
+                    "data": data,
+                    "chart_type": chart_type,
+                    "chart_config": chart_config,
+                },
+            )
         )
     except Exception as e:
         return [TextContent(type="text", text=f"Error: {str(e)}")]
@@ -191,7 +203,9 @@ async def get_chart_schema(chart_type: str) -> Sequence[TextContent | ImageConte
         JSON schema for the chart type
     """
     try:
-        return await get_chart_schema_handler({"chart_type": chart_type})
+        return await get_chart_schema_handler(
+            cast(GetChartSchemaArgs, {"chart_type": chart_type})
+        )
     except Exception as e:
         return [TextContent(type="text", text=f"Error: {str(e)}")]
 
@@ -215,7 +229,9 @@ async def publish_chart(chart_id: str) -> Sequence[TextContent | ImageContent]:
         Public URL of the published chart
     """
     try:
-        return await publish_chart_handler({"chart_id": chart_id})
+        return await publish_chart_handler(
+            cast(PublishChartArgs, {"chart_id": chart_id})
+        )
     except Exception as e:
         return [TextContent(type="text", text=f"Error: {str(e)}")]
 
@@ -237,7 +253,9 @@ async def get_chart(chart_id: str) -> Sequence[TextContent | ImageContent]:
         Chart information including metadata and URLs
     """
     try:
-        return await get_chart_info_handler({"chart_id": chart_id})
+        return await get_chart_info_handler(
+            cast(GetChartArgs, {"chart_id": chart_id})
+        )
     except Exception as e:
         return [TextContent(type="text", text=f"Error: {str(e)}")]
 
@@ -299,7 +317,7 @@ async def update_chart(
         if chart_config is not None:
             args["chart_config"] = chart_config
 
-        return await update_chart_handler(args)
+        return await update_chart_handler(cast(UpdateChartArgs, args))
     except Exception as e:
         return [TextContent(type="text", text=f"Error: {str(e)}")]
 
@@ -320,7 +338,9 @@ async def delete_chart(chart_id: str) -> Sequence[TextContent | ImageContent]:
         Confirmation message
     """
     try:
-        return await delete_chart_handler({"chart_id": chart_id})
+        return await delete_chart_handler(
+            cast(DeleteChartArgs, {"chart_id": chart_id})
+        )
     except Exception as e:
         return [TextContent(type="text", text=f"Error: {str(e)}")]
 
@@ -375,7 +395,7 @@ async def export_chart_png(
         if border_color is not None:
             args["border_color"] = border_color
 
-        return await export_chart_png_handler(args)
+        return await export_chart_png_handler(cast(ExportChartPngArgs, args))
     except Exception as e:
         return [TextContent(type="text", text=f"Error: {str(e)}")]
 

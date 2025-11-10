@@ -7,12 +7,13 @@ from datawrapper import get_chart
 from mcp.types import ImageContent
 
 from ..logging import get_correlation_id, get_logger, log_duration
+from ..types import ExportChartPngArgs
 from ..utils import get_api_token
 
 logger = get_logger("handlers.export")
 
 
-async def export_chart_png(arguments: dict) -> list[ImageContent]:
+async def export_chart_png(arguments: ExportChartPngArgs) -> list[ImageContent]:
     """Export a chart as PNG and return it as inline image."""
     start_time = time.time()
     cid = get_correlation_id()

@@ -7,12 +7,13 @@ from datawrapper import get_chart
 from mcp.types import TextContent
 
 from ..logging import get_correlation_id, get_logger, log_duration
+from ..types import DeleteChartArgs
 from ..utils import get_api_token
 
 logger = get_logger("handlers.delete")
 
 
-async def delete_chart(arguments: dict) -> list[TextContent]:
+async def delete_chart(arguments: DeleteChartArgs) -> list[TextContent]:
     """Delete a chart permanently."""
     start_time = time.time()
     cid = get_correlation_id()

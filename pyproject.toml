@@ -28,6 +28,7 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "License :: OSI Approved :: MIT License",
     "Intended Audience :: Developers",
+    "Typing :: Typed",
 ]
 keywords = ["datawrapper", "mcp", "model-context-protocol", "charts", "visualization", "ai"]
 
@@ -67,6 +68,9 @@ datawrapper-mcp = "datawrapper_mcp.server:main"
 
 [tool.setuptools]
 packages = ["datawrapper_mcp"]
+
+[tool.setuptools.package-data]
+datawrapper_mcp = ["py.typed"]
 
 [tool.setuptools_scm]
 

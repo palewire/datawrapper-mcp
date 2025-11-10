@@ -7,12 +7,13 @@ from datawrapper import get_chart
 from mcp.types import TextContent
 
 from ..logging import get_correlation_id, get_logger, log_duration
+from ..types import GetChartArgs
 from ..utils import get_api_token
 
 logger = get_logger("handlers.retrieve")
 
 
-async def get_chart_info(arguments: dict) -> list[TextContent]:
+async def get_chart_info(arguments: GetChartArgs) -> list[TextContent]:
     """Get information about an existing chart."""
     start_time = time.time()
     cid = get_correlation_id()

@@ -7,12 +7,13 @@ from mcp.types import TextContent
 
 from ..config import CHART_CLASSES
 from ..logging import get_correlation_id, get_logger, log_duration
+from ..types import CreateChartArgs
 from ..utils import get_api_token, json_to_dataframe
 
 logger = get_logger("handlers.create")
 
 
-async def create_chart(arguments: dict) -> list[TextContent]:
+async def create_chart(arguments: CreateChartArgs) -> list[TextContent]:
     """Create a chart with full Pydantic model configuration."""
     start_time = time.time()
     cid = get_correlation_id()

@@ -7,11 +7,12 @@ from mcp.types import TextContent
 
 from ..config import CHART_CLASSES
 from ..logging import get_correlation_id, get_logger, log_duration
+from ..types import GetChartSchemaArgs
 
 logger = get_logger("handlers.schema")
 
 
-async def get_chart_schema(arguments: dict) -> list[TextContent]:
+async def get_chart_schema(arguments: GetChartSchemaArgs) -> list[TextContent]:
     """Get the Pydantic schema for a chart type."""
     start_time = time.time()
     chart_type = arguments["chart_type"]

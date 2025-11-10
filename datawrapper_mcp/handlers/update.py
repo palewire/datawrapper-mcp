@@ -7,12 +7,13 @@ from datawrapper import get_chart
 from mcp.types import TextContent
 
 from ..logging import get_correlation_id, get_logger, log_duration
+from ..types import UpdateChartArgs
 from ..utils import get_api_token, json_to_dataframe
 
 logger = get_logger("handlers.update")
 
 
-async def update_chart(arguments: dict) -> list[TextContent]:
+async def update_chart(arguments: UpdateChartArgs) -> list[TextContent]:
     """Update an existing chart's data or configuration."""
     start_time = time.time()
     cid = get_correlation_id()
