@@ -34,6 +34,42 @@ async def chart_types_resource() -> str:
 
 
 @mcp.tool()
+async def list_chart_types() -> str:
+    """⚠️ DATAWRAPPER MCP TOOL ⚠️
+    This is part of the Datawrapper MCP server integration.
+
+    ---
+
+    List all available Datawrapper chart types with brief descriptions.
+    
+    Use this tool to discover which chart types you can create. After choosing a type,
+    use get_chart_schema(chart_type) to explore detailed configuration options.
+
+    Returns:
+        List of available chart types with descriptions
+    """
+    chart_descriptions = {
+        "bar": "Horizontal bar chart - good for comparing categories",
+        "line": "Line chart - ideal for showing trends over time",
+        "area": "Area chart - filled line chart for emphasizing magnitude",
+        "arrow": "Arrow chart - shows before/after comparisons with arrows",
+        "column": "Vertical column chart - classic bar chart orientation",
+        "multiple_column": "Grouped column chart - compare multiple series side-by-side",
+        "scatter": "Scatter plot - visualize correlations between two variables",
+        "stacked_bar": "Stacked bar chart - show part-to-whole relationships",
+    }
+    
+    result = "Available Datawrapper chart types:\n\n"
+    for chart_type, description in chart_descriptions.items():
+        result += f"• {chart_type}: {description}\n"
+    
+    result += "\nTo see detailed configuration options for a specific type, use:\n"
+    result += "get_chart_schema(chart_type='your_chosen_type')"
+    
+    return result
+
+
+@mcp.tool()
 async def create_chart(
     data: str | list | dict,
     chart_type: str,
@@ -58,10 +94,37 @@ async def create_chart(
     visualization settings, axes, colors, and more. The chart_config should
     be a complete Pydantic model dict matching the schema for the chosen chart type.
 
+    QUICK EXAMPLES:
+    
+    1. Basic chart with title:
+       chart_config = {
+           "title": "Monthly Sales",
+           "intro": "Sales data for Q1 2024"
+       }
+    
+    2. Chart with custom colors:
+       chart_config = {
+           "title": "Product Comparison",
+           "color_category": {
+               "Product A": "#1f77b4",
+               "Product B": "#ff7f0e"
+           }
+       }
+    
+    3. Styled line chart:
+       chart_config = {
+           "title": "Sales Trends",
+           "lines": [
+               {"column": "sales", "width": "style2", "interpolation": "curved"}
+           ],
+           "custom_range_y": [0, 1000]
+       }
+
     STYLING WORKFLOW:
-    1. Use get_chart_schema to explore all available options for your chart type
-    2. Refer to https://datawrapper.readthedocs.io/en/latest/ for detailed examples
-    3. Build your chart_config with the desired styling properties
+    1. Use list_chart_types to see available chart types
+    2. Use get_chart_schema to explore all options for your chosen type
+    3. Refer to https://datawrapper.readthedocs.io/en/latest/ for detailed examples
+    4. Build your chart_config with the desired styling properties
 
     Common styling patterns:
     - Colors: {"color_category": {"sales": "#1d81a2", "profit": "#15607a"}}
@@ -73,8 +136,6 @@ async def create_chart(
 
     See the documentation for chart-type specific examples and advanced patterns.
 
-    Example data format: [{"date": "2024-01", "value": 100}, {"date": "2024-02", "value": 150}]
-
     Args:
         data: Chart data. RECOMMENDED: Pass data inline as a list or dict.
             PREFERRED FORMATS (use these first):
@@ -83,7 +144,8 @@ async def create_chart(
             3. JSON string of format 1 or 2: '[{"year": 2020, "sales": 100}]'
             ALTERNATIVE (only for extremely large datasets where inline data is impractical):
             4. File path to CSV or JSON: "/path/to/data.csv" or "/path/to/data.json"
-        chart_type: Type of chart to create (bar, line, area, arrow, column, multiple_column, scatter, stacked_bar)
+        chart_type: Type of chart to create. Use list_chart_types to see all available types.
+            Common types: bar, line, area, arrow, column, multiple_column, scatter, stacked_bar
         chart_config: Complete chart configuration as a Pydantic model dict
 
     Returns:
@@ -196,7 +258,22 @@ async def update_chart(
     ---
 
     Update an existing Datawrapper chart's data or configuration using Pydantic models.
-    IMPORTANT: The chart_config must use high-level Pydantic fields only (title, intro,
+    
+    ⚠️ IMPORTANT LIMITATION: You CANNOT change the chart type with this tool.
+    Chart types are immutable once created. To change from one chart type to another
+    (e.g., column → stacked_bar, or line → area), you must create a new chart instead.
+    
+    WHAT YOU CAN UPDATE:
+    • Chart data (add/modify/replace data points)
+    • Title, intro, byline, source information
+    • Colors, styling, axes configuration
+    • Tooltips, annotations, labels
+    • Any other configuration options for the existing chart type
+    
+    WHAT YOU CANNOT UPDATE:
+    ✗ Chart type (bar, line, column, etc.) - this is permanent
+    
+    The chart_config must use high-level Pydantic fields only (title, intro,
     byline, source_name, source_url, etc.). Do NOT use low-level serialized structures
     like 'metadata', 'visualize', or other internal API fields.
 
