@@ -327,6 +327,27 @@ When users ask about styling charts (colors, line widths, axes, tooltips, etc.):
 4. Provide chart_config dict using high-level Pydantic fields
 5. Use `create_chart` or `update_chart` with the validated config
 
+## Testing Best Practices
+
+### Mocking FailedRequestError
+
+When testing error conditions that raise `FailedRequestError` from the datawrapper library:
+
+```python
+from datawrapper.exceptions import FailedRequestError
+from unittest.mock import MagicMock
+
+# Create a mock response object with status_code attribute
+mock_response = MagicMock()
+mock_response.status_code = 401
+mock_response.text = "Unauthorized: DATAWRAPPER_ACCESS_TOKEN environment variable not set"
+
+# Pass the mock response to FailedRequestError
+mock_get_chart.side_effect = FailedRequestError(mock_response)
+```
+
+**Important**: `FailedRequestError` expects a response object with a `status_code` attribute, not a plain string. Passing a string will cause `AttributeError: 'str' object has no attribute 'status_code'`.
+
 ## Common Issues
 
 1. **Missing API token**: Set DATAWRAPPER_ACCESS_TOKEN environment variable
@@ -335,3 +356,4 @@ When users ask about styling charts (colors, line widths, axes, tooltips, etc.):
 4. **Type errors**: Check Pydantic validation messages for required fields
 5. **Styling questions**: Always start with get_chart_schema, then refer to documentation
 6. **Mypy errors**: Ensure pandas-stubs is installed and type annotations use `type[Any]`
+7. **Test failures with FailedRequestError**: Ensure mock response objects have `status_code` attribute
