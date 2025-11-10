@@ -2,6 +2,7 @@
 
 import base64
 import time
+from typing import Any
 
 from datawrapper import get_chart
 from mcp.types import ImageContent
@@ -20,7 +21,7 @@ async def export_chart_png(arguments: ExportChartPngArgs) -> list[ImageContent]:
     chart_id = arguments["chart_id"]
 
     # Build export parameters
-    export_params: dict[str, int | bool | str] = {}
+    export_params: dict[str, Any] = {}
     if "width" in arguments:
         export_params["width"] = arguments["width"]
     if "height" in arguments:
