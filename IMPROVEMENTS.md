@@ -46,98 +46,7 @@ def create_chart(...) -> Sequence[TextContent | ImageContent]:
 
 ---
 
-### 2. ✅ Add Structured Logging Infrastructure (COMPLETED)
-
-**Status**: ✅ Completed on 2025-01-10
-
-**What Was Done**:
-- Created `datawrapper_mcp/logging.py` with comprehensive logging infrastructure
-  * JsonFormatter class for structured JSON logging
-  * correlation_id ContextVar for tracking async operations
-  * setup_logging() function with environment variable configuration
-  * Helper functions: get_correlation_id(), get_logger(), log_duration()
-- Initialized logging in `server.py` main() function
-- Added logging to `utils.py` (get_api_token and json_to_dataframe)
-- Instrumented all 7 handlers with consistent logging pattern:
-  * create.py, update.py, delete.py, publish.py, export.py, retrieve.py, schema.py
-  * Operation start logging with correlation_id and parameters
-  * Success logging with results and duration_ms
-  * Error logging with full exception details (exc_info=True)
-- Created comprehensive test suite in `tests/test_logging.py`
-- Updated README.md with dedicated Logging section
-- Updated .clinerules with logging infrastructure documentation
-- Environment variables: DATAWRAPPER_MCP_LOG_LEVEL (default: INFO), DATAWRAPPER_MCP_LOG_FORMAT (default: text)
-- Security: API tokens are NEVER logged (explicit comment in get_api_token)
-
-**Impact**: High - Enables production operations, debugging, and performance monitoring
-
-**Original Requirements**:
-- Console-only logging (no file logging) ✅
-- Environment variables prefixed with DATAWRAPPER_MCP_ ✅
-- API tokens never logged ✅
-- Support both text and JSON formats ✅
-- Correlation IDs for async operations ✅
-
-**Current Issue**: No logging infrastructure
-- Cannot trace operations in production
-- No audit trail for chart operations
-- Difficult to debug issues
-- No performance monitoring
-
-**Proposed Solution**:
-```python
-# Add to utils.py or new logging.py module:
-import logging
-import uuid
-from contextvars import ContextVar
-
-# Correlation ID for request tracing
-correlation_id: ContextVar[str] = ContextVar('correlation_id', default='')
-
-def setup_logging():
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(correlation_id)s - %(message)s',
-        handlers=[
-            logging.StreamHandler(),
-            logging.FileHandler('datawrapper_mcp.log')
-        ]
-    )
-
-# Usage in handlers:
-logger = logging.getLogger(__name__)
-
-def create_chart_handler(...):
-    correlation_id.set(str(uuid.uuid4()))
-    logger.info(f"Creating chart", extra={
-        'chart_type': chart_type,
-        'data_size': len(data),
-        'correlation_id': correlation_id.get()
-    })
-    # ... rest of implementation
-```
-
-**What to Log**:
-- API calls (chart creation, updates, deletions)
-- Validation failures with details
-- Data conversion operations
-- Chart operations (publish, export)
-- Performance metrics (operation duration)
-- Error conditions with full context
-
-**Implementation Steps**:
-1. Add logging configuration module
-2. Add correlation ID context variable
-3. Instrument all handlers with logging calls
-4. Add structured logging format (JSON optional)
-5. Document logging configuration options
-6. Add log rotation configuration
-
-**Effort**: Medium (4-6 hours)
-
----
-
-### 3. Enhance Error Messages with Actionable Guidance
+### 2. Enhance Error Messages with Actionable Guidance
 
 **Current Issue**: Generic error messages don't guide users to solutions
 - Users don't know how to fix issues
@@ -198,7 +107,7 @@ raise DatawrapperMCPError(
 
 ---
 
-### 4. Add Input Validation Before API Calls
+### 3. Add Input Validation Before API Calls
 
 **Current Issue**: No validation for inputs before making API calls
 - Invalid chart_ids cause unnecessary API calls
@@ -263,7 +172,7 @@ def update_chart_handler(chart_id: str, ...):
 
 ## 📊 MEDIUM PRIORITY IMPROVEMENTS
 
-### 5. Implement Resource Caching for Static Schemas
+### 4. Implement Resource Caching for Static Schemas
 
 **Current Issue**: `chart_types_resource` regenerates schemas on every request
 - Schemas are static (only change when CHART_CLASSES changes)
@@ -302,7 +211,7 @@ def chart_types_resource() -> str:
 
 ---
 
-### 6. Add Comprehensive Docstring Examples
+### 5. Add Comprehensive Docstring Examples
 
 **Current Issue**: Docstrings lack concrete usage examples
 - Developers must guess at proper usage patterns
@@ -375,7 +284,7 @@ def create_chart(
 
 ---
 
-### 7. Create Troubleshooting Guide
+### 6. Create Troubleshooting Guide
 
 **Current Issue**: No centralized troubleshooting documentation
 - Users struggle with common issues
@@ -445,7 +354,7 @@ Valid formats:
 
 ---
 
-### 8. Add Rate Limiting Awareness and Handling
+### 7. Add Rate Limiting Awareness and Handling
 
 **Current Issue**: No handling or documentation of Datawrapper API rate limits
 - Unexpected failures during high-volume operations
@@ -504,7 +413,7 @@ def create_chart_handler(...):
 
 ## 🔧 LOW PRIORITY IMPROVEMENTS
 
-### 9. Add Telemetry and Metrics Collection
+### 8. Add Telemetry and Metrics Collection
 
 **Current Issue**: No visibility into usage patterns or performance
 - Cannot identify bottlenecks
@@ -602,7 +511,7 @@ def create_chart_handler(...):
 
 ---
 
-### 10. Implement Retry Logic with Exponential Backoff
+### 9. Implement Retry Logic with Exponential Backoff
 
 **Current Issue**: No retry logic for transient failures
 - Network glitches cause immediate failures
@@ -683,7 +592,7 @@ def create_chart_handler(...):
 
 ---
 
-### 11. Add Batch Operations Support
+### 10. Add Batch Operations Support
 
 **Current Issue**: No support for bulk operations
 - Must create charts one at a time
@@ -811,22 +720,21 @@ If implementing these improvements, suggested priority order:
 
 ### Phase 1: Foundation (Week 1)
 1. **Standardize return types** - Affects all tools, foundational change
-2. **Add structured logging** - Enables debugging for subsequent changes
-3. **Enhance error messages** - Immediate UX improvement
+2. **Enhance error messages** - Immediate UX improvement
+3. **Add input validation** - Prevents common errors
 
 ### Phase 2: Robustness (Week 2)
-4. **Add input validation** - Prevents common errors
-5. **Implement resource caching** - Easy performance win
-6. **Add retry logic** - Improves reliability
+4. **Implement resource caching** - Easy performance win
+5. **Add retry logic** - Improves reliability
+6. **Document rate limits** - Prevents production issues
 
 ### Phase 3: Documentation (Week 3)
 7. **Improve docstrings** - Better developer experience
 8. **Create troubleshooting guide** - Reduces support burden
-9. **Document rate limits** - Prevents production issues
 
 ### Phase 4: Advanced Features (Week 4+)
-10. **Add telemetry** - Usage insights
-11. **Batch operations** - Advanced use cases
+9. **Add telemetry** - Usage insights
+10. **Batch operations** - Advanced use cases
 
 ---
 
@@ -834,12 +742,11 @@ If implementing these improvements, suggested priority order:
 
 If time is limited, these improvements provide the best ROI:
 
-1. **Standardize return types** (2-3 hours) - High impact, low effort
-2. **Add input validation** (2-3 hours) - Prevents many errors
-3. **Implement resource caching** (1 hour) - Easy performance boost
-4. **Enhance error messages** (3-4 hours) - Significantly improves UX
+1. **Add input validation** (2-3 hours) - Prevents many errors
+2. **Implement resource caching** (1 hour) - Easy performance boost
+3. **Enhance error messages** (3-4 hours) - Significantly improves UX
 
-Total: ~8-11 hours for substantial improvements
+Total: ~6-8 hours for substantial improvements
 
 ---
 

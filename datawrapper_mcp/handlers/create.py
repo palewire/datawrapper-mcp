@@ -1,41 +1,19 @@
 """Handler for creating Datawrapper charts."""
 
 import json
-import time
 from typing import Any
 
 from mcp.types import TextContent
 
 from ..config import CHART_CLASSES
-from ..logging import get_correlation_id, get_logger, log_duration
 from ..types import CreateChartArgs
 from ..utils import get_api_token, json_to_dataframe
-
-logger = get_logger("handlers.create")
 
 
 async def create_chart(arguments: CreateChartArgs) -> list[TextContent]:
     """Create a chart with full Pydantic model configuration."""
-    start_time = time.time()
-    cid = get_correlation_id()
-
-    chart_type = arguments["chart_type"]
-    data_type = type(arguments["data"]).__name__
-    config_keys = (
-        list(arguments["chart_config"].keys()) if arguments.get("chart_config") else []
-    )
-
-    logger.info(
-        "Creating chart",
-        extra={
-            "correlation_id": cid,
-            "chart_type": chart_type,
-            "data_type": data_type,
-            "config_keys": config_keys,
-        },
-    )
-
     api_token = get_api_token()
+    chart_type = arguments["chart_type"]
 
     # Convert data to DataFrame
     df = json_to_dataframe(arguments["data"])
@@ -47,17 +25,6 @@ async def create_chart(arguments: CreateChartArgs) -> list[TextContent]:
     try:
         chart = chart_class.model_validate(arguments["chart_config"])
     except Exception as e:
-        logger.error(
-            "Chart validation failed",
-            extra={
-                "correlation_id": cid,
-                "chart_type": chart_type,
-                "error_type": type(e).__name__,
-                "error_message": str(e),
-                "duration_ms": log_duration(start_time),
-            },
-            exc_info=True,
-        )
         return [
             TextContent(
                 type="text",
@@ -71,32 +38,7 @@ async def create_chart(arguments: CreateChartArgs) -> list[TextContent]:
     chart.data = df
 
     # Create chart using Pydantic instance method
-    try:
-        chart.create(access_token=api_token)
-
-        logger.info(
-            "Chart created successfully",
-            extra={
-                "correlation_id": cid,
-                "chart_id": chart.chart_id,
-                "chart_type": chart_type,
-                "title": chart.title,
-                "duration_ms": log_duration(start_time),
-            },
-        )
-    except Exception as e:
-        logger.error(
-            "Chart creation failed",
-            extra={
-                "correlation_id": cid,
-                "chart_type": chart_type,
-                "error_type": type(e).__name__,
-                "error_message": str(e),
-                "duration_ms": log_duration(start_time),
-            },
-            exc_info=True,
-        )
-        raise
+    chart.create(access_token=api_token)
 
     result = {
         "chart_id": chart.chart_id,

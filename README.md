@@ -106,8 +106,6 @@ docker run -p 8501:8501 \
 - `MCP_SERVER_HOST`: Server host (default: `0.0.0.0`)
 - `MCP_SERVER_PORT`: Server port (default: `8501`)
 - `MCP_SERVER_NAME`: Server name (default: `datawrapper-mcp`)
-- `DATAWRAPPER_MCP_LOG_LEVEL`: Logging level (default: `INFO`, options: `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`)
-- `DATAWRAPPER_MCP_LOG_FORMAT`: Log output format (default: `text`, options: `text`, `json`)
 
 #### Health Check Endpoint
 
@@ -171,21 +169,3 @@ spec:
     port: 8501
     targetPort: 8501
 ```
-
-## Logging
-
-The server includes comprehensive structured logging to help with debugging, monitoring, and auditing chart operations.
-
-### Configuration
-
-Logging is configured via environment variables:
-
-- **`DATAWRAPPER_MCP_LOG_LEVEL`**: Controls the verbosity of logs
-  - Options: `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`
-  - Default: `INFO`
-  - Example: `DATAWRAPPER_MCP_LOG_LEVEL=DEBUG`
-
-- **`DATAWRAPPER_MCP_LOG_FORMAT`**: Controls the output format
-  - Options: `text` (human-readable), `json` (structured)
-  - Default: `text`
-  - Example: `DATAWRAPPER_MCP_LOG_FORMAT=json`

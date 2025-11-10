@@ -69,7 +69,6 @@ datawrapper_mcp/
 ├── server.py            # Main MCP server implementation
 ├── config.py            # Configuration and chart type mappings
 ├── utils.py             # Utility functions (data conversion, API token)
-├── logging.py           # Logging infrastructure
 └── handlers/            # Handler modules for each operation
     ├── __init__.py
     ├── create.py        # Chart creation handler
@@ -90,8 +89,6 @@ datawrapper_mcp/
 ## Environment Variables
 
 - `DATAWRAPPER_ACCESS_TOKEN`: Required. Get from https://app.datawrapper.de/account/api-tokens
-- `DATAWRAPPER_MCP_LOG_LEVEL`: Optional. Logging level (default: INFO, options: DEBUG, INFO, WARNING, ERROR, CRITICAL)
-- `DATAWRAPPER_MCP_LOG_FORMAT`: Optional. Log format (default: text, options: text, json)
 
 ## Supported Chart Types
 
@@ -333,20 +330,3 @@ When users ask about styling charts (colors, line widths, axes, tooltips, etc.):
 4. **Type errors**: Check Pydantic validation messages for required fields
 5. **Styling questions**: Always start with get_chart_schema, then refer to documentation
 6. **Mypy errors**: Ensure pandas-stubs is installed and type annotations use `type[Any]`
-
-## Logging Infrastructure
-
-The project includes comprehensive structured logging:
-
-### Key Components
-
-1. **datawrapper_mcp/logging.py**: Core logging infrastructure
-   - `JsonFormatter`: Custom formatter for structured JSON logs
-   - `correlation_id`: ContextVar for tracking async operations
-   - `setup_logging()`: Configures logging based on environment variables
-   - `get_correlation_id()`: Returns/creates correlation ID for current context
-   - `get_logger(name)`: Returns logger with 'datawrapper_mcp.' prefix
-   - `log_duration(start_time)`: Calculates duration in milliseconds
-
-2. **Handler Instrumentation**: All 7 handlers include logging
-   - Operation start logging with correlation
