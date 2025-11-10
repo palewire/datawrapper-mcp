@@ -34,7 +34,7 @@ async def chart_types_resource() -> str:
 
 
 @mcp.tool()
-async def list_chart_types() -> str:
+async def list_chart_types() -> Sequence[TextContent | ImageContent]:
     """⚠️ DATAWRAPPER MCP TOOL ⚠️
     This is part of the Datawrapper MCP server integration.
 
@@ -66,7 +66,7 @@ async def list_chart_types() -> str:
     result += "\nTo see detailed configuration options for a specific type, use:\n"
     result += "get_chart_schema(chart_type='your_chosen_type')"
     
-    return result
+    return [TextContent(type="text", text=result)]
 
 
 @mcp.tool()
@@ -74,7 +74,7 @@ async def create_chart(
     data: str | list | dict,
     chart_type: str,
     chart_config: dict,
-) -> str:
+) -> Sequence[TextContent | ImageContent]:
     """⚠️ THIS IS THE DATAWRAPPER INTEGRATION ⚠️
     Use this MCP tool for ALL Datawrapper chart creation.
 
@@ -152,21 +152,19 @@ async def create_chart(
         Chart ID and editor URL
     """
     try:
-        result = await create_chart_handler(
+        return await create_chart_handler(
             {
                 "data": data,
                 "chart_type": chart_type,
                 "chart_config": chart_config,
             }
         )
-        # Extract text from TextContent
-        return result[0].text if result else "Chart created successfully"
     except Exception as e:
-        return f"Error: {str(e)}"
+        return [TextContent(type="text", text=f"Error: {str(e)}")]
 
 
 @mcp.tool()
-async def get_chart_schema(chart_type: str) -> str:
+async def get_chart_schema(chart_type: str) -> Sequence[TextContent | ImageContent]:
     """⚠️ DATAWRAPPER MCP TOOL ⚠️
     This is part of the Datawrapper MCP server integration.
 
@@ -192,14 +190,13 @@ async def get_chart_schema(chart_type: str) -> str:
         JSON schema for the chart type
     """
     try:
-        result = await get_chart_schema_handler({"chart_type": chart_type})
-        return result[0].text if result else "Schema retrieved successfully"
+        return await get_chart_schema_handler({"chart_type": chart_type})
     except Exception as e:
-        return f"Error: {str(e)}"
+        return [TextContent(type="text", text=f"Error: {str(e)}")]
 
 
 @mcp.tool()
-async def publish_chart(chart_id: str) -> str:
+async def publish_chart(chart_id: str) -> Sequence[TextContent | ImageContent]:
     """⚠️ DATAWRAPPER MCP TOOL ⚠️
     This is part of the Datawrapper MCP server integration.
 
@@ -217,14 +214,13 @@ async def publish_chart(chart_id: str) -> str:
         Public URL of the published chart
     """
     try:
-        result = await publish_chart_handler({"chart_id": chart_id})
-        return result[0].text if result else "Chart published successfully"
+        return await publish_chart_handler({"chart_id": chart_id})
     except Exception as e:
-        return f"Error: {str(e)}"
+        return [TextContent(type="text", text=f"Error: {str(e)}")]
 
 
 @mcp.tool()
-async def get_chart(chart_id: str) -> str:
+async def get_chart(chart_id: str) -> Sequence[TextContent | ImageContent]:
     """⚠️ DATAWRAPPER MCP TOOL ⚠️
     This is part of the Datawrapper MCP server integration.
 
@@ -240,10 +236,9 @@ async def get_chart(chart_id: str) -> str:
         Chart information including metadata and URLs
     """
     try:
-        result = await get_chart_info_handler({"chart_id": chart_id})
-        return result[0].text if result else "Chart retrieved successfully"
+        return await get_chart_info_handler({"chart_id": chart_id})
     except Exception as e:
-        return f"Error: {str(e)}"
+        return [TextContent(type="text", text=f"Error: {str(e)}")]
 
 
 @mcp.tool()
@@ -251,7 +246,7 @@ async def update_chart(
     chart_id: str,
     data: str | list | dict | None = None,
     chart_config: dict | None = None,
-) -> str:
+) -> Sequence[TextContent | ImageContent]:
     """⚠️ DATAWRAPPER MCP TOOL ⚠️
     This is part of the Datawrapper MCP server integration.
 
@@ -303,14 +298,13 @@ async def update_chart(
         if chart_config is not None:
             args["chart_config"] = chart_config
 
-        result = await update_chart_handler(args)
-        return result[0].text if result else "Chart updated successfully"
+        return await update_chart_handler(args)
     except Exception as e:
-        return f"Error: {str(e)}"
+        return [TextContent(type="text", text=f"Error: {str(e)}")]
 
 
 @mcp.tool()
-async def delete_chart(chart_id: str) -> str:
+async def delete_chart(chart_id: str) -> Sequence[TextContent | ImageContent]:
     """⚠️ DATAWRAPPER MCP TOOL ⚠️
     This is part of the Datawrapper MCP server integration.
 
@@ -325,10 +319,9 @@ async def delete_chart(chart_id: str) -> str:
         Confirmation message
     """
     try:
-        result = await delete_chart_handler({"chart_id": chart_id})
-        return result[0].text if result else "Chart deleted successfully"
+        return await delete_chart_handler({"chart_id": chart_id})
     except Exception as e:
-        return f"Error: {str(e)}"
+        return [TextContent(type="text", text=f"Error: {str(e)}")]
 
 
 @mcp.tool()
@@ -387,7 +380,7 @@ async def export_chart_png(
 
 
 def main():
-    """Run the MCP server with stdio transport (for backwards compatibility)."""
+    """Run the MCP server with stdio transport."""
     mcp.run(transport="stdio")
 
 

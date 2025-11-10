@@ -25,6 +25,22 @@ This is a Model Context Protocol (MCP) server that provides tools for creating D
 
 ### Two-Tier Tool Design
 
+The server uses a handler/tool separation pattern:
+
+1. **Handlers** (in `datawrapper_mcp/handlers/`): Contain business logic
+   - Return `list[TextContent]` or `list[TextContent | ImageContent]`
+   - Handle Datawrapper API interactions
+   - Perform Pydantic validation
+   - Format responses with structured data
+
+2. **Tools** (in `datawrapper_mcp/server.py`): Thin MCP wrappers
+   - Return `Sequence[TextContent | ImageContent]`
+   - Pass through handler results directly
+   - Wrap exceptions in TextContent for error handling
+   - Provide MCP protocol interface
+
+### Key Tools
+
 1. **Chart Creation** (`create_chart`): Full control using Pydantic models
    - Takes data, chart_type, and complete chart_config dict
    - Validates config using Pydantic's model_validate()
@@ -188,11 +204,18 @@ The `json_to_dataframe()` utility provides helpful error messages that:
 - Delete: `chart.delete(access_token=api_token)`
 - Retrieve: `get_chart(chart_id, access_token=api_token)` (factory function)
 
-### Error Handling
+### Return Types and Error Handling
 
+**All tools return `Sequence[TextContent | ImageContent]`:**
+- Consistent return type across all tools
+- Preserves structured data capabilities (annotations, audience, priority)
+- Handlers return sequences, tools pass them through directly
+- Exception handling wraps errors in TextContent
+
+**Error Handling:**
 - Missing API token raises ValueError with helpful message
 - Invalid chart configs return TextContent with validation errors
-- All tool calls wrapped in try/except to return error messages
+- All tool calls wrapped in try/except to return TextContent with error messages
 - Chart type mapping errors provide clear feedback on supported types
 
 ### Update Chart Implementation

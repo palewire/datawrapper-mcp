@@ -4,14 +4,19 @@ This document contains improvement ideas identified through comprehensive code a
 
 ## 🎯 HIGH PRIORITY IMPROVEMENTS
 
-### 1. Standardize Return Types Across All Tools
+### 1. ✅ Standardize Return Types Across All Tools (COMPLETED)
 
-**Current Issue**: Inconsistent return types across tools
-- Most tools return `str`
-- `export_chart_png` returns `Sequence[TextContent | ImageContent]`
-- This breaks MCP protocol expectations and makes the API unpredictable
+**Status**: ✅ Completed on 2025-01-10
 
-**Impact**: High - Affects protocol compliance and API consistency
+**What Was Done**:
+- Updated all 7 tools in `server.py` to return `Sequence[TextContent | ImageContent]`
+- Removed `.text` extraction logic from all tools
+- Tools now pass through handler results directly
+- Wrapped exceptions in `TextContent` for consistent error handling
+- All 69 tests pass without modification (tests target handlers, not tools)
+- Updated documentation in README.md and .clinerules
+
+**Impact**: High - Achieved protocol compliance and API consistency
 
 **Proposed Solution**:
 ```python
