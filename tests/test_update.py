@@ -143,10 +143,15 @@ async def test_update_without_api_token(no_api_token):
     with patch("datawrapper_mcp.handlers.update.get_chart") as mock_get_chart:
         from datawrapper.exceptions import FailedRequestError
 
-        # Simulate the 401 error that datawrapper raises when token is missing
-        mock_get_chart.side_effect = FailedRequestError(
-            "401 Unauthorized: DATAWRAPPER_ACCESS_TOKEN environment variable not set"
+        # Create a mock response object with status_code attribute
+        mock_response = MagicMock()
+        mock_response.status_code = 401
+        mock_response.text = (
+            "Unauthorized: DATAWRAPPER_ACCESS_TOKEN environment variable not set"
         )
+
+        # Simulate the 401 error that datawrapper raises when token is missing
+        mock_get_chart.side_effect = FailedRequestError(mock_response)
 
         arguments = {"chart_id": "test123", "chart_config": {"title": "New Title"}}
 
