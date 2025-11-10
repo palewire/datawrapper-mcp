@@ -2,7 +2,7 @@
 
 import base64
 import time
-from typing import Any
+from typing import Any, cast
 
 from datawrapper import get_chart
 from mcp.types import ImageContent
@@ -55,7 +55,9 @@ async def export_chart_png(arguments: ExportChartPngArgs) -> list[ImageContent]:
         chart = get_chart(chart_id, access_token=api_token)
 
         # Export PNG using Pydantic instance method
-        png_bytes = chart.export_png(access_token=api_token, **export_params)
+        png_bytes = chart.export_png(
+            access_token=api_token, **cast(dict[str, Any], export_params)
+        )
 
         # Encode to base64
         base64_data = base64.b64encode(png_bytes).decode("utf-8")
