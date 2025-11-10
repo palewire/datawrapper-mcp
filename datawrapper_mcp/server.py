@@ -105,6 +105,11 @@ async def create_chart(
     visualization settings, axes, colors, and more. The chart_config should
     be a complete Pydantic model dict matching the schema for the chosen chart type.
 
+    BEST PRACTICES:
+    - Start simple, then add customization based on user feedback
+    - Only apply styling when requested or when it significantly improves readability
+    - Let Datawrapper handle axis scaling automatically unless there's a specific reason to override
+
     QUICK EXAMPLES:
 
     1. Basic chart with title:
@@ -141,6 +146,9 @@ async def create_chart(
     - Colors: {"color_category": {"sales": "#1d81a2", "profit": "#15607a"}}
     - Line styling: {"lines": [{"column": "sales", "width": "style1", "interpolation": "curved"}]}
     - Axis ranges: {"custom_range_y": [0, 100], "custom_range_x": [2020, 2024]}
+        NOTE: Datawrapper's automatic axis scaling is excellent. Only set custom ranges when
+        you need specific customization (e.g., comparing multiple charts, forcing zero baseline
+        for specific analytical reasons, or matching a house style guide).
     - Grid formatting: {"y_grid_format": "0", "x_grid": "on", "y_grid": "on"}
     - Tooltips: {"tooltip_number_format": "00.00", "tooltip_x_format": "YYYY"}
     - Annotations: {"text_annotations": [{"x": "2023", "y": 50, "text": "Peak"}]}
