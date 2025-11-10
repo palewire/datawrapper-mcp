@@ -5,7 +5,6 @@ import logging
 import os
 from unittest.mock import patch
 
-import pytest
 
 from datawrapper_mcp.logging import (
     JsonFormatter,
@@ -31,10 +30,10 @@ class TestJsonFormatter:
             args=(),
             exc_info=None,
         )
-        
+
         result = formatter.format(record)
         data = json.loads(result)
-        
+
         assert data["timestamp"]
         assert data["level"] == "INFO"
         assert data["logger"] == "test"
@@ -54,17 +53,17 @@ class TestJsonFormatter:
         )
         record.correlation_id = "test-123"
         record.chart_id = "abc123"
-        
+
         result = formatter.format(record)
         data = json.loads(result)
-        
+
         assert data["correlation_id"] == "test-123"
         assert data["chart_id"] == "abc123"
 
     def test_format_with_exception(self):
         """Test formatting with exception info."""
         import sys
-        
+
         formatter = JsonFormatter()
         try:
             raise ValueError("Test error")
@@ -79,10 +78,10 @@ class TestJsonFormatter:
                 args=(),
                 exc_info=exc_info,
             )
-            
+
             result = formatter.format(record)
             data = json.loads(result)
-            
+
             assert data["level"] == "ERROR"
             assert data["message"] == "Error occurred"
             assert "exception" in data
@@ -125,11 +124,11 @@ class TestLogDuration:
     def test_log_duration_calculates_milliseconds(self):
         """Test that log_duration calculates duration in milliseconds."""
         import time
-        
+
         start = time.time()
         time.sleep(0.01)  # Sleep for 10ms
         duration = log_duration(start)
-        
+
         assert duration >= 10
         assert duration < 100  # Should be less than 100ms
 
@@ -141,7 +140,7 @@ class TestSetupLogging:
         """Test setup_logging with default text format."""
         with patch.dict(os.environ, {}, clear=True):
             setup_logging()
-            
+
             root_logger = logging.getLogger("datawrapper_mcp")
             assert root_logger.level == logging.INFO
             assert len(root_logger.handlers) == 1
@@ -155,7 +154,7 @@ class TestSetupLogging:
             clear=True,
         ):
             setup_logging()
-            
+
             root_logger = logging.getLogger("datawrapper_mcp")
             handler = root_logger.handlers[0]
             assert isinstance(handler.formatter, JsonFormatter)
@@ -168,7 +167,7 @@ class TestSetupLogging:
             clear=True,
         ):
             setup_logging()
-            
+
             root_logger = logging.getLogger("datawrapper_mcp")
             assert root_logger.level == logging.DEBUG
 
@@ -180,21 +179,21 @@ class TestSetupLogging:
             clear=True,
         ):
             setup_logging()
-            
+
             root_logger = logging.getLogger("datawrapper_mcp")
             assert root_logger.level == logging.INFO
 
     def test_setup_logging_clears_existing_handlers(self):
         """Test that setup_logging clears existing handlers."""
         root_logger = logging.getLogger("datawrapper_mcp")
-        
+
         # Add a dummy handler
         dummy_handler = logging.StreamHandler()
         root_logger.addHandler(dummy_handler)
-        initial_count = len(root_logger.handlers)
-        
+        _initial_count = len(root_logger.handlers)
+
         setup_logging()
-        
+
         # Should have exactly 1 handler after setup
         assert len(root_logger.handlers) == 1
         assert dummy_handler not in root_logger.handlers
@@ -208,12 +207,12 @@ class TestLoggingIntegration:
         with caplog.at_level(logging.INFO):
             logger = get_logger("test")
             corr_id = get_correlation_id()
-            
+
             logger.info(
                 "Test message",
                 extra={"correlation_id": corr_id},
             )
-            
+
             assert len(caplog.records) == 1
             assert caplog.records[0].correlation_id == corr_id
 
@@ -221,7 +220,7 @@ class TestLoggingIntegration:
         """Test logger with multiple extra fields."""
         with caplog.at_level(logging.INFO):
             logger = get_logger("test")
-            
+
             logger.info(
                 "Test message",
                 extra={
@@ -231,7 +230,7 @@ class TestLoggingIntegration:
                     "duration_ms": 150,
                 },
             )
-            
+
             assert len(caplog.records) == 1
             record = caplog.records[0]
             assert record.correlation_id == "test-123"

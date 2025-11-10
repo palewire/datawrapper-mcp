@@ -220,7 +220,7 @@ def validate_chart_id(chart_id: str) -> None:
             message="Chart ID cannot be empty",
             guidance="Provide a valid chart ID from a previously created chart"
         )
-    
+
     # Datawrapper chart IDs are typically alphanumeric
     if not re.match(r'^[a-zA-Z0-9]+$', chart_id):
         raise DatawrapperMCPError(
@@ -320,7 +320,7 @@ def create_chart(
     chart_config: dict,
 ) -> Sequence[TextContent | ImageContent]:
     """Create a Datawrapper chart with full control using Pydantic models.
-    
+
     Examples:
         Basic line chart:
         >>> data = [
@@ -334,7 +334,7 @@ def create_chart(
         ...     "source_url": "https://example.com"
         ... }
         >>> create_chart(data, "line", config)
-        
+
         Styled line chart with colors:
         >>> config = {
         ...     "title": "Styled Chart",
@@ -348,17 +348,17 @@ def create_chart(
         ...     ]
         ... }
         >>> create_chart(data, "line", config)
-    
+
     Args:
         data: Chart data in one of these formats:
             - List of records: [{"col": val}, ...]
             - Dict of arrays: {"col": [vals]}
             - JSON string of above formats
             - File path to CSV or JSON (for large datasets only)
-        chart_type: One of: bar, line, area, arrow, column, 
+        chart_type: One of: bar, line, area, arrow, column,
                    multiple_column, scatter, stacked_bar
         chart_config: Complete chart configuration dict with Pydantic fields
-    
+
     Returns:
         Chart ID and editor URL
     """
@@ -394,7 +394,7 @@ Create `TROUBLESHOOTING.md` with sections:
 
 ### "DATAWRAPPER_ACCESS_TOKEN environment variable not set"
 **Cause**: API token not configured
-**Solution**: 
+**Solution**:
 1. Get token at https://app.datawrapper.de/account/api-tokens
 2. Set environment variable: `export DATAWRAPPER_ACCESS_TOKEN=your_token`
 3. Restart the MCP server
@@ -532,15 +532,15 @@ class OperationMetric:
 class MetricsCollector:
     def __init__(self):
         self.metrics: list[OperationMetric] = []
-    
+
     def record(self, metric: OperationMetric):
         self.metrics.append(metric)
-    
+
     def get_stats(self) -> dict:
         """Get aggregated statistics"""
         total = len(self.metrics)
         successful = sum(1 for m in self.metrics if m.success)
-        
+
         return {
             "total_operations": total,
             "success_rate": successful / total if total > 0 else 0,
@@ -549,7 +549,7 @@ class MetricsCollector:
             "error_codes": self._count_by_field("error_code"),
             "avg_duration_ms": sum(m.duration_ms for m in self.metrics) / total if total > 0 else 0
         }
-    
+
     def _count_by_field(self, field: str) -> dict:
         counts = {}
         for metric in self.metrics:
@@ -637,20 +637,20 @@ def with_exponential_backoff(
                 except retryable_exceptions as e:
                     if attempt == max_retries - 1:
                         raise
-                    
+
                     # Calculate delay with exponential backoff
                     delay = min(base_delay * (exponential_base ** attempt), max_delay)
-                    
+
                     # Add jitter to prevent thundering herd
                     if jitter:
                         delay = delay * (0.5 + random.random() * 0.5)
-                    
+
                     logger.warning(
                         f"Attempt {attempt + 1}/{max_retries} failed: {e}. "
                         f"Retrying in {delay:.2f}s"
                     )
                     time.sleep(delay)
-            
+
             return func(*args, **kwargs)
         return wrapper
     return decorator
@@ -699,16 +699,16 @@ def create_charts_batch(
     charts: list[dict],
 ) -> Sequence[TextContent | ImageContent]:
     """Create multiple charts in a single operation.
-    
+
     Args:
         charts: List of chart specifications, each containing:
             - data: Chart data
             - chart_type: Chart type
             - chart_config: Chart configuration
-    
+
     Returns:
         List of results with chart IDs and URLs
-    
+
     Example:
         >>> charts = [
         ...     {
@@ -743,7 +743,7 @@ def create_charts_batch(
                 "success": False,
                 "error": str(e)
             })
-    
+
     return [TextContent(
         type="text",
         text=json.dumps(results, indent=2)

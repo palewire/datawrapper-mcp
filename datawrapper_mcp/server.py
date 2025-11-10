@@ -51,7 +51,7 @@ async def list_chart_types() -> Sequence[TextContent | ImageContent]:
     ---
 
     List all available Datawrapper chart types with brief descriptions.
-    
+
     Use this tool to discover which chart types you can create. After choosing a type,
     use get_chart_schema(chart_type) to explore detailed configuration options.
 
@@ -68,14 +68,14 @@ async def list_chart_types() -> Sequence[TextContent | ImageContent]:
         "scatter": "Scatter plot - visualize correlations between two variables",
         "stacked_bar": "Stacked bar chart - show part-to-whole relationships",
     }
-    
+
     result = "Available Datawrapper chart types:\n\n"
     for chart_type, description in chart_descriptions.items():
         result += f"• {chart_type}: {description}\n"
-    
+
     result += "\nTo see detailed configuration options for a specific type, use:\n"
     result += "get_chart_schema(chart_type='your_chosen_type')"
-    
+
     return [TextContent(type="text", text=result)]
 
 
@@ -105,13 +105,13 @@ async def create_chart(
     be a complete Pydantic model dict matching the schema for the chosen chart type.
 
     QUICK EXAMPLES:
-    
+
     1. Basic chart with title:
        chart_config = {
            "title": "Monthly Sales",
            "intro": "Sales data for Q1 2024"
        }
-    
+
     2. Chart with custom colors:
        chart_config = {
            "title": "Product Comparison",
@@ -120,7 +120,7 @@ async def create_chart(
                "Product B": "#ff7f0e"
            }
        }
-    
+
     3. Styled line chart:
        chart_config = {
            "title": "Sales Trends",
@@ -253,9 +253,7 @@ async def get_chart(chart_id: str) -> Sequence[TextContent | ImageContent]:
         Chart information including metadata and URLs
     """
     try:
-        return await get_chart_info_handler(
-            cast(GetChartArgs, {"chart_id": chart_id})
-        )
+        return await get_chart_info_handler(cast(GetChartArgs, {"chart_id": chart_id}))
     except Exception as e:
         return [TextContent(type="text", text=f"Error: {str(e)}")]
 
@@ -272,21 +270,21 @@ async def update_chart(
     ---
 
     Update an existing Datawrapper chart's data or configuration using Pydantic models.
-    
+
     ⚠️ IMPORTANT LIMITATION: You CANNOT change the chart type with this tool.
     Chart types are immutable once created. To change from one chart type to another
     (e.g., column → stacked_bar, or line → area), you must create a new chart instead.
-    
+
     WHAT YOU CAN UPDATE:
     • Chart data (add/modify/replace data points)
     • Title, intro, byline, source information
     • Colors, styling, axes configuration
     • Tooltips, annotations, labels
     • Any other configuration options for the existing chart type
-    
+
     WHAT YOU CANNOT UPDATE:
     ✗ Chart type (bar, line, column, etc.) - this is permanent
-    
+
     The chart_config must use high-level Pydantic fields only (title, intro,
     byline, source_name, source_url, etc.). Do NOT use low-level serialized structures
     like 'metadata', 'visualize', or other internal API fields.
@@ -338,9 +336,7 @@ async def delete_chart(chart_id: str) -> Sequence[TextContent | ImageContent]:
         Confirmation message
     """
     try:
-        return await delete_chart_handler(
-            cast(DeleteChartArgs, {"chart_id": chart_id})
-        )
+        return await delete_chart_handler(cast(DeleteChartArgs, {"chart_id": chart_id}))
     except Exception as e:
         return [TextContent(type="text", text=f"Error: {str(e)}")]
 

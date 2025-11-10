@@ -16,7 +16,7 @@ async def get_chart_schema(arguments: GetChartSchemaArgs) -> list[TextContent]:
     """Get the Pydantic schema for a chart type."""
     start_time = time.time()
     chart_type = arguments["chart_type"]
-    
+
     logger.info(
         "Getting chart schema",
         extra={
@@ -24,7 +24,7 @@ async def get_chart_schema(arguments: GetChartSchemaArgs) -> list[TextContent]:
             "chart_type": chart_type,
         },
     )
-    
+
     chart_class = CHART_CLASSES[chart_type]
 
     schema = chart_class.model_json_schema()
@@ -52,5 +52,5 @@ async def get_chart_schema(arguments: GetChartSchemaArgs) -> list[TextContent]:
             "duration_ms": log_duration(start_time),
         },
     )
-    
+
     return [TextContent(type="text", text=json.dumps(result, indent=2))]

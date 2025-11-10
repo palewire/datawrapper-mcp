@@ -18,9 +18,9 @@ async def export_chart_png(arguments: ExportChartPngArgs) -> list[ImageContent]:
     start_time = time.time()
     cid = get_correlation_id()
     chart_id = arguments["chart_id"]
-    
+
     # Build export parameters
-    export_params = {}
+    export_params: dict[str, int | bool | str] = {}
     if "width" in arguments:
         export_params["width"] = arguments["width"]
     if "height" in arguments:
@@ -32,10 +32,12 @@ async def export_chart_png(arguments: ExportChartPngArgs) -> list[ImageContent]:
     if "transparent" in arguments:
         export_params["transparent"] = arguments["transparent"]
     if "border_width" in arguments:
-        export_params["borderWidth"] = arguments["border_width"]
+        border_width = arguments["border_width"]
+        assert isinstance(border_width, int)
+        export_params["borderWidth"] = border_width
     if "border_color" in arguments:
         export_params["borderColor"] = arguments["border_color"]
-    
+
     logger.info(
         "Exporting chart as PNG",
         extra={
@@ -44,7 +46,7 @@ async def export_chart_png(arguments: ExportChartPngArgs) -> list[ImageContent]:
             "export_params": export_params,
         },
     )
-    
+
     api_token = get_api_token()
 
     # Get chart using factory function
@@ -56,7 +58,7 @@ async def export_chart_png(arguments: ExportChartPngArgs) -> list[ImageContent]:
 
         # Encode to base64
         base64_data = base64.b64encode(png_bytes).decode("utf-8")
-        
+
         logger.info(
             "Chart exported successfully",
             extra={

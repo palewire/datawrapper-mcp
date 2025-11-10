@@ -358,7 +358,7 @@ logger = get_logger("handlers.operation_name")
 
 async def handler_function(arguments: dict) -> list[TextContent]:
     start_time = time.time()
-    
+
     logger.info(
         "Starting operation",
         extra={
@@ -366,10 +366,10 @@ async def handler_function(arguments: dict) -> list[TextContent]:
             "param1": value1,
         },
     )
-    
+
     try:
         # ... operation logic ...
-        
+
         logger.info(
             "Operation completed successfully",
             extra={

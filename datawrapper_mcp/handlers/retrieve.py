@@ -18,7 +18,7 @@ async def get_chart_info(arguments: GetChartArgs) -> list[TextContent]:
     start_time = time.time()
     cid = get_correlation_id()
     chart_id = arguments["chart_id"]
-    
+
     logger.info(
         "Retrieving chart information",
         extra={
@@ -26,7 +26,7 @@ async def get_chart_info(arguments: GetChartArgs) -> list[TextContent]:
             "chart_id": chart_id,
         },
     )
-    
+
     api_token = get_api_token()
 
     # Get chart using factory function
@@ -40,7 +40,7 @@ async def get_chart_info(arguments: GetChartArgs) -> list[TextContent]:
             "public_url": chart.get_public_url(),
             "edit_url": chart.get_editor_url(),
         }
-        
+
         logger.info(
             "Chart information retrieved successfully",
             extra={

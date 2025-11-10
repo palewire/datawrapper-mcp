@@ -18,7 +18,7 @@ async def publish_chart(arguments: PublishChartArgs) -> list[TextContent]:
     start_time = time.time()
     cid = get_correlation_id()
     chart_id = arguments["chart_id"]
-    
+
     logger.info(
         "Publishing chart",
         extra={
@@ -26,14 +26,14 @@ async def publish_chart(arguments: PublishChartArgs) -> list[TextContent]:
             "chart_id": chart_id,
         },
     )
-    
+
     api_token = get_api_token()
 
     # Get chart and publish using Pydantic instance method
     try:
         chart = get_chart(chart_id, access_token=api_token)
         chart.publish(access_token=api_token)
-        
+
         public_url = chart.get_public_url()
         logger.info(
             "Chart published successfully",

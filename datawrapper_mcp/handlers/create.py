@@ -17,11 +17,13 @@ async def create_chart(arguments: CreateChartArgs) -> list[TextContent]:
     """Create a chart with full Pydantic model configuration."""
     start_time = time.time()
     cid = get_correlation_id()
-    
+
     chart_type = arguments["chart_type"]
     data_type = type(arguments["data"]).__name__
-    config_keys = list(arguments["chart_config"].keys()) if arguments.get("chart_config") else []
-    
+    config_keys = (
+        list(arguments["chart_config"].keys()) if arguments.get("chart_config") else []
+    )
+
     logger.info(
         "Creating chart",
         extra={
@@ -31,7 +33,7 @@ async def create_chart(arguments: CreateChartArgs) -> list[TextContent]:
             "config_keys": config_keys,
         },
     )
-    
+
     api_token = get_api_token()
 
     # Convert data to DataFrame
@@ -70,7 +72,7 @@ async def create_chart(arguments: CreateChartArgs) -> list[TextContent]:
     # Create chart using Pydantic instance method
     try:
         chart.create(access_token=api_token)
-        
+
         logger.info(
             "Chart created successfully",
             extra={

@@ -18,11 +18,11 @@ async def update_chart(arguments: UpdateChartArgs) -> list[TextContent]:
     start_time = time.time()
     cid = get_correlation_id()
     chart_id = arguments["chart_id"]
-    
+
     has_data = "data" in arguments
     has_config = "chart_config" in arguments
     config_keys = list(arguments["chart_config"].keys()) if has_config else []
-    
+
     logger.info(
         "Updating chart",
         extra={
@@ -33,7 +33,7 @@ async def update_chart(arguments: UpdateChartArgs) -> list[TextContent]:
             "config_keys": config_keys,
         },
     )
-    
+
     api_token = get_api_token()
 
     # Get chart using factory function - returns correct Pydantic class instance
@@ -71,7 +71,7 @@ async def update_chart(arguments: UpdateChartArgs) -> list[TextContent]:
                 # Convert alias to field name if needed
                 field_name = alias_to_field.get(key, key)
                 setattr(chart, field_name, value)
-            
+
             logger.debug(
                 "Chart config updated",
                 extra={
@@ -104,7 +104,7 @@ async def update_chart(arguments: UpdateChartArgs) -> list[TextContent]:
     # Update using Pydantic instance method
     try:
         chart.update(access_token=api_token)
-        
+
         logger.info(
             "Chart updated successfully",
             extra={

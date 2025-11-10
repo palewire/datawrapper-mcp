@@ -46,13 +46,6 @@ test = [
     "pytest-vcr",
     "pytest-xdist",
 ]
-docs = [
-    "sphinx",
-    "sphinx-autobuild",
-    "sphinxcontrib-mermaid",
-    "myst-parser",
-    "sphinx-palewire-theme",
-]
 mypy = [
     "mypy",
     "types-requests",

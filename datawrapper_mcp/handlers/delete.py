@@ -18,7 +18,7 @@ async def delete_chart(arguments: DeleteChartArgs) -> list[TextContent]:
     start_time = time.time()
     cid = get_correlation_id()
     chart_id = arguments["chart_id"]
-    
+
     logger.info(
         "Deleting chart",
         extra={
@@ -26,14 +26,14 @@ async def delete_chart(arguments: DeleteChartArgs) -> list[TextContent]:
             "chart_id": chart_id,
         },
     )
-    
+
     api_token = get_api_token()
 
     # Get chart and delete using Pydantic instance method
     try:
         chart = get_chart(chart_id, access_token=api_token)
         chart.delete(access_token=api_token)
-        
+
         logger.info(
             "Chart deleted successfully",
             extra={
