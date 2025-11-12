@@ -7,10 +7,10 @@ name = "datawrapper-mcp"
 dynamic = ["version"]
 requires-python = ">=3.10"
 dependencies = [
-    "datawrapper>=2.0.12",
-    'exceptiongroup; python_version<"3.11"',
+    "datawrapper>=2.0.13",
     "mcp[cli]>=1.20.0",
     "pandas>=2.0.0",
+    'exceptiongroup; python_version<"3.11"',
     'typing_extensions>=4.0.0; python_version<"3.11"',
 ]
 authors = [
