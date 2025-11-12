@@ -492,7 +492,7 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "datawrapper", specifier = ">=2.0.7" },
+    { name = "datawrapper", specifier = ">=2.0.12" },
     { name = "exceptiongroup", marker = "python_full_version < '3.11'" },
     { name = "mcp", extras = ["cli"], specifier = ">=1.20.0" },
     { name = "mypy", marker = "extra == 'mypy'" },
