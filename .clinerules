@@ -107,7 +107,11 @@ The server supports 8 chart types from the datawrapper library:
 1. **create_chart**: Chart creation with full Pydantic config
 2. **get_chart_schema**: Get JSON schema for a chart type
 3. **publish_chart**: Publish chart to make it public (only on explicit user request)
-4. **get_chart**: Retrieve chart information
+4. **get_chart**: Retrieve chart information including complete configuration
+   - Returns complete Pydantic model configuration via `chart.model_dump()`
+   - Configuration can be adapted to new datasets for chart cloning/templating
+   - Enables style transfer workflows: retrieve config from one chart, apply to new data
+   - All fields included (no filtering) - complete chart state for reuse
 5. **update_chart**: Update chart data or configuration (Pydantic-validated)
 6. **delete_chart**: Delete a chart
 7. **export_chart_png**: Export chart as PNG image (only on explicit user request)

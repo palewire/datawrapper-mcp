@@ -9,7 +9,7 @@ from ..types import GetChartArgs
 
 
 async def get_chart_info(arguments: GetChartArgs) -> list[TextContent]:
-    """Get information about an existing chart."""
+    """Get information about an existing chart including complete configuration."""
     chart_id = arguments["chart_id"]
 
     # Get chart using factory function
@@ -19,6 +19,7 @@ async def get_chart_info(arguments: GetChartArgs) -> list[TextContent]:
         "chart_id": chart.chart_id,
         "title": chart.title,
         "type": chart.chart_type,
+        "config": chart.model_dump(),  # Complete Pydantic model dump
         "public_url": chart.get_public_url(),
         "edit_url": chart.get_editor_url(),
     }

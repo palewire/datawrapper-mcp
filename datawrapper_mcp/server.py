@@ -252,13 +252,27 @@ async def get_chart(chart_id: str) -> str:
     ---
 
     Get information about an existing Datawrapper chart,
-    including its metadata, data, and public URL if published.
+    including its complete configuration, metadata, and URLs.
+
+    The returned configuration can be used to:
+    - Understand how a chart is styled and configured
+    - Adapt the configuration to a new dataset
+    - Clone a chart's styling to create similar visualizations
+
+    Returns:
+    - chart_id: The chart's unique identifier
+    - title: Chart title
+    - type: Chart type (bar, line, etc.)
+    - config: Complete Pydantic model configuration including all styling,
+              colors, axes, tooltips, annotations, and other properties
+    - public_url: Public URL if published
+    - edit_url: Editor URL
 
     Args:
         chart_id: ID of the chart to retrieve
 
     Returns:
-        Chart information including metadata and URLs
+        Chart information including complete configuration and URLs
     """
     try:
         arguments = cast(GetChartArgs, {"chart_id": chart_id})
