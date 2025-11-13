@@ -1,8 +1,16 @@
-FROM python:3.11-slim
+FROM --platform=linux/amd64 python:3.11-slim AS build
+
+# Install minimal system dependencies required
+RUN apt-get update && \
+    apt-get install -y \
+    libxml2-dev \
+    && rm -rf /var/lib/apt/lists
 
 # Create deployment user and group
 RUN groupadd -g 1234 deploymentgroup && \
-    useradd -u 1234 -g deploymentgroup -m -s /bin/bash deployment
+    useradd -m -u 1234 -g deploymentgroup deployment
+USER deployment
+ENV PATH="/home/deployment/.local/bin:$PATH"
 
 # Set working directory
 WORKDIR /app
@@ -14,23 +22,16 @@ COPY ./deployment /app/deployment
 # Install dependencies
 RUN pip install --no-cache-dir -r /app/deployment/requirements.txt
 
-# Set ownership
-RUN chown -R deployment:deploymentgroup /app
-
-# Switch to deployment user
-USER deployment
-
-# Set environment variables (can be overridden at runtime)
-ENV MCP_SERVER_HOST=0.0.0.0
-ENV MCP_SERVER_PORT=8501
-ENV MCP_SERVER_NAME=datawrapper-mcp
+# Create a directory for the .env file
+RUN mkdir -p /app/config
 
 # Expose the server port
 EXPOSE 8501
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8501/healthz')"
+# Set environment variables (can be overridden at runtime)
+ENV MCP_SERVER_HOST="0.0.0.0"
+ENV MCP_SERVER_PORT=8501
+ENV MCP_SERVER_NAME="datawrapper-mcp"
 
 # Run the HTTP server
 CMD ["python", "-m", "deployment.app"]
