@@ -1,0 +1,35 @@
+name: Release deployment
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build-and-attach-tar:
+    name: Build and attach Docker tar deployment
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker tar
+        run: make datawrapper-mcp.tar
+
+      - name: Rename tar with version
+        run: |
+          VERSION="${{ github.event.release.tag_name }}"
+          mv datawrapper-mcp.tar datawrapper-mcp-${VERSION}.tar
+
+      - name: Upload tar to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION="${{ github.event.release.tag_name }}"
+          gh release upload ${{ github.event.release.tag_name }} \
+            datawrapper-mcp-${VERSION}.tar \
+            --clobber
