@@ -442,7 +442,7 @@ wheels = [
 
 [[package]]
 name = "datawrapper"
-version = "2.0.13"
+version = "2.0.14"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "exceptiongroup", marker = "python_full_version < '3.11'" },
@@ -454,9 +454,9 @@ dependencies = [
     { name = "requests" },
     { name = "rich" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/fc/6c/6f3c2a5f3fb4de77b4bf54b5fdecabbf92ab88113750312abf1f686241e6/datawrapper-2.0.13.tar.gz", hash = "sha256:73218e92c92aa1021a14194bdaedf8c8220bb1fbbd3227150c5fb1e266c61453", size = 548187 }
+sdist = { url = "https://files.pythonhosted.org/packages/29/15/b6a3952f5a79d8c9e9b513f993eb8d175d349d221319f5d67e8b134c4f0e/datawrapper-2.0.14.tar.gz", hash = "sha256:83a9d097c73b9821ac284b208d8c0623f9719e1aad12e39a47112e1bdc262904", size = 547905 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ed/d9/a5d9d6fe3eeb2a1cc2942f714188a9bf0487b07e984a038d87efc0e847b4/datawrapper-2.0.13-py3-none-any.whl", hash = "sha256:137e00ff2900928b72e2ec579c2c29ee2be4f2e1f768dee1cd231a1457370c66", size = 102481 },
+    { url = "https://files.pythonhosted.org/packages/16/78/c21dde05dd5a8186867589a77acc21e20432d7841eb2e06b866daf21db66/datawrapper-2.0.14-py3-none-any.whl", hash = "sha256:8c8d99f926a627890a28cca13197977eb32171cbb00dad164f33d185ad3a3e22", size = 102395 },
 ]
 
 [[package]]
@@ -492,7 +492,7 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "datawrapper", specifier = ">=2.0.13" },
+    { name = "datawrapper", specifier = ">=2.0.14" },
     { name = "exceptiongroup", marker = "python_full_version < '3.11'" },
     { name = "mcp", extras = ["cli"], specifier = ">=1.20.0" },
     { name = "mypy", marker = "extra == 'mypy'" },
@@ -535,7 +535,7 @@ name = "exceptiongroup"
 version = "1.3.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "typing-extensions", marker = "python_full_version < '3.13'" },
+    { name = "typing-extensions", marker = "python_full_version < '3.11'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/0b/9f/a65090624ecf468cdca03533906e7c69ed7588582240cfe7cc9e770b50eb/exceptiongroup-1.3.0.tar.gz", hash = "sha256:b241f5885f560bc56a59ee63ca4c6a8bfa46ae4ad651af316d4e81817bb9fd88", size = 29749 }
 wheels = [
@@ -785,7 +785,7 @@ wheels = [
 
 [[package]]
 name = "mcp"
-version = "1.21.0"
+version = "1.21.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "anyio" },
@@ -799,11 +799,13 @@ dependencies = [
     { name = "pywin32", marker = "sys_platform == 'win32'" },
     { name = "sse-starlette" },
     { name = "starlette" },
+    { name = "typing-extensions" },
+    { name = "typing-inspection" },
     { name = "uvicorn", marker = "sys_platform != 'emscripten'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/33/54/dd2330ef4611c27ae59124820863c34e1d3edb1133c58e6375e2d938c9c5/mcp-1.21.0.tar.gz", hash = "sha256:bab0a38e8f8c48080d787233343f8d301b0e1e95846ae7dead251b2421d99855", size = 452697 }
+sdist = { url = "https://files.pythonhosted.org/packages/f7/25/4df633e7574254ada574822db2245bbee424725d1b01bccae10bf128794e/mcp-1.21.1.tar.gz", hash = "sha256:540e6ac4b12b085c43f14879fde04cbdb10148a09ea9492ff82d8c7ba651a302", size = 469071 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/39/47/850b6edc96c03bd44b00de9a0ca3c1cc71e0ba1cd5822955bc9e4eb3fad3/mcp-1.21.0-py3-none-any.whl", hash = "sha256:598619e53eb0b7a6513db38c426b28a4bdf57496fed04332100d2c56acade98b", size = 173672 },
+    { url = "https://files.pythonhosted.org/packages/49/af/01fb42df59ad15925ffc1e2e609adafddd3ac4572f606faae0dc8b55ba0c/mcp-1.21.1-py3-none-any.whl", hash = "sha256:dd35abe36d68530a8a1291daa25d50276d8731e545c0434d6e250a3700dd2a6d", size = 174852 },
 ]
 
 [package.optional-dependencies]
