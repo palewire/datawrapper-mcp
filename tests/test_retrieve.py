@@ -3,6 +3,7 @@
 import json
 from unittest.mock import MagicMock, patch
 
+import pandas as pd
 import pytest
 
 from datawrapper_mcp.handlers.retrieve import get_chart_info
@@ -159,3 +160,93 @@ async def test_get_chart_info_includes_all_fields():
     for key in complete_config:
         assert key in config
         assert config[key] == complete_config[key]
+
+
+@pytest.mark.asyncio
+async def test_get_chart_info_with_dataframe():
+    """Test that DataFrame data is properly serialized to JSON."""
+    mock_chart = MagicMock()
+    mock_chart.chart_id = "test789"
+    mock_chart.title = "DataFrame Test"
+    mock_chart.chart_type = "bar"
+    mock_chart.get_public_url.return_value = "https://datawrapper.dwcdn.net/test789/"
+    mock_chart.get_editor_url.return_value = (
+        "https://app.datawrapper.de/chart/test789/visualize"
+    )
+
+    # Create a real DataFrame
+    df = pd.DataFrame(
+        {
+            "year": [2020, 2021, 2022],
+            "value": [100, 150, 200],
+            "category": ["A", "B", "C"],
+        }
+    )
+
+    # Mock config with real DataFrame
+    mock_config = {
+        "title": "DataFrame Test",
+        "data": df,  # Real DataFrame object
+        "color_category": {"A": "#ff0000"},
+    }
+    mock_chart.model_dump.return_value = mock_config
+
+    with patch("datawrapper_mcp.handlers.retrieve.get_chart", return_value=mock_chart):
+        result = await get_chart_info({"chart_id": "test789"})
+
+    # Verify result is JSON serializable
+    assert len(result) == 1
+    assert result[0].type == "text"
+
+    # Parse JSON response (this would fail if DataFrame wasn't converted)
+    response = json.loads(result[0].text)
+
+    # Verify DataFrame was converted to list of records
+    config = response["config"]
+    assert "data" in config
+    assert isinstance(config["data"], list)
+    assert len(config["data"]) == 3
+
+    # Verify data structure matches list of records format
+    expected_data = [
+        {"year": 2020, "value": 100, "category": "A"},
+        {"year": 2021, "value": 150, "category": "B"},
+        {"year": 2022, "value": 200, "category": "C"},
+    ]
+    assert config["data"] == expected_data
+
+    # Verify other config fields are preserved
+    assert config["title"] == "DataFrame Test"
+    assert config["color_category"] == {"A": "#ff0000"}
+
+
+@pytest.mark.asyncio
+async def test_get_chart_info_with_none_data():
+    """Test that None data is handled correctly."""
+    mock_chart = MagicMock()
+    mock_chart.chart_id = "test999"
+    mock_chart.title = "No Data Test"
+    mock_chart.chart_type = "bar"
+    mock_chart.get_public_url.return_value = "https://datawrapper.dwcdn.net/test999/"
+    mock_chart.get_editor_url.return_value = (
+        "https://app.datawrapper.de/chart/test999/visualize"
+    )
+
+    # Mock config with None data
+    mock_config = {
+        "title": "No Data Test",
+        "data": None,
+        "color_category": {"A": "#ff0000"},
+    }
+    mock_chart.model_dump.return_value = mock_config
+
+    with patch("datawrapper_mcp.handlers.retrieve.get_chart", return_value=mock_chart):
+        result = await get_chart_info({"chart_id": "test999"})
+
+    # Verify result is JSON serializable
+    response = json.loads(result[0].text)
+
+    # Verify None data is preserved
+    config = response["config"]
+    assert config["data"] is None
+    assert config["title"] == "No Data Test"

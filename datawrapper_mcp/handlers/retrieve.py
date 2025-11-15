@@ -15,11 +15,18 @@ async def get_chart_info(arguments: GetChartArgs) -> list[TextContent]:
     # Get chart using factory function
     chart = get_chart(chart_id)
 
+    # Get the complete config
+    config = chart.model_dump()
+
+    # Convert DataFrame to list of records if data exists
+    if config.get("data") is not None and hasattr(config["data"], "to_dict"):
+        config["data"] = config["data"].to_dict(orient="records")
+
     result = {
         "chart_id": chart.chart_id,
         "title": chart.title,
         "type": chart.chart_type,
-        "config": chart.model_dump(),  # Complete Pydantic model dump
+        "config": config,
         "public_url": chart.get_public_url(),
         "edit_url": chart.get_editor_url(),
     }
