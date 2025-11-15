@@ -5,6 +5,7 @@ import json
 from mcp.types import TextContent
 from datawrapper import get_chart
 
+from ..config import API_TYPE_TO_SIMPLIFIED
 from ..types import GetChartArgs
 
 
@@ -22,10 +23,13 @@ async def get_chart_info(arguments: GetChartArgs) -> list[TextContent]:
     if config.get("data") is not None and hasattr(config["data"], "to_dict"):
         config["data"] = config["data"].to_dict(orient="records")
 
+    # Convert API type to simplified name for consistency with list_chart_types
+    simplified_type = API_TYPE_TO_SIMPLIFIED.get(chart.chart_type, chart.chart_type)
+
     result = {
         "chart_id": chart.chart_id,
         "title": chart.title,
-        "type": chart.chart_type,
+        "type": simplified_type,
         "config": config,
         "public_url": chart.get_public_url(),
         "edit_url": chart.get_editor_url(),

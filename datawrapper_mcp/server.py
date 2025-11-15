@@ -262,7 +262,8 @@ async def get_chart(chart_id: str) -> str:
     Returns:
     - chart_id: The chart's unique identifier
     - title: Chart title
-    - type: Chart type (bar, line, etc.)
+    - type: Simplified chart type name (bar, line, stacked_bar, etc.) - same format
+            as used in list_chart_types and create_chart
     - config: Complete Pydantic model configuration including all styling,
               colors, axes, tooltips, annotations, and other properties
     - public_url: Public URL if published
