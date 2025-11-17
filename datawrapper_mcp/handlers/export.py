@@ -28,9 +28,9 @@ async def export_chart_png(arguments: ExportChartPngArgs) -> list[ImageContent]:
     if "border_width" in arguments:
         border_width = arguments["border_width"]
         assert isinstance(border_width, int)
-        export_params["borderWidth"] = border_width
+        export_params["border_width"] = border_width
     if "border_color" in arguments:
-        export_params["borderColor"] = arguments["border_color"]
+        export_params["border_color"] = arguments["border_color"]
 
     # Get chart using factory function
     chart = get_chart(chart_id)
