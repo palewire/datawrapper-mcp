@@ -1,5 +1,7 @@
 A Model Context Protocol (MCP) server that enables AI assistants to create Datawrapper charts. Built on the [datawrapper Python library](https://github.com/chekos/datawrapper) with Pydantic validation.
 
+<!-- mcp-name: io.github.palewire/datawrapper-mcp -->
+
 ## Example Usage
 
 Here's a complete example showing how to create, publish, update, and display a chart by chatting with the assistant:
