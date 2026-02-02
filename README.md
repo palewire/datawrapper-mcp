@@ -124,12 +124,12 @@ This ensures that the value set for `DATAWRAPPER_ACCESS_TOKEN` in your environme
 
 ### OpenAI Codex GUI
 
-If you're using the Codex Desktop Application, you can set up the MCP in your settings under `MCP servers`.
+If you're using the [Codex Desktop Application](https://openai.com/codex/), you can set up the MCP in your settings under `MCP servers`.
 
 1. Under Custom servers, click `Add server`.
 2. Under Name, enter `datawrapper-mcp`.
 3. Select STDIO.
-4. Under Command to launch, type `uvx` ([you must have `uv` installed](https://docs.astral.sh/uv/getting-started/installation/)).
+4. Under Command to launch, type `uvx` ([you must have uv installed](https://docs.astral.sh/uv/getting-started/installation/)).
 5. Under Arguments, add `datawrapper-mcp`.
 6. Under Environment variables, add `DATAWRAPPER_ACCESS_TOKEN` as the key and your token as the value.
 7. Click Save.
