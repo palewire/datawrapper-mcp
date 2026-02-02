@@ -45,7 +45,7 @@ Here's a complete example showing how to create, publish, update, and display a 
 
 #### Using uvx (Recommended)
 
-Configure your MCP client to run the server with `uvx` in `claude_desktop_config.json`:
+Configure your MCP client for **Claude Code** to run the server with `uvx` in `claude_desktop_config.json`:
 
 ```json
 {
@@ -59,6 +59,18 @@ Configure your MCP client to run the server with `uvx` in `claude_desktop_config
     }
   }
 }
+```
+
+Or configure your MCP client for [**OpenAI's Codex**](https://developers.openai.com/codex/cli/) to run the server by pasting the following in `~/.codex/config.toml`:
+
+```
+[mcp_servers.datawrapper]
+args = ["datawrapper-mcp"]
+command = "uvx"
+startup_timeout_sec = 30
+
+[mcp_servers.datawrapper.env]
+DATAWRAPPER_ACCESS_TOKEN = "your-token-here"
 ```
 
 #### Using pip
@@ -81,6 +93,46 @@ Then configure your MCP client:
   }
 }
 ```
+
+Or configure your MCP client for [**OpenAI's Codex**](https://developers.openai.com/codex/cli/) to run the server by pasting the following in `~/.codex/config.toml`:
+
+```
+[mcp_servers.datawrapper]
+command = "datawrapper-mcp"
+startup_timeout_sec = 30
+
+[mcp_servers.datawrapper.env]
+DATAWRAPPER_ACCESS_TOKEN = "your-token-here"
+```
+
+#### More Secure Secrets (Advanced)
+
+If you're using [**OpenAI's Codex**](https://developers.openai.com/codex/cli/), you can also configure a pass-through environment variable by ensuring that `DATAWRAPPER_ACCESS_TOKEN` is set in your environment, and replacing this in your `config.toml`:
+
+```
+[mcp_servers.datawrapper.env]
+DATAWRAPPER_ACCESS_TOKEN = "your-token-here"
+```
+
+With this:
+
+```
+env_vars = ["DATAWRAPPER_ACCESS_TOKEN"]
+```
+
+This ensures that the value set for `DATAWRAPPER_ACCESS_TOKEN` in your environment is passed through to Codex without having to store the secret as text in a config file.
+
+### OpenAI Codex GUI
+
+If you're using the Codex Desktop Application, you can set up the MCP in your settings under `MCP servers`.
+
+1. Under Custom servers, click `Add server`.
+2. Under Name, enter `datawrapper-mcp`.
+3. Select STDIO.
+4. Under Command to launch, type `uvx` ([you must have `uv` installed](https://docs.astral.sh/uv/getting-started/installation/)).
+5. Under Arguments, add `datawrapper-mcp`.
+6. Under Environment variables, add `DATAWRAPPER_ACCESS_TOKEN` as the key and your token as the value.
+7. Click Save.
 
 ### Kubernetes Deployment
 
