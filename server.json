@@ -1,5 +1,5 @@
 {
-  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.palewire/datawrapper-mcp",
   "title": "Datawrapper",
   "description": "A Model Context Protocol (MCP) server for creating Datawrapper charts using AI assistants",
