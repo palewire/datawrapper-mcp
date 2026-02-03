@@ -35,11 +35,18 @@ Here's a complete example showing how to create, publish, update, and display a 
 
 ## Getting Started
 
+### Requirements
+
+- A Datawrapper account (sign up at https://datawrapper.de/signup/)
+- An MCP client such as [Claude](https://claude.ai/) or [OpenAI Codex](https://openai.com/codex/)
+- Python 3.10 or higher
+- A Python package installer such as [pip](https://pip.pypa.io/en/stable/installation/) or [uvx](https://docs.astral.sh/uv/getting-started/installation/)
+
 ### Get Your API Token
 
 1. Go to https://app.datawrapper.de/account/api-tokens
 2. Create a new API token
-3. Add it to your MCP configuration as shown above
+3. Add it to your MCP configuration as shown below
 
 ### Installation
 
@@ -121,7 +128,7 @@ startup_timeout_sec = 30
 DATAWRAPPER_ACCESS_TOKEN = "your-token-here"
 ```
 
-**Secure Secrets (Advanced)**
+**Secure secrets**
 
 For enhanced security, you can configure a pass-through environment variable by ensuring that `DATAWRAPPER_ACCESS_TOKEN` is set in your environment, and replacing this in your `config.toml`:
 
