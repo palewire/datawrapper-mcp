@@ -3,7 +3,7 @@
   "name": "io.github.palewire/datawrapper-mcp",
   "title": "Datawrapper",
   "description": "A Model Context Protocol (MCP) server for creating Datawrapper charts using AI assistants",
-  "version": "0.0.18",
+  "version": "0.0.19",
   "repository": {
     "url": "https://github.com/palewire/datawrapper-mcp",
     "source": "github"
