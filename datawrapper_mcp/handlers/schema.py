@@ -25,7 +25,7 @@ async def get_chart_schema(arguments: GetChartSchemaArgs) -> list[TextContent]:
         "class_name": chart_class.__name__,
         "schema": schema,
         "usage": (
-            "Use this schema to construct a chart_config dict for create_chart_advanced. "
+            "Use this schema to construct a chart_config dict for create_chart. "
             "The schema shows all available properties, their types, and descriptions."
         ),
     }
