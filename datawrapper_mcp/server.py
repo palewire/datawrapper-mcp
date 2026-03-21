@@ -201,7 +201,7 @@ async def create_chart(
         chart_config: Complete chart configuration as a Pydantic model dict
 
     Returns:
-        Chart ID and editor URL
+        Chart ID, editor URL, and an inline PNG preview image (if export succeeds)
     """
     try:
         arguments = cast(
@@ -335,7 +335,7 @@ async def update_chart(
         chart_config: Updated chart configuration using high-level Pydantic fields (optional)
 
     Returns:
-        Confirmation message with editor URL
+        Confirmation message, editor URL, and an inline PNG preview image (if export succeeds)
     """
     arguments: dict[str, Any] = {"chart_id": chart_id}
     if data is not None:
