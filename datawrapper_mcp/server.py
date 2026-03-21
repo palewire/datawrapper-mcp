@@ -6,9 +6,8 @@ from typing import Any, Sequence, cast
 from fastmcp import FastMCP
 from fastmcp.tools import ToolResult
 from mcp.types import ImageContent, TextContent
-from prefab_ui.actions.mcp import CallTool, SendMessage
 from prefab_ui.app import PrefabApp
-from prefab_ui.components import Button, Column, Image, Row, Text
+from prefab_ui.components import Column, Image, Text
 
 from .config import CHART_CLASSES
 from .handlers import create_chart as create_chart_handler
@@ -253,23 +252,6 @@ async def create_chart(
         else:
             Text("Chart created (preview too large or unavailable)")
 
-        with Row(gap=2, align="center"):
-            Button(
-                "Publish",
-                on_click=CallTool(
-                    "publish_chart",
-                    arguments={"chart_id": chart_id},
-                ),
-            )
-            Button(
-                "Open in editor",
-                on_click=SendMessage(f"Open {edit_url} in my browser"),
-            )
-            Text(
-                chart_id,
-                css_class="ml-auto text-xs text-muted-foreground font-mono",
-            )
-
     return ToolResult(
         content=f"Chart '{title}' created (ID: {chart_id}). Edit: {edit_url}",
         structured_content=PrefabApp(
@@ -437,23 +419,6 @@ async def update_chart(
             )
         else:
             Text("Chart updated (preview too large or unavailable)")
-
-        with Row(gap=2, align="center"):
-            Button(
-                "Re-publish",
-                on_click=CallTool(
-                    "publish_chart",
-                    arguments={"chart_id": chart_id},
-                ),
-            )
-            Button(
-                "Open in editor",
-                on_click=SendMessage(f"Open {edit_url} in my browser"),
-            )
-            Text(
-                chart_id,
-                css_class="ml-auto text-xs text-muted-foreground font-mono",
-            )
 
     return ToolResult(
         content=f"Chart '{title}' updated (ID: {chart_id}). Edit: {edit_url}",
