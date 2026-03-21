@@ -11,7 +11,7 @@ Modify `create_chart` and `update_chart` to automatically export a PNG preview a
 Key design decisions:
 
 - **No publishing required.** The Datawrapper API supports PNG export on unpublished charts, so this feature doesn't change the chart's visibility.
-- **Non-blocking.** The PNG export is wrapped in a try/except. If it fails for any reason, the text response (chart ID, URLs) is still returned — the preview is a bonus, not a gate.
+- **Best-effort, non-fatal preview.** PNG export is attempted synchronously and wrapped in a try/except. If it fails for any reason, the text response (chart ID, URLs) is still returned — the preview is a bonus, not a gate.
 - **No new tools or parameters.** The change is internal to the existing handlers. The MCP tool interface is unchanged from the caller's perspective.
 
 ## Files changed
