@@ -51,28 +51,25 @@ class TestCreateChartPreview:
         )
         mock_instance.export_png.return_value = b"PNG_DATA"
 
-        with patch(
-            "datawrapper_mcp.handlers.create.CHART_CLASSES", {"bar": MagicMock()}
+        chart_cls = MagicMock()
+        chart_cls.model_validate.return_value = mock_instance
+        with (
+            patch(
+                "datawrapper_mcp.handlers.create.CHART_CLASSES",
+                {"bar": chart_cls},
+            ),
+            patch(
+                "datawrapper_mcp.handlers.create.json_to_dataframe",
+                return_value=MagicMock(),
+            ),
         ):
-            chart_cls = MagicMock()
-            chart_cls.model_validate.return_value = mock_instance
-            with (
-                patch(
-                    "datawrapper_mcp.handlers.create.CHART_CLASSES",
-                    {"bar": chart_cls},
-                ),
-                patch(
-                    "datawrapper_mcp.handlers.create.json_to_dataframe",
-                    return_value=MagicMock(),
-                ),
-            ):
-                arguments = {
-                    "chart_type": "bar",
-                    "data": [{"x": 1}],
-                    "chart_config": {"title": "Test Chart"},
-                }
+            arguments = {
+                "chart_type": "bar",
+                "data": [{"x": 1}],
+                "chart_config": {"title": "Test Chart"},
+            }
 
-                result = await create_chart(arguments)
+            result = await create_chart(arguments)
 
         assert len(result) == 2
         assert result[0].type == "text"
