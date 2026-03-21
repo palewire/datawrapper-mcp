@@ -8,7 +8,7 @@ dynamic = ["version"]
 requires-python = ">=3.10"
 dependencies = [
     "datawrapper>=2.0.14",
-    "mcp[cli]>=1.20.0",
+    "fastmcp>=3.0.0",
     "pandas>=2.0.0",
     'exceptiongroup; python_version<"3.11"',
     'typing_extensions>=4.0.0; python_version<"3.11"',
@@ -65,7 +65,7 @@ datawrapper-mcp = "datawrapper_mcp.server:main"
 packages = ["datawrapper_mcp"]
 
 [tool.setuptools.package-data]
-datawrapper_mcp = ["py.typed"]
+datawrapper_mcp = ["py.typed", "vendor/*.js"]
 
 [tool.setuptools_scm]
 

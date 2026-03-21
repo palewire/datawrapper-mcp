@@ -3,10 +3,12 @@
 import json
 from typing import Any, Sequence, cast
 
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
+from fastmcp.server.apps import AppConfig, ResourceCSP
 from mcp.types import ImageContent, TextContent
 
 from .config import CHART_CLASSES
+from .views import get_chart_view_html
 from .types import (
     CreateChartArgs,
     DeleteChartArgs,
@@ -28,6 +30,23 @@ from .handlers import (
 
 # Initialize the FastMCP server
 mcp = FastMCP("datawrapper-mcp")
+
+# MCP App View configuration
+CHART_VIEW_URI = "ui://datawrapper-mcp/chart-view.html"
+CHART_VIEW_APP = AppConfig(resource_uri=CHART_VIEW_URI)
+
+
+@mcp.resource(
+    CHART_VIEW_URI,
+    app=AppConfig(
+        csp=ResourceCSP(
+            frame_domains=["https://datawrapper.dwcdn.net"],
+        )
+    ),
+)
+def chart_view_resource() -> str:
+    """Interactive chart viewer rendered inline in the conversation."""
+    return get_chart_view_html()
 
 
 @mcp.resource("datawrapper://chart-types")
@@ -113,7 +132,7 @@ async def get_chart_schema(chart_type: str) -> str:
         return f"Error retrieving schema for chart_type '{chart_type}': {str(e)}"
 
 
-@mcp.tool()
+@mcp.tool(app=CHART_VIEW_APP)
 async def create_chart(
     data: str | list | dict,
     chart_type: str,
@@ -287,7 +306,7 @@ async def get_chart(chart_id: str) -> str:
         return f"Error retrieving chart with ID '{chart_id}': {str(e)}"
 
 
-@mcp.tool()
+@mcp.tool(app=CHART_VIEW_APP)
 async def update_chart(
     chart_id: str,
     data: str | list | dict | None = None,
