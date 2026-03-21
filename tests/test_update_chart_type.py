@@ -34,7 +34,7 @@ async def test_update_validates_via_setattr(mock_api_token):
             },
         }
 
-        result = await update_chart(arguments)
+        metadata, _images = await update_chart(arguments)
 
         # Verify attribute was set directly (Pydantic validates automatically)
         assert mock_chart.title == "Updated Title"
@@ -43,9 +43,7 @@ async def test_update_validates_via_setattr(mock_api_token):
         assert mock_chart.chart_type == "column-chart"
 
         # Verify update was successful
-        assert len(result) > 0
-        assert result[0].type == "text"
-        assert "updated successfully" in result[0].text.lower()
+        assert "chart_id" in metadata
 
 
 @pytest.mark.asyncio
@@ -75,7 +73,7 @@ async def test_update_only_sets_provided_fields(mock_api_token):
             "chart_config": {"title": "New Title"},
         }
 
-        result = await update_chart(arguments)
+        metadata, _images = await update_chart(arguments)
 
         # Verify only title was updated
         assert mock_chart.title == "New Title"
@@ -87,6 +85,4 @@ async def test_update_only_sets_provided_fields(mock_api_token):
         assert mock_chart.chart_type == "column-chart"
 
         # Verify update was successful
-        assert len(result) > 0
-        assert result[0].type == "text"
-        assert "updated successfully" in result[0].text.lower()
+        assert "chart_id" in metadata

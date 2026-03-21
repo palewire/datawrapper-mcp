@@ -1,17 +1,23 @@
 """Handler for updating Datawrapper charts."""
 
-import json
+from typing import Any
 
 from datawrapper import get_chart
-from mcp.types import ImageContent, TextContent
+from mcp.types import ImageContent
 
 from ..types import UpdateChartArgs
 from ..utils import json_to_dataframe
 from .preview import try_export_preview
 
 
-async def update_chart(arguments: UpdateChartArgs) -> list[TextContent | ImageContent]:
-    """Update an existing chart's data or configuration."""
+async def update_chart(
+    arguments: UpdateChartArgs,
+) -> tuple[dict[str, Any], list[ImageContent]]:
+    """Update an existing chart's data or configuration.
+
+    Returns:
+        A tuple of (metadata_dict, preview_images).
+    """
     chart_id = arguments["chart_id"]
 
     # Get chart using factory function - returns correct Pydantic class instance
@@ -51,18 +57,15 @@ async def update_chart(arguments: UpdateChartArgs) -> list[TextContent | ImageCo
     # Update using Pydantic instance method
     chart.update()
 
-    result = {
+    metadata: dict[str, Any] = {
         "chart_id": chart.chart_id,
-        "message": "Chart updated successfully!",
+        "title": chart.title,
         "edit_url": chart.get_editor_url(),
     }
 
-    response: list[TextContent | ImageContent] = [
-        TextContent(type="text", text=json.dumps(result, indent=2))
-    ]
-
+    images: list[ImageContent] = []
     preview = try_export_preview(chart)
     if preview:
-        response.append(preview)
+        images.append(preview)
 
-    return response
+    return metadata, images

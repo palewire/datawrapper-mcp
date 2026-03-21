@@ -43,15 +43,14 @@ async def test_update_with_high_level_fields(mock_api_token, mock_get_chart):
             },
         }
 
-        result = await update_chart(arguments)
+        metadata, _images = await update_chart(arguments)
 
         # Verify update was called without access_token (library auto-retrieves from env)
         mock_chart.update.assert_called_once_with()
 
-        # Verify result contains success message
-        assert len(result) > 0
-        assert result[0].type == "text"
-        assert "updated successfully" in result[0].text.lower()
+        # Verify result contains chart metadata
+        assert "chart_id" in metadata
+        assert "edit_url" in metadata
 
 
 @pytest.mark.asyncio
@@ -95,14 +94,13 @@ async def test_update_merges_with_existing_config(
             },
         }
 
-        result = await update_chart(arguments)
+        metadata, _images = await update_chart(arguments)
 
         # Verify update was called without access_token (library auto-retrieves from env)
         mock_chart.update.assert_called_once_with()
 
         # Verify result indicates success
-        assert len(result) > 0
-        assert result[0].type == "text"
+        assert "chart_id" in metadata
 
 
 @pytest.mark.asyncio
@@ -118,7 +116,7 @@ async def test_update_validates_through_pydantic(mock_api_token, mock_get_chart)
         "chart_config": {"title": "Updated Title", "intro": "Test intro"},
     }
 
-    result = await update_chart(arguments)
+    metadata, _images = await update_chart(arguments)
 
     # Verify setattr was called for each config item
     # (Pydantic validates automatically due to validate_assignment=True)
@@ -129,9 +127,7 @@ async def test_update_validates_through_pydantic(mock_api_token, mock_get_chart)
     mock_chart.update.assert_called_once_with()
 
     # Verify result indicates success
-    assert len(result) > 0
-    assert result[0].type == "text"
-    assert "updated successfully" in result[0].text.lower()
+    assert "chart_id" in metadata
 
 
 @pytest.mark.asyncio
@@ -157,13 +153,7 @@ async def test_update_without_api_token(no_api_token):
 
         # The library will raise FailedRequestError when no token is available
         try:
-            result = await update_chart(arguments)
-            # If we get here, check for error in result
-            assert len(result) > 0
-            assert result[0].type == "text"
-            assert (
-                "error" in result[0].text.lower() or "token" in result[0].text.lower()
-            )
+            _metadata, _images = await update_chart(arguments)
         except FailedRequestError as e:
             # This is expected - the library raises FailedRequestError when no token
             assert "401" in str(e) or "Unauthorized" in str(e)
@@ -184,11 +174,7 @@ async def test_update_with_invalid_chart_id(mock_api_token):
         # The call_tool wrapper catches exceptions, but we're calling directly
         # so we expect the exception to propagate
         try:
-            result = await update_chart(arguments)
-            # If we get here, check for error in result
-            assert len(result) > 0
-            assert result[0].type == "text"
-            assert "error" in result[0].text.lower()
+            _metadata, _images = await update_chart(arguments)
         except Exception as e:
             # This is expected - the function raises when chart not found
             assert "Chart not found" in str(e)
@@ -237,7 +223,7 @@ async def test_update_uses_direct_attribute_assignment(mock_api_token, mock_get_
 
     arguments = {"chart_id": "test123", "chart_config": {"title": "New Title"}}
 
-    result = await update_chart(arguments)
+    metadata, _images = await update_chart(arguments)
 
     # Verify attribute was set directly (no type() or model_validate calls)
     assert mock_chart.title == "New Title"
@@ -246,6 +232,4 @@ async def test_update_uses_direct_attribute_assignment(mock_api_token, mock_get_
     mock_chart.update.assert_called_once_with()
 
     # Verify result indicates success
-    assert len(result) > 0
-    assert result[0].type == "text"
-    assert "updated successfully" in result[0].text.lower()
+    assert "chart_id" in metadata

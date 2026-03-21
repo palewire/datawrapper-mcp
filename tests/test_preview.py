@@ -23,7 +23,7 @@ class TestTryExportPreview:
         assert result.mimeType == "image/png"
         expected_base64 = base64.b64encode(b"PNG_IMAGE_DATA").decode("utf-8")
         assert result.data == expected_base64
-        mock_chart.export_png.assert_called_once_with()
+        mock_chart.export_png.assert_called_once_with(zoom=1)
 
     def test_returns_none_on_failure(self):
         """Test that a failed export returns None and logs a warning."""
@@ -69,15 +69,16 @@ class TestCreateChartPreview:
                 "chart_config": {"title": "Test Chart"},
             }
 
-            result = await create_chart(arguments)
+            metadata, images = await create_chart(arguments)
 
-        assert len(result) == 2
-        assert result[0].type == "text"
-        assert result[1].type == "image"
-        assert result[1].mimeType == "image/png"
+        assert metadata["chart_id"] == "abc123"
+        assert metadata["title"] == "Test Chart"
+        assert len(images) == 1
+        assert images[0].type == "image"
+        assert images[0].mimeType == "image/png"
 
     async def test_create_without_preview_on_export_failure(self, mock_api_token):
-        """Test that create_chart returns only text when export fails."""
+        """Test that create_chart returns only metadata when export fails."""
         from datawrapper_mcp.handlers.create import create_chart
 
         mock_instance = MagicMock()
@@ -106,10 +107,10 @@ class TestCreateChartPreview:
                 "chart_config": {"title": "Test Chart"},
             }
 
-            result = await create_chart(arguments)
+            metadata, images = await create_chart(arguments)
 
-        assert len(result) == 1
-        assert result[0].type == "text"
+        assert metadata["chart_id"] == "abc123"
+        assert len(images) == 0
 
 
 @pytest.mark.asyncio
@@ -129,17 +130,17 @@ class TestUpdateChartPreview:
             "chart_config": {"title": "Updated Title"},
         }
 
-        result = await update_chart(arguments)
+        metadata, images = await update_chart(arguments)
 
-        assert len(result) == 2
-        assert result[0].type == "text"
-        assert result[1].type == "image"
-        assert result[1].mimeType == "image/png"
+        assert "chart_id" in metadata
+        assert len(images) == 1
+        assert images[0].type == "image"
+        assert images[0].mimeType == "image/png"
 
     async def test_update_without_preview_on_export_failure(
         self, mock_api_token, mock_get_chart
     ):
-        """Test that update_chart returns only text when export fails."""
+        """Test that update_chart returns only metadata when export fails."""
         from datawrapper_mcp.handlers.update import update_chart
 
         mock_chart = mock_get_chart.return_value
@@ -151,7 +152,7 @@ class TestUpdateChartPreview:
             "chart_config": {"title": "Updated Title"},
         }
 
-        result = await update_chart(arguments)
+        metadata, images = await update_chart(arguments)
 
-        assert len(result) == 1
-        assert result[0].type == "text"
+        assert "chart_id" in metadata
+        assert len(images) == 0

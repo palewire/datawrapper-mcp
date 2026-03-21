@@ -3,10 +3,20 @@
 import json
 from typing import Any, Sequence, cast
 
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
+from fastmcp.tools import ToolResult
 from mcp.types import ImageContent, TextContent
+from prefab_ui.app import PrefabApp
+from prefab_ui.components import Column, Image, Text
 
 from .config import CHART_CLASSES
+from .handlers import create_chart as create_chart_handler
+from .handlers import delete_chart as delete_chart_handler
+from .handlers import export_chart_png as export_chart_png_handler
+from .handlers import get_chart_info as get_chart_info_handler
+from .handlers import get_chart_schema as get_chart_schema_handler
+from .handlers import publish_chart as publish_chart_handler
+from .handlers import update_chart as update_chart_handler
 from .types import (
     CreateChartArgs,
     DeleteChartArgs,
@@ -16,15 +26,10 @@ from .types import (
     PublishChartArgs,
     UpdateChartArgs,
 )
-from .handlers import (
-    create_chart as create_chart_handler,
-    delete_chart as delete_chart_handler,
-    export_chart_png as export_chart_png_handler,
-    get_chart_info as get_chart_info_handler,
-    get_chart_schema as get_chart_schema_handler,
-    publish_chart as publish_chart_handler,
-    update_chart as update_chart_handler,
-)
+
+# Maximum base64 PNG size (bytes) to include inline in PrefabUI view.
+# structuredContent has a 25,000 token limit; 200KB base64 ≈ 67K tokens.
+MAX_PREVIEW_BYTES = 200_000
 
 # Initialize the FastMCP server
 mcp = FastMCP("datawrapper-mcp")
@@ -113,12 +118,12 @@ async def get_chart_schema(chart_type: str) -> str:
         return f"Error retrieving schema for chart_type '{chart_type}': {str(e)}"
 
 
-@mcp.tool()
+@mcp.tool(app=True)
 async def create_chart(
     data: str | list | dict,
     chart_type: str,
-    chart_config: dict,
-) -> Sequence[TextContent | ImageContent]:
+    chart_config: dict | str,
+) -> ToolResult:
     """⚠️ THIS IS THE DATAWRAPPER INTEGRATION ⚠️
     Use this MCP tool for ALL Datawrapper chart creation.
 
@@ -203,34 +208,76 @@ async def create_chart(
     Returns:
         Chart ID, editor URL, and an inline PNG preview image (if export succeeds)
     """
+    # FastMCP 3.x strict validation: Claude may send these as JSON strings
+    parsed_config: dict[str, Any] = (
+        json.loads(chart_config) if isinstance(chart_config, str) else chart_config
+    )
+    if isinstance(data, str):
+        try:
+            data = json.loads(data)
+        except (json.JSONDecodeError, TypeError):
+            pass  # It's a file path or CSV string, not JSON
+
     try:
-        arguments = cast(
-            CreateChartArgs,
-            {
-                "data": data,
-                "chart_type": chart_type,
-                "chart_config": chart_config,
-            },
-        )
-        return await create_chart_handler(arguments)
+        arguments: CreateChartArgs = {
+            "data": data,
+            "chart_type": chart_type,
+            "chart_config": parsed_config,
+        }
+        chart_data, images = await create_chart_handler(arguments)
     except Exception as e:
-        return [
-            TextContent(
-                type="text",
-                text=f"Error creating chart of type '{chart_type}': {str(e)}",
+        return ToolResult(
+            content=[
+                TextContent(
+                    type="text",
+                    text=f"Error creating chart of type '{chart_type}': {e}",
+                )
+            ],
+        )
+
+    chart_id = chart_data["chart_id"]
+    edit_url = chart_data["edit_url"]
+    title = chart_data.get("title", "")
+    image_item = images[0] if images else None
+
+    # Build non-Apps fallback content (TextContent + optional ImageContent)
+    fallback: list[TextContent | ImageContent] = [
+        TextContent(
+            type="text",
+            text=f"Chart '{title}' created (ID: {chart_id}). Edit: {edit_url}",
+        )
+    ]
+    if image_item:
+        fallback.append(image_item)
+
+    # Build PrefabUI component tree for Apps hosts
+    with Column(gap=4, css_class="p-4") as view:  # type: ignore[call-arg]
+        if image_item and len(image_item.data) <= MAX_PREVIEW_BYTES:
+            Image(
+                src=f"data:{image_item.mimeType};base64,{image_item.data}",
+                alt=title,
+                css_class="w-full rounded",  # type: ignore[call-arg]
             )
-        ]
+        else:
+            Text("Chart created (preview too large or unavailable)")
+
+    return ToolResult(
+        content=fallback,
+        structured_content=PrefabApp(
+            view=view,
+            state={"chart_id": chart_id, "edit_url": edit_url},
+        ),
+    )
 
 
-@mcp.tool()
-async def publish_chart(chart_id: str) -> str:
+@mcp.tool(app=True)
+async def publish_chart(chart_id: str) -> ToolResult:
     """⚠️ DATAWRAPPER MCP TOOL ⚠️
     This is part of the Datawrapper MCP server integration.
 
     ---
 
-    Publish a Datawrapper chart to make it publicly accessible.
-    Returns the public URL of the published chart.
+    Publish a Datawrapper chart to make it publicly accessible and render a preview in chat.
     IMPORTANT: Only use this tool when the user explicitly requests to publish the chart.
     Do not automatically publish charts after creation unless specifically asked.
 
@@ -238,14 +285,62 @@ async def publish_chart(chart_id: str) -> str:
         chart_id: ID of the chart to publish
 
     Returns:
-        Public URL of the published chart
+        Public URL plus an inline preview when available
     """
     try:
         arguments = cast(PublishChartArgs, {"chart_id": chart_id})
-        result = await publish_chart_handler(arguments)
-        return result[0].text
+        chart_data, images = await publish_chart_handler(arguments)
     except Exception as e:
-        return f"Error publishing chart with ID '{chart_id}': {str(e)}"
+        return ToolResult(
+            content=[
+                TextContent(
+                    type="text",
+                    text=f"Error publishing chart with ID '{chart_id}': {e}",
+                )
+            ]
+        )
+
+    public_url = chart_data.get("public_url", "")
+    chart_id = chart_data.get("chart_id", chart_id)
+    title = chart_data.get("title", "")
+    edit_url = chart_data.get("edit_url", "")
+
+    image_item = images[0] if images else None
+
+    # Build non-Apps fallback content (TextContent + optional ImageContent)
+    fallback: list[TextContent | ImageContent] = [
+        TextContent(
+            type="text",
+            text=(
+                f"Chart '{title}' published (ID: {chart_id}). Public URL: {public_url}"
+            ),
+        )
+    ]
+    if image_item:
+        fallback.append(image_item)
+
+    # Build PrefabUI component tree for Apps hosts
+    with Column(gap=4, css_class="p-4") as view:  # type: ignore[call-arg]
+        if image_item and len(image_item.data) <= MAX_PREVIEW_BYTES:
+            Image(
+                src=f"data:{image_item.mimeType};base64,{image_item.data}",
+                alt=title or f"Chart {chart_id}",
+                css_class="w-full rounded",  # type: ignore[call-arg]
+            )
+        else:
+            Text("Chart published (preview too large or unavailable)")
+
+    return ToolResult(
+        content=fallback,
+        structured_content=PrefabApp(
+            view=view,
+            state={
+                "chart_id": chart_id,
+                "public_url": public_url,
+                "edit_url": edit_url,
+            },
+        ),
+    )
 
 
 @mcp.tool()
@@ -287,12 +382,12 @@ async def get_chart(chart_id: str) -> str:
         return f"Error retrieving chart with ID '{chart_id}': {str(e)}"
 
 
-@mcp.tool()
+@mcp.tool(app=True)
 async def update_chart(
     chart_id: str,
     data: str | list | dict | None = None,
-    chart_config: dict | None = None,
-) -> Sequence[TextContent | ImageContent]:
+    chart_config: dict | str | None = None,
+) -> ToolResult:
     """⚠️ DATAWRAPPER MCP TOOL ⚠️
     This is part of the Datawrapper MCP server integration.
 
@@ -337,20 +432,68 @@ async def update_chart(
     Returns:
         Confirmation message, editor URL, and an inline PNG preview image (if export succeeds)
     """
+    # FastMCP 3.x strict validation: Claude may send these as JSON strings
+    parsed_config: dict[str, Any] | None = (
+        json.loads(chart_config) if isinstance(chart_config, str) else chart_config
+    )
+    if isinstance(data, str):
+        try:
+            data = json.loads(data)
+        except (json.JSONDecodeError, TypeError):
+            pass  # It's a file path or CSV string, not JSON
+
     arguments: dict[str, Any] = {"chart_id": chart_id}
     if data is not None:
         arguments["data"] = data
-    if chart_config is not None:
-        arguments["chart_config"] = chart_config
+    if parsed_config is not None:
+        arguments["chart_config"] = parsed_config
 
     try:
-        return await update_chart_handler(cast(UpdateChartArgs, arguments))
+        chart_data, images = await update_chart_handler(
+            cast(UpdateChartArgs, arguments)
+        )
     except Exception as e:
-        return [
-            TextContent(
-                type="text", text=f"Error updating chart with ID '{chart_id}': {str(e)}"
+        return ToolResult(
+            content=[
+                TextContent(
+                    type="text",
+                    text=f"Error updating chart with ID '{chart_id}': {e}",
+                )
+            ],
+        )
+
+    edit_url = chart_data.get("edit_url", "")
+    title = chart_data.get("title", "")
+    image_item = images[0] if images else None
+
+    # Build non-Apps fallback content (TextContent + optional ImageContent)
+    fallback: list[TextContent | ImageContent] = [
+        TextContent(
+            type="text",
+            text=f"Chart '{title}' updated (ID: {chart_id}). Edit: {edit_url}",
+        )
+    ]
+    if image_item:
+        fallback.append(image_item)
+
+    # Build PrefabUI component tree for Apps hosts
+    with Column(gap=4, css_class="p-4") as view:  # type: ignore[call-arg]
+        if image_item and len(image_item.data) <= MAX_PREVIEW_BYTES:
+            Image(
+                src=f"data:{image_item.mimeType};base64,{image_item.data}",
+                alt=title,
+                css_class="w-full rounded",  # type: ignore[call-arg]
             )
-        ]
+        else:
+            Text("Chart updated (preview too large or unavailable)")
+
+    return ToolResult(
+        content=fallback,
+        structured_content=PrefabApp(
+            view=view,
+            state={"chart_id": chart_id, "edit_url": edit_url},
+        ),
+    )
 
 
 @mcp.tool()

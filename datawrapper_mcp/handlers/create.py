@@ -1,9 +1,8 @@
 """Handler for creating Datawrapper charts."""
 
-import json
 from typing import Any
 
-from mcp.types import ImageContent, TextContent
+from mcp.types import ImageContent
 
 from ..config import CHART_CLASSES
 from ..types import CreateChartArgs
@@ -11,8 +10,14 @@ from ..utils import json_to_dataframe
 from .preview import try_export_preview
 
 
-async def create_chart(arguments: CreateChartArgs) -> list[TextContent | ImageContent]:
-    """Create a chart with full Pydantic model configuration."""
+async def create_chart(
+    arguments: CreateChartArgs,
+) -> tuple[dict[str, Any], list[ImageContent]]:
+    """Create a chart with full Pydantic model configuration.
+
+    Returns:
+        A tuple of (metadata_dict, preview_images).
+    """
     chart_type = arguments["chart_type"]
 
     # Convert data to DataFrame
@@ -37,23 +42,16 @@ async def create_chart(arguments: CreateChartArgs) -> list[TextContent | ImageCo
     # Create chart using Pydantic instance method
     chart.create()
 
-    result = {
+    metadata: dict[str, Any] = {
         "chart_id": chart.chart_id,
         "chart_type": chart_type,
         "title": chart.title,
         "edit_url": chart.get_editor_url(),
-        "message": (
-            f"Chart created successfully! Edit it at: {chart.get_editor_url()}\n"
-            f"Use publish_chart with chart_id '{chart.chart_id}' to make it public."
-        ),
     }
 
-    response: list[TextContent | ImageContent] = [
-        TextContent(type="text", text=json.dumps(result, indent=2))
-    ]
-
+    images: list[ImageContent] = []
     preview = try_export_preview(chart)
     if preview:
-        response.append(preview)
+        images.append(preview)
 
-    return response
+    return metadata, images
