@@ -8,6 +8,7 @@ import asyncio
 import logging
 import time
 
+from fastmcp.exceptions import ToolError
 from fastmcp.server.middleware import CallNext, Middleware, MiddlewareContext
 from fastmcp.tools import ToolResult
 from mcp.types import TextContent
@@ -30,14 +31,7 @@ class ErrorHandlingMiddleware(Middleware):
         except Exception as e:
             tool_name = context.message.name if context.message else "unknown"
             logger.exception("Unhandled error in tool '%s'", tool_name)
-            return ToolResult(
-                content=[
-                    TextContent(
-                        type="text",
-                        text=f"Error in {tool_name}: {e}",
-                    )
-                ],
-            )
+            raise ToolError(f"Error in {tool_name}: {e}") from e
 
 
 class RateLimitingMiddleware(Middleware):

@@ -87,6 +87,42 @@ jobs:
         name: Run tests
         run: uv run pytest --cov -sv
 
+  mcp-inspector:
+    name: Smoke-test with MCP Inspector
+    runs-on: ubuntu-latest
+    needs: [test-python]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - id: install-uv
+        name: Install uv
+        uses: astral-sh/setup-uv@v7
+        with:
+          version: "latest"
+          enable-cache: true
+          cache-dependency-glob: '**/pyproject.toml'
+
+      - id: install-python
+        name: Install Python
+        run: uv python install 3.13
+
+      - id: install-python-dependencies
+        name: Install Python dependencies
+        run: uv sync
+
+      - id: setup-node
+        name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - id: inspector
+        name: Run MCP Inspector
+        run: |
+          echo '{"mcpServers":{"datawrapper-mcp":{"command":"uv","args":["run","datawrapper-mcp"]}}}' > /tmp/mcp-inspector.json
+          npx --yes @modelcontextprotocol/inspector --cli --config /tmp/mcp-inspector.json --server datawrapper-mcp --method tools/list
+
   build:
     name: Build release candidate
     runs-on: ubuntu-latest

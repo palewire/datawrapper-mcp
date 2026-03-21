@@ -65,22 +65,27 @@ class TestErrorHandlingMiddleware:
         call_next.assert_awaited_once()
 
     @pytest.mark.asyncio
-    async def test_catches_exception_and_returns_error_result(self):
+    async def test_catches_exception_and_raises_tool_error(self):
+        from fastmcp.exceptions import ToolError
+
         mw = ErrorHandlingMiddleware()
         call_next = AsyncMock(side_effect=RuntimeError("boom"))
 
-        result = await mw.on_call_tool(_make_context("my_tool"), call_next)
+        with pytest.raises(ToolError, match="my_tool") as exc_info:
+            await mw.on_call_tool(_make_context("my_tool"), call_next)
 
-        assert "Error in my_tool" in result.content[0].text
-        assert "boom" in result.content[0].text
+        assert "boom" in str(exc_info.value)
 
     @pytest.mark.asyncio
     async def test_logs_exception(self, caplog):
+        from fastmcp.exceptions import ToolError
+
         mw = ErrorHandlingMiddleware()
         call_next = AsyncMock(side_effect=ValueError("bad value"))
 
         with caplog.at_level(logging.ERROR, logger="datawrapper_mcp"):
-            await mw.on_call_tool(_make_context("broken_tool"), call_next)
+            with pytest.raises(ToolError):
+                await mw.on_call_tool(_make_context("broken_tool"), call_next)
 
         assert "broken_tool" in caplog.text
 
