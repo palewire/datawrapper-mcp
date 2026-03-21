@@ -4,6 +4,7 @@ Provides error handling, rate limiting, and timing middleware
 built on the FastMCP Middleware base class.
 """
 
+import asyncio
 import logging
 import time
 
@@ -24,6 +25,8 @@ class ErrorHandlingMiddleware(Middleware):
     ) -> ToolResult:
         try:
             return await call_next(context)
+        except asyncio.CancelledError:
+            raise
         except Exception as e:
             tool_name = context.message.name if context.message else "unknown"
             logger.exception("Unhandled error in tool '%s'", tool_name)

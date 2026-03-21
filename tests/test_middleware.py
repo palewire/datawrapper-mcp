@@ -1,5 +1,6 @@
 """Tests for production middleware (error handling, rate limiting, timing)."""
 
+import asyncio
 import logging
 from dataclasses import dataclass
 from unittest.mock import AsyncMock
@@ -76,6 +77,14 @@ class TestErrorHandlingMiddleware:
             await mw.on_call_tool(_make_context("broken_tool"), call_next)
 
         assert "broken_tool" in caplog.text
+
+    @pytest.mark.asyncio
+    async def test_reraises_cancelled_error(self):
+        mw = ErrorHandlingMiddleware()
+        call_next = AsyncMock(side_effect=asyncio.CancelledError())
+
+        with pytest.raises(asyncio.CancelledError):
+            await mw.on_call_tool(_make_context(), call_next)
 
 
 # ---------------------------------------------------------------------------
