@@ -1,5 +1,5 @@
 [![PyPI](https://img.shields.io/pypi/v/datawrapper-mcp)](https://pypi.org/project/datawrapper-mcp/)
-[![MCP Registry](https://img.shields.io/badge/MCP-Registry-blue)](https://registry.modelcontextprotocol.io/servers/io.github.palewire/datawrapper-mcp)
+[![MCP Registry](https://img.shields.io/badge/MCP-Registry-blue)](https://registry.modelcontextprotocol.io/?q=datawrapper)
 [![Docker Hub](https://img.shields.io/docker/v/palewire/datawrapper-mcp?label=Docker%20Hub)](https://hub.docker.com/r/palewire/datawrapper-mcp)
 
 A Model Context Protocol (MCP) server and app for creating Datawrapper charts using AI assistants. Built on the [datawrapper Python library](https://github.com/chekos/datawrapper).
@@ -45,14 +45,14 @@ Here's a more complete example showing how to create, publish, update, and displ
 
 | Tool               | Description                                        |
 | ------------------ | -------------------------------------------------- |
-| `list_chart_types` | List available chart types with descriptions        |
-| `get_chart_schema` | Get the full configuration schema for a chart type  |
-| `create_chart`     | Create a new chart with data and configuration      |
-| `update_chart`     | Update an existing chart's data or styling          |
-| `publish_chart`    | Publish a chart to make it publicly accessible      |
-| `get_chart`        | Retrieve a chart's configuration and metadata       |
-| `delete_chart`     | Permanently delete a chart                          |
-| `export_chart_png` | Export a chart as a PNG image                        |
+| `list_chart_types` | List available chart types with descriptions       |
+| `get_chart_schema` | Get the full configuration schema for a chart type |
+| `create_chart`     | Create a new chart with data and configuration     |
+| `update_chart`     | Update an existing chart's data or styling         |
+| `publish_chart`    | Publish a chart to make it publicly accessible     |
+| `get_chart`        | Retrieve a chart's configuration and metadata      |
+| `delete_chart`     | Permanently delete a chart                         |
+| `export_chart_png` | Export a chart as a PNG image                      |
 
 ## Chart Types
 
