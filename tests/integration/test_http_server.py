@@ -83,6 +83,23 @@ def test_server_responds_to_requests(http_server):
         time.sleep(0.1)
 
 
+def test_well_known_mcp_json(http_server):
+    """Test .well-known/mcp.json discovery endpoint."""
+    response = requests.get(f"{http_server}/.well-known/mcp.json")
+
+    assert response.status_code == 200
+    data = response.json()
+    assert "mcp" in data
+    mcp = data["mcp"]
+    assert mcp["name"] == "datawrapper-mcp"
+    assert mcp["endpoint"] == "/mcp"
+    assert isinstance(mcp["versions"], list)
+    assert len(mcp["versions"]) > 0
+    assert mcp["capabilities"]["tools"] is True
+    assert mcp["capabilities"]["resources"] is True
+    assert mcp["capabilities"]["apps"] is True
+
+
 def test_server_handles_invalid_routes(http_server):
     """Test that server handles invalid routes gracefully."""
     response = requests.get(f"{http_server}/invalid-route")

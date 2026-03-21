@@ -14,6 +14,26 @@ async def health_check(request: Request):
     return JSONResponse({"status": "healthy", "service": "datawrapper-mcp"})
 
 
+@mcp.custom_route("/.well-known/mcp.json", methods=["GET"])
+async def well_known_mcp(request: Request):
+    """MCP server discovery endpoint (SEP-1960)."""
+    return JSONResponse(
+        {
+            "mcp": {
+                "versions": ["2025-11-25"],
+                "endpoint": "/mcp",
+                "name": "datawrapper-mcp",
+                "description": "Create Datawrapper charts via MCP",
+                "capabilities": {
+                    "tools": True,
+                    "resources": True,
+                    "apps": True,
+                },
+            }
+        }
+    )
+
+
 if __name__ == "__main__":
     # Get configuration from environment variables
     host = os.getenv("MCP_SERVER_HOST", "0.0.0.0")

@@ -150,6 +150,23 @@ def test_docker_sse_endpoint(docker_container):
         pass
 
 
+def test_docker_well_known_mcp_json(docker_container):
+    """Test .well-known/mcp.json discovery endpoint in Docker container."""
+    response = requests.get("http://localhost:8503/.well-known/mcp.json", timeout=10)
+
+    assert response.status_code == 200
+    data = response.json()
+    assert "mcp" in data
+    mcp = data["mcp"]
+    assert mcp["name"] == "datawrapper-mcp"
+    assert mcp["endpoint"] == "/mcp"
+    assert isinstance(mcp["versions"], list)
+    assert len(mcp["versions"]) > 0
+    assert mcp["capabilities"]["tools"] is True
+    assert mcp["capabilities"]["resources"] is True
+    assert mcp["capabilities"]["apps"] is True
+
+
 def test_docker_multiple_requests(docker_container):
     """Test that Docker container handles multiple requests."""
     for i in range(10):

@@ -3,7 +3,7 @@
   "name": "io.github.palewire/datawrapper-mcp",
   "title": "Datawrapper",
   "description": "A Model Context Protocol (MCP) server for creating Datawrapper charts using AI assistants",
-  "version": "0.0.19",
+  "version": "0.1.0",
   "repository": {
     "url": "https://github.com/palewire/datawrapper-mcp",
     "source": "github"
@@ -13,10 +13,27 @@
       "registryType": "pypi",
       "registryBaseUrl": "https://pypi.org",
       "identifier": "datawrapper-mcp",
-      "version": "0.0.16",
+      "version": "0.1.0",
       "runtimeHint": "uvx",
       "transport": {
         "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "DATAWRAPPER_ACCESS_TOKEN",
+          "description": "Datawrapper API Access Token",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    },
+    {
+      "registryType": "docker",
+      "registryBaseUrl": "https://hub.docker.com",
+      "identifier": "palewire/datawrapper-mcp",
+      "version": "latest",
+      "transport": {
+        "type": "streamable-http"
       },
       "environmentVariables": [
         {
