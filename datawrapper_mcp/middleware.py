@@ -95,7 +95,8 @@ class TimingMiddleware(Middleware):
     ) -> ToolResult:
         tool_name = context.message.name if context.message else "unknown"
         start = time.monotonic()
-        result = await call_next(context)
-        elapsed = time.monotonic() - start
-        logger.info("Tool '%s' completed in %.3fs", tool_name, elapsed)
-        return result
+        try:
+            return await call_next(context)
+        finally:
+            elapsed = time.monotonic() - start
+            logger.info("Tool '%s' completed in %.3fs", tool_name, elapsed)
