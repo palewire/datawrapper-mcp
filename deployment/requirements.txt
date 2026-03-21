@@ -1,11 +1,14 @@
 # Core MCP server dependencies
-fastmcp>=3.0.0
+fastmcp[apps]==3.1.1
 
 # Datawrapper API integration
-datawrapper>=2.0.7
+datawrapper>=2.0.14
 
 # Data manipulation
 pandas>=2.0.0
+
+# UI components
+prefab-ui==0.8.0
 
 # HTTP server dependencies (included with mcp[cli] but explicit for clarity)
 starlette>=0.27.0
