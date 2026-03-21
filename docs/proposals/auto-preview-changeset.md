@@ -12,7 +12,7 @@ Key design decisions:
 
 - **No publishing required.** The Datawrapper API supports PNG export on unpublished charts, so this feature doesn't change the chart's visibility.
 - **Best-effort, non-fatal preview.** PNG export is attempted synchronously and wrapped in a try/except. If it fails for any reason, the text response (chart ID, URLs) is still returned — the preview is a bonus, not a gate.
-- **No new tools or parameters.** The change is internal to the existing handlers. The MCP tool interface is unchanged from the caller's perspective.
+- **No new tools or parameters.** The change is internal to the existing handlers. From the caller's perspective, the same tools and parameters are used, but the response shape changes from `list[TextContent]` to `Sequence[TextContent | ImageContent]` (text plus an optional image block).
 
 ## Files changed
 
