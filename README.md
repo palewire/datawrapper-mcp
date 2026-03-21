@@ -4,7 +4,11 @@ A Model Context Protocol (MCP) server that enables AI assistants to create Dataw
 
 ## Example Usage
 
-Here's a complete example showing how to create, publish, update, and display a chart by chatting with the assistant:
+You can provide a data file and simply ask for the chart you want. The draft will soon appear in the panel.
+
+![Books chat chart](.github/books.png)
+
+Here's a more complete example showing how to create, publish, update, and display a chart by chatting with the assistant:
 
 ```
 "Create a datawrapper line chart showing temperature trends with this data:
@@ -211,28 +215,28 @@ spec:
         app: datawrapper-mcp
     spec:
       containers:
-      - name: datawrapper-mcp
-        image: datawrapper-mcp:latest
-        ports:
-        - containerPort: 8501
-        env:
-        - name: DATAWRAPPER_ACCESS_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: datawrapper-secrets
-              key: access-token
-        livenessProbe:
-          httpGet:
-            path: /healthz
-            port: 8501
-          initialDelaySeconds: 5
-          periodSeconds: 30
-        readinessProbe:
-          httpGet:
-            path: /healthz
-            port: 8501
-          initialDelaySeconds: 5
-          periodSeconds: 10
+        - name: datawrapper-mcp
+          image: datawrapper-mcp:latest
+          ports:
+            - containerPort: 8501
+          env:
+            - name: DATAWRAPPER_ACCESS_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: datawrapper-secrets
+                  key: access-token
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 8501
+            initialDelaySeconds: 5
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 8501
+            initialDelaySeconds: 5
+            periodSeconds: 10
 ---
 apiVersion: v1
 kind: Service
@@ -242,7 +246,7 @@ spec:
   selector:
     app: datawrapper-mcp
   ports:
-  - protocol: TCP
-    port: 8501
-    targetPort: 8501
+    - protocol: TCP
+      port: 8501
+      targetPort: 8501
 ```
