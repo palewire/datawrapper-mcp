@@ -161,6 +161,18 @@ If you're using the [Codex Desktop Application](https://openai.com/codex/), you 
 6. Under Environment variables, add `DATAWRAPPER_ACCESS_TOKEN` as the key and your token as the value
 7. Click Save
 
+### Client Configuration Reference
+
+| Client          | Config file                  | Transport                |
+| --------------- | ---------------------------- | ------------------------ |
+| Claude Desktop  | `claude_desktop_config.json` | stdio or streamable-http |
+| Claude.ai       | Managed connector            | streamable-http          |
+| Claude Code     | `.claude/settings.json`      | stdio                    |
+| VS Code Copilot | `.vscode/mcp.json`           | stdio                    |
+| Cursor          | `.cursor/mcp.json`           | stdio or streamable-http |
+| ChatGPT         | Dev Mode settings            | streamable-http only     |
+| OpenAI Codex    | `~/.codex/config.toml`       | stdio                    |
+
 ### Kubernetes Deployment
 
 For enterprise deployments, this server can be deployed to Kubernetes using HTTP transport:
