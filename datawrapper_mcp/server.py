@@ -5,7 +5,7 @@ from typing import Any, Sequence, cast
 
 from fastmcp import FastMCP
 from fastmcp.tools import ToolResult
-from mcp.types import ImageContent, TextContent
+from mcp.types import ImageContent, TextContent, ToolAnnotations
 from prefab_ui.app import PrefabApp
 from prefab_ui.components import Column, Image, Text
 
@@ -48,7 +48,14 @@ async def chart_types_resource() -> str:
     return json.dumps(chart_info, indent=2)
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations=ToolAnnotations(
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    )
+)
 async def list_chart_types() -> Sequence[TextContent | ImageContent]:
     """⚠️ DATAWRAPPER MCP TOOL ⚠️
     This is part of the Datawrapper MCP server integration.
@@ -84,7 +91,14 @@ async def list_chart_types() -> Sequence[TextContent | ImageContent]:
     return [TextContent(type="text", text=result)]
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations=ToolAnnotations(
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=False,
+    )
+)
 async def get_chart_schema(chart_type: str) -> str:
     """⚠️ DATAWRAPPER MCP TOOL ⚠️
     This is part of the Datawrapper MCP server integration.
@@ -118,7 +132,15 @@ async def get_chart_schema(chart_type: str) -> str:
         return f"Error retrieving schema for chart_type '{chart_type}': {str(e)}"
 
 
-@mcp.tool(app=True)
+@mcp.tool(
+    app=True,
+    annotations=ToolAnnotations(
+        readOnlyHint=False,
+        destructiveHint=False,
+        idempotentHint=False,
+        openWorldHint=True,
+    ),
+)
 async def create_chart(
     data: str | list | dict,
     chart_type: str,
@@ -270,7 +292,15 @@ async def create_chart(
     )
 
 
-@mcp.tool(app=True)
+@mcp.tool(
+    app=True,
+    annotations=ToolAnnotations(
+        readOnlyHint=False,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=True,
+    ),
+)
 async def publish_chart(chart_id: str) -> ToolResult:
     """⚠️ DATAWRAPPER MCP TOOL ⚠️
     This is part of the Datawrapper MCP server integration.
@@ -343,7 +373,14 @@ async def publish_chart(chart_id: str) -> ToolResult:
     )
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations=ToolAnnotations(
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=True,
+    )
+)
 async def get_chart(chart_id: str) -> str:
     """⚠️ DATAWRAPPER MCP TOOL ⚠️
     This is part of the Datawrapper MCP server integration.
@@ -382,7 +419,15 @@ async def get_chart(chart_id: str) -> str:
         return f"Error retrieving chart with ID '{chart_id}': {str(e)}"
 
 
-@mcp.tool(app=True)
+@mcp.tool(
+    app=True,
+    annotations=ToolAnnotations(
+        readOnlyHint=False,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=True,
+    ),
+)
 async def update_chart(
     chart_id: str,
     data: str | list | dict | None = None,
@@ -496,7 +541,14 @@ async def update_chart(
     )
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations=ToolAnnotations(
+        readOnlyHint=False,
+        destructiveHint=True,
+        idempotentHint=True,
+        openWorldHint=True,
+    )
+)
 async def delete_chart(chart_id: str) -> str:
     """⚠️ DATAWRAPPER MCP TOOL ⚠️
     This is part of the Datawrapper MCP server integration.
@@ -520,7 +572,14 @@ async def delete_chart(chart_id: str) -> str:
         return f"Error deleting chart with ID '{chart_id}': {str(e)}"
 
 
-@mcp.tool()
+@mcp.tool(
+    annotations=ToolAnnotations(
+        readOnlyHint=True,
+        destructiveHint=False,
+        idempotentHint=True,
+        openWorldHint=True,
+    )
+)
 async def export_chart_png(
     chart_id: str,
     width: int | None = None,
