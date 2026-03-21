@@ -243,12 +243,12 @@ async def create_chart(
     title = chart_data.get("title", "")
 
     # Build PrefabUI component tree
-    with Column(gap=4, css_class="p-4") as view:
+    with Column(gap=4, css_class="p-4") as view:  # type: ignore[call-arg]
         if image_item and len(image_item.data) <= MAX_PREVIEW_BYTES:
             Image(
                 src=f"data:{image_item.mimeType};base64,{image_item.data}",
                 alt=title,
-                css_class="w-full rounded",
+                css_class="w-full rounded",  # type: ignore[call-arg]
             )
         else:
             Text("Chart created (preview too large or unavailable)")
