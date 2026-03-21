@@ -119,7 +119,9 @@ jobs:
 
       - id: inspector
         name: Run MCP Inspector
-        run: npx --yes @modelcontextprotocol/inspector --cli list tools -- uv run datawrapper-mcp
+        run: |
+          echo '{"mcpServers":{"datawrapper-mcp":{"command":"uv","args":["run","datawrapper-mcp"]}}}' > /tmp/mcp-inspector.json
+          npx --yes @modelcontextprotocol/inspector --cli --config /tmp/mcp-inspector.json --server datawrapper-mcp --method tools/list
 
   build:
     name: Build release candidate
