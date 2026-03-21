@@ -23,7 +23,7 @@ class TestTryExportPreview:
         assert result.mimeType == "image/png"
         expected_base64 = base64.b64encode(b"PNG_IMAGE_DATA").decode("utf-8")
         assert result.data == expected_base64
-        mock_chart.export_png.assert_called_once_with()
+        mock_chart.export_png.assert_called_once_with(zoom=1)
 
     def test_returns_none_on_failure(self):
         """Test that a failed export returns None and logs a warning."""
