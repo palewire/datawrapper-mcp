@@ -270,15 +270,14 @@ async def create_chart(
     )
 
 
-@mcp.tool()
-async def publish_chart(chart_id: str) -> str:
+@mcp.tool(app=True)
+async def publish_chart(chart_id: str) -> ToolResult:
     """⚠️ DATAWRAPPER MCP TOOL ⚠️
     This is part of the Datawrapper MCP server integration.
 
     ---
 
-    Publish a Datawrapper chart to make it publicly accessible.
-    Returns the public URL of the published chart.
+    Publish a Datawrapper chart to make it publicly accessible and render a preview in chat.
     IMPORTANT: Only use this tool when the user explicitly requests to publish the chart.
     Do not automatically publish charts after creation unless specifically asked.
 
@@ -286,14 +285,62 @@ async def publish_chart(chart_id: str) -> str:
         chart_id: ID of the chart to publish
 
     Returns:
-        Public URL of the published chart
+        Public URL plus an inline preview when available
     """
     try:
         arguments = cast(PublishChartArgs, {"chart_id": chart_id})
-        result = await publish_chart_handler(arguments)
-        return result[0].text
+        chart_data, images = await publish_chart_handler(arguments)
     except Exception as e:
-        return f"Error publishing chart with ID '{chart_id}': {str(e)}"
+        return ToolResult(
+            content=[
+                TextContent(
+                    type="text",
+                    text=f"Error publishing chart with ID '{chart_id}': {e}",
+                )
+            ]
+        )
+
+    public_url = chart_data.get("public_url", "")
+    chart_id = chart_data.get("chart_id", chart_id)
+    title = chart_data.get("title", "")
+    edit_url = chart_data.get("edit_url", "")
+
+    image_item = images[0] if images else None
+
+    # Build non-Apps fallback content (TextContent + optional ImageContent)
+    fallback: list[TextContent | ImageContent] = [
+        TextContent(
+            type="text",
+            text=(
+                f"Chart '{title}' published (ID: {chart_id}). Public URL: {public_url}"
+            ),
+        )
+    ]
+    if image_item:
+        fallback.append(image_item)
+
+    # Build PrefabUI component tree for Apps hosts
+    with Column(gap=4, css_class="p-4") as view:  # type: ignore[call-arg]
+        if image_item and len(image_item.data) <= MAX_PREVIEW_BYTES:
+            Image(
+                src=f"data:{image_item.mimeType};base64,{image_item.data}",
+                alt=title or f"Chart {chart_id}",
+                css_class="w-full rounded",  # type: ignore[call-arg]
+            )
+        else:
+            Text("Chart published (preview too large or unavailable)")
+
+    return ToolResult(
+        content=fallback,
+        structured_content=PrefabApp(
+            view=view,
+            state={
+                "chart_id": chart_id,
+                "public_url": public_url,
+                "edit_url": edit_url,
+            },
+        ),
+    )
 
 
 @mcp.tool()
