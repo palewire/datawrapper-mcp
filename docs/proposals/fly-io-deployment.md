@@ -36,9 +36,9 @@ This creates a `fly.toml` file. Edit it to expose the right port:
 [http_service]
   internal_port = 8501
   force_https = true
-  auto_stop_machines = "stop"
+  auto_stop_machines = "off"        # keep running to preserve MCP sessions
   auto_start_machines = true
-  min_machines_running = 1        # keep one warm so demos aren't slow
+  min_machines_running = 1
 
 [checks.health]
   port = 8501
