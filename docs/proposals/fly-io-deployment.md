@@ -46,6 +46,7 @@ This creates a `fly.toml` file. Edit it to expose the right port:
   path = "/healthz"
   interval = "10s"
   timeout = "2s"
+  grace_period = "15s"
 
 [[vm]]
   size = "shared-cpu-1x"

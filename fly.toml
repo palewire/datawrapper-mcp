@@ -21,6 +21,7 @@ type = "http"
 path = "/healthz"
 interval = "10s"
 timeout = "2s"
+grace_period = "15s"
 
 [[vm]]
 size = "shared-cpu-1x"
