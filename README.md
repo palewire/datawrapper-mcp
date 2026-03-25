@@ -92,6 +92,23 @@ Use `list_chart_types` to see descriptions, then `get_chart_schema` to explore c
 
 For other clients (Claude Desktop, Cursor, VS Code Copilot, ChatGPT, OpenAI Codex) and Kubernetes deployment, see the [installation guide](INSTALLATION.md).
 
+### Using Your Own Token (Hosted Deployments)
+
+When connecting to a hosted instance of the server over HTTP, you can authenticate
+with your own Datawrapper API token by sending it in the `Authorization` header:
+
+```
+Authorization: Bearer <your-datawrapper-api-token>
+```
+
+This ensures charts are created under your account instead of the server operator's.
+The token is read from the header automatically — no need to include it in every
+tool call.
+
+You can also pass `access_token` directly as a tool argument, which takes precedence
+over the header. When neither is provided, the server falls back to its
+`DATAWRAPPER_ACCESS_TOKEN` environment variable.
+
 ### Supported Clients
 
 | Client          | Config file                  | Transport                |
