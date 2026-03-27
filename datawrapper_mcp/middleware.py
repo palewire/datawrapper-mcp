@@ -21,10 +21,23 @@ class BearerTokenMiddleware(Middleware):
     """Inject Authorization bearer token as access_token into tool arguments.
 
     Reads the HTTP Authorization header and, if present, injects the bearer
-    token as ``access_token`` into the tool arguments dict. An explicit
-    ``access_token`` tool argument always takes precedence (via setdefault).
+    token as ``access_token`` into the tool arguments dict — but only for
+    tools listed in *inject_for*. An explicit ``access_token`` tool argument
+    always takes precedence (via setdefault).
     On stdio transports, get_http_headers() returns {} so this is a no-op.
+
+    Parameters
+    ----------
+    inject_for:
+        Tool names whose arguments should receive the bearer token.
+        When *None* (the default), the token is injected into **every**
+        tool call — this preserves backward-compatible behaviour but may
+        cause validation errors for tools that do not declare an
+        ``access_token`` parameter.
     """
+
+    def __init__(self, *, inject_for: frozenset[str] | None = None) -> None:
+        self._inject_for = inject_for
 
     async def on_call_tool(
         self,
@@ -36,7 +49,8 @@ class BearerTokenMiddleware(Middleware):
         if auth.startswith("Bearer ") and context.message:
             token = auth.removeprefix("Bearer ").strip()
             if token and context.message.arguments is not None:
-                context.message.arguments.setdefault("access_token", token)
+                if self._inject_for is None or context.message.name in self._inject_for:
+                    context.message.arguments.setdefault("access_token", token)
         return await call_next(context)
 
 

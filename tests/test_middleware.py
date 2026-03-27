@@ -282,3 +282,44 @@ class TestBearerTokenMiddleware:
             await mw.on_call_tool(ctx, call_next)
 
         assert ctx.message.arguments is None
+
+    @pytest.mark.asyncio
+    async def test_no_injection_for_tools_outside_inject_for(self):
+        """Token is NOT injected into tools not listed in inject_for.
+
+        list_chart_types and get_chart_schema don't call the Datawrapper API
+        and have no access_token parameter.  Injecting the header token into
+        them caused a pydantic ValidationError ("Unexpected keyword argument").
+        """
+        mw = BearerTokenMiddleware(inject_for=frozenset({"create_chart"}))
+        call_next = AsyncMock(return_value=_ok_result())
+        ctx = _make_context_with_args(
+            tool_name="list_chart_types",
+            arguments={},
+        )
+
+        with patch(
+            "datawrapper_mcp.middleware.get_http_headers",
+            return_value={"authorization": "Bearer dw_my_token"},
+        ):
+            await mw.on_call_tool(ctx, call_next)
+
+        assert "access_token" not in ctx.message.arguments
+
+    @pytest.mark.asyncio
+    async def test_injects_for_tools_in_inject_for(self):
+        """Token IS injected for tools listed in inject_for."""
+        mw = BearerTokenMiddleware(inject_for=frozenset({"create_chart"}))
+        call_next = AsyncMock(return_value=_ok_result())
+        ctx = _make_context_with_args(
+            tool_name="create_chart",
+            arguments={"chart_type": "bar"},
+        )
+
+        with patch(
+            "datawrapper_mcp.middleware.get_http_headers",
+            return_value={"authorization": "Bearer dw_my_token"},
+        ):
+            await mw.on_call_tool(ctx, call_next)
+
+        assert ctx.message.arguments["access_token"] == "dw_my_token"
