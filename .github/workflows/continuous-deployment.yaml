@@ -205,3 +205,18 @@ jobs:
 
       - name: Publish to MCP Registry
         run: ./mcp-publisher publish
+
+  fly-deploy:
+    name: Deploy to Fly.io
+    runs-on: ubuntu-latest
+    needs: [test-python]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    concurrency: fly-deploy
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+      - run: flyctl deploy --remote-only
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
