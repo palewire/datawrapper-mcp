@@ -44,7 +44,18 @@ mcp = FastMCP(
     middleware=[
         TimingMiddleware(),
         RateLimitingMiddleware(max_calls=200, period=60),
-        BearerTokenMiddleware(),
+        BearerTokenMiddleware(
+            inject_for=frozenset(
+                {
+                    "create_chart",
+                    "publish_chart",
+                    "get_chart",
+                    "update_chart",
+                    "delete_chart",
+                    "export_chart_png",
+                }
+            ),
+        ),
         ErrorHandlingMiddleware(),
     ],
 )
