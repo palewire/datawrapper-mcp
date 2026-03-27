@@ -49,7 +49,10 @@ class BearerTokenMiddleware(Middleware):
         if auth.startswith("Bearer ") and context.message:
             token = auth.removeprefix("Bearer ").strip()
             if token and context.message.arguments is not None:
-                if self._inject_for is None or context.message.name in self._inject_for:
+                if (
+                    self._inject_for is None
+                    or context.message.name in self._inject_for
+                ):
                     context.message.arguments.setdefault("access_token", token)
         return await call_next(context)
 
