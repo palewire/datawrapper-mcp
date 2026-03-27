@@ -71,7 +71,7 @@ async def chart_types_resource() -> str:
         openWorldHint=False,
     )
 )
-async def list_chart_types() -> Sequence[TextContent | ImageContent]:
+async def list_chart_types(access_token: str | None = None) -> Sequence[TextContent | ImageContent]:  # noqa: ARG001
     """⚠️ DATAWRAPPER MCP TOOL ⚠️
     This is part of the Datawrapper MCP server integration.
 
@@ -114,7 +114,7 @@ async def list_chart_types() -> Sequence[TextContent | ImageContent]:
         openWorldHint=False,
     )
 )
-async def get_chart_schema(chart_type: str) -> str:
+async def get_chart_schema(chart_type: str, access_token: str | None = None) -> str:  # noqa: ARG001
     """⚠️ DATAWRAPPER MCP TOOL ⚠️
     This is part of the Datawrapper MCP server integration.
 

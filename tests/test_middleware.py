@@ -282,3 +282,23 @@ class TestBearerTokenMiddleware:
             await mw.on_call_tool(ctx, call_next)
 
         assert ctx.message.arguments is None
+
+    @pytest.mark.asyncio
+    async def test_injects_token_into_empty_args(self):
+        """Token is injected even when the tool args dict starts empty.
+
+        Covers tools like list_chart_types and get_chart_schema that accept
+        access_token as an optional param so that BearerTokenMiddleware can
+        forward the authenticated user's token without a validation error.
+        """
+        mw = BearerTokenMiddleware()
+        call_next = AsyncMock(return_value=_ok_result())
+        ctx = _make_context_with_args(tool_name="list_chart_types", arguments={})
+
+        with patch(
+            "datawrapper_mcp.middleware.get_http_headers",
+            return_value={"authorization": "Bearer dw_my_token"},
+        ):
+            await mw.on_call_tool(ctx, call_next)
+
+        assert ctx.message.arguments["access_token"] == "dw_my_token"
