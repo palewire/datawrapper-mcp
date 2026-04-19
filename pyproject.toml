@@ -8,7 +8,7 @@ dynamic = ["version"]
 requires-python = ">=3.10"
 dependencies = [
     "datawrapper>=2.0.14",
-    "fastmcp[apps]==3.1.1",
+    "fastmcp[apps]==3.2.4",
     "prefab-ui==0.18.1",
     "pandas>=2.0.0",
     'exceptiongroup; python_version<"3.11"',
