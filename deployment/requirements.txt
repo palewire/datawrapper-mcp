@@ -12,4 +12,4 @@ prefab-ui==0.18.1
 
 # HTTP server dependencies (included with mcp[cli] but explicit for clarity)
 starlette>=0.27.0
-uvicorn>=0.23.0
+uvicorn>=0.46.0
