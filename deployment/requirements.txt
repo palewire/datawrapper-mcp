@@ -11,5 +11,5 @@ pandas>=2.0.0
 prefab-ui==0.18.1
 
 # HTTP server dependencies (included with mcp[cli] but explicit for clarity)
-starlette>=0.27.0
+starlette>=1.0.0
 uvicorn>=0.23.0
