@@ -1,11 +1,10 @@
 """Tests for update_chart validation."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 
 
-@pytest.mark.asyncio
 async def test_update_with_high_level_fields(mock_api_token, mock_get_chart):
     """Test that high-level Pydantic fields are accepted."""
     from datawrapper_mcp.handlers.update import update_chart
@@ -53,7 +52,6 @@ async def test_update_with_high_level_fields(mock_api_token, mock_get_chart):
         assert "edit_url" in metadata
 
 
-@pytest.mark.asyncio
 async def test_update_merges_with_existing_config(
     mock_api_token, mock_get_chart, mock_bar_chart_class
 ):
@@ -103,7 +101,6 @@ async def test_update_merges_with_existing_config(
         assert "chart_id" in metadata
 
 
-@pytest.mark.asyncio
 async def test_update_validates_through_pydantic(mock_api_token, mock_get_chart):
     """Test that config is validated through Pydantic's validate_assignment."""
     from datawrapper_mcp.handlers.update import update_chart
@@ -130,7 +127,6 @@ async def test_update_validates_through_pydantic(mock_api_token, mock_get_chart)
     assert "chart_id" in metadata
 
 
-@pytest.mark.asyncio
 async def test_update_without_api_token(no_api_token):
     """Test that update fails gracefully without API token."""
     from datawrapper_mcp.handlers.update import update_chart
@@ -159,7 +155,6 @@ async def test_update_without_api_token(no_api_token):
             assert "401" in str(e) or "Unauthorized" in str(e)
 
 
-@pytest.mark.asyncio
 async def test_update_with_invalid_chart_id(mock_api_token):
     """Test that update handles invalid chart ID gracefully."""
     from datawrapper_mcp.handlers.update import update_chart
@@ -180,7 +175,6 @@ async def test_update_with_invalid_chart_id(mock_api_token):
             assert "Chart not found" in str(e)
 
 
-@pytest.mark.asyncio
 async def test_update_preserves_chart_type(
     mock_api_token, mock_get_chart, mock_bar_chart_class
 ):
@@ -213,7 +207,6 @@ async def test_update_preserves_chart_type(
         mock_chart.update.assert_called_once()
 
 
-@pytest.mark.asyncio
 async def test_update_uses_direct_attribute_assignment(mock_api_token, mock_get_chart):
     """Test that update uses direct attribute assignment with setattr."""
     from datawrapper_mcp.handlers.update import update_chart
@@ -233,3 +226,21 @@ async def test_update_uses_direct_attribute_assignment(mock_api_token, mock_get_
 
     # Verify result indicates success
     assert "chart_id" in metadata
+
+
+async def test_update_invalid_config_raises_helpful_value_error(
+    mock_api_token, mock_get_chart
+):
+    """An error while applying chart_config should surface a ValueError with
+    guidance, not the raw underlying exception."""
+    from datawrapper_mcp.handlers.update import update_chart
+
+    mock_chart = mock_get_chart.return_value
+    type(mock_chart).model_fields = PropertyMock(side_effect=RuntimeError("boom"))
+
+    arguments = {"chart_id": "test123", "chart_config": {"title": "New Title"}}
+
+    with pytest.raises(ValueError, match="Invalid chart configuration") as exc_info:
+        await update_chart(arguments)
+
+    assert "get_chart_schema" in str(exc_info.value)

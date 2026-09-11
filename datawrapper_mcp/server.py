@@ -19,6 +19,7 @@ from .handlers import get_chart_info as get_chart_info_handler
 from .handlers import get_chart_schema as get_chart_schema_handler
 from .handlers import publish_chart as publish_chart_handler
 from .handlers import update_chart as update_chart_handler
+from .handlers.schema import clean_chart_schema
 from .middleware import (
     BearerTokenMiddleware,
     ErrorHandlingMiddleware,
@@ -71,7 +72,7 @@ async def chart_types_resource() -> str:
         chart_class_typed: type[Any] = chart_class
         chart_info[name] = {
             "class_name": chart_class_typed.__name__,
-            "schema": chart_class_typed.model_json_schema(),
+            "schema": clean_chart_schema(chart_class_typed.model_json_schema()),
         }
     return json.dumps(chart_info, indent=2)
 
@@ -662,7 +663,7 @@ async def export_chart_png(
     return await export_chart_png_handler(cast("ExportChartPngArgs", args))
 
 
-def main() -> None:
+def main() -> None:  # pragma: no cover - trivial stdio entry point
     """Run the MCP server with stdio transport."""
     mcp.run(transport="stdio")
 

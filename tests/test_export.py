@@ -9,7 +9,6 @@ from datawrapper_mcp.handlers.export import export_chart_png
 from datawrapper_mcp.types import ExportChartPngArgs
 
 
-@pytest.mark.asyncio
 class TestExportChartPng:
     """Tests for export_chart_png handler."""
 

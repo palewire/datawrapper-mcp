@@ -1,15 +1,25 @@
-"""Integration tests for Docker deployment."""
+"""Integration tests for Docker deployment.
 
-import os
+Docker is preinstalled on GitHub-hosted runners, so these run in CI too. They
+don't need a real Datawrapper API token: the routes under test (health check,
+discovery) never call the Datawrapper API, so a placeholder token is enough to
+let the container start.
+"""
+
 import subprocess
-import time
 
 import pytest
 import requests
 
+from tests.integration.conftest import free_port, wait_until_ready
+
 # Building and starting a Docker image is much slower than the suite's
-# default 60s timeout, so give this module's tests more room to run.
-pytestmark = pytest.mark.timeout(300)
+# default 60s timeout, so give this module's tests more room to run. Also
+# marked "integration" so CI runs it once instead of once per Python version.
+pytestmark = [pytest.mark.timeout(300), pytest.mark.integration]
+
+CONTAINER_PORT = 8501
+STARTUP_TIMEOUT = 30
 
 
 @pytest.fixture(scope="module")
@@ -41,10 +51,7 @@ def docker_image():
 @pytest.fixture(scope="module")
 def docker_container(docker_image):
     """Run Docker container for testing."""
-    # Check for API token
-    api_token = os.getenv("DATAWRAPPER_ACCESS_TOKEN")
-    if not api_token:
-        pytest.skip("DATAWRAPPER_ACCESS_TOKEN not set")
+    host_port = free_port()
 
     # Start container
     print("\nStarting Docker container...")
@@ -54,13 +61,13 @@ def docker_container(docker_image):
             "run",
             "-d",
             "-p",
-            "8503:8501",  # Use different port to avoid conflicts
+            f"{host_port}:{CONTAINER_PORT}",
             "-e",
-            f"DATAWRAPPER_ACCESS_TOKEN={api_token}",
+            "DATAWRAPPER_ACCESS_TOKEN=placeholder-token-not-used",
             "-e",
             "MCP_SERVER_HOST=0.0.0.0",
             "-e",
-            "MCP_SERVER_PORT=8501",
+            f"MCP_SERVER_PORT={CONTAINER_PORT}",
             docker_image,
         ],
         capture_output=True,
@@ -71,26 +78,20 @@ def docker_container(docker_image):
         pytest.fail(f"Docker run failed: {result.stderr}")
 
     container_id = result.stdout.strip()
+    base_url = f"http://localhost:{host_port}"
 
-    # Wait for container to be ready
-    time.sleep(3)
-
-    # Verify container is running
-    result = subprocess.run(
-        ["docker", "ps", "-q", "-f", f"id={container_id}"],
-        capture_output=True,
-        text=True,
-    )
-
-    if not result.stdout.strip():
-        # Container not running, get logs
+    try:
+        wait_until_ready(f"{base_url}/healthz", STARTUP_TIMEOUT)
+    except TimeoutError:
         logs = subprocess.run(
             ["docker", "logs", container_id], capture_output=True, text=True
         )
         subprocess.run(["docker", "rm", "-f", container_id], capture_output=True)
-        pytest.fail(f"Container failed to start. Logs:\n{logs.stdout}\n{logs.stderr}")
+        pytest.fail(
+            f"Container failed to become ready. Logs:\n{logs.stdout}\n{logs.stderr}"
+        )
 
-    yield container_id
+    yield base_url, container_id
 
     # Cleanup: stop and remove container
     subprocess.run(["docker", "stop", container_id], capture_output=True)
@@ -99,10 +100,9 @@ def docker_container(docker_image):
 
 def test_docker_health_check(docker_container):
     """Test health check endpoint in Docker container."""
-    # Give container a moment to fully start
-    time.sleep(1)
+    base_url, _container_id = docker_container
 
-    response = requests.get("http://localhost:8503/healthz", timeout=10)
+    response = requests.get(f"{base_url}/healthz", timeout=10)
 
     assert response.status_code == 200
     data = response.json()
@@ -112,8 +112,10 @@ def test_docker_health_check(docker_container):
 
 def test_docker_container_logs(docker_container):
     """Test that container logs show successful startup."""
+    _base_url, container_id = docker_container
+
     result = subprocess.run(
-        ["docker", "logs", docker_container], capture_output=True, text=True
+        ["docker", "logs", container_id], capture_output=True, text=True
     )
 
     logs = result.stdout + result.stderr
@@ -127,9 +129,10 @@ def test_docker_container_logs(docker_container):
 
 def test_docker_container_running(docker_container):
     """Test that container stays running."""
-    # Check container status
+    _base_url, container_id = docker_container
+
     result = subprocess.run(
-        ["docker", "inspect", "-f", "{{.State.Running}}", docker_container],
+        ["docker", "inspect", "-f", "{{.State.Running}}", container_id],
         capture_output=True,
         text=True,
     )
@@ -139,9 +142,11 @@ def test_docker_container_running(docker_container):
 
 def test_docker_sse_endpoint(docker_container):
     """Test that SSE endpoint is accessible in Docker."""
+    base_url, _container_id = docker_container
+
     try:
         response = requests.get(
-            "http://localhost:8503/sse",
+            f"{base_url}/sse",
             headers={"Accept": "text/event-stream"},
             timeout=2,
             stream=True,
@@ -155,7 +160,9 @@ def test_docker_sse_endpoint(docker_container):
 
 def test_docker_well_known_mcp_json(docker_container):
     """Test .well-known/mcp.json discovery endpoint in Docker container."""
-    response = requests.get("http://localhost:8503/.well-known/mcp.json", timeout=10)
+    base_url, _container_id = docker_container
+
+    response = requests.get(f"{base_url}/.well-known/mcp.json", timeout=10)
 
     assert response.status_code == 200
     data = response.json()
@@ -172,10 +179,11 @@ def test_docker_well_known_mcp_json(docker_container):
 
 def test_docker_multiple_requests(docker_container):
     """Test that Docker container handles multiple requests."""
+    base_url, _container_id = docker_container
+
     for _ in range(10):
-        response = requests.get("http://localhost:8503/healthz", timeout=5)
+        response = requests.get(f"{base_url}/healthz", timeout=5)
         assert response.status_code == 200
-        time.sleep(0.1)
 
 
 if __name__ == "__main__":

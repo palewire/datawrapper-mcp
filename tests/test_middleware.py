@@ -67,7 +67,6 @@ def _ok_result() -> ToolResult:
 class TestErrorHandlingMiddleware:
     """ErrorHandlingMiddleware should catch exceptions and return safe responses."""
 
-    @pytest.mark.asyncio
     async def test_passes_through_successful_result(self):
         mw = ErrorHandlingMiddleware()
         call_next = AsyncMock(return_value=_ok_result())
@@ -77,7 +76,6 @@ class TestErrorHandlingMiddleware:
         assert result.content[0].text == "ok"
         call_next.assert_awaited_once()
 
-    @pytest.mark.asyncio
     async def test_catches_exception_and_raises_tool_error(self):
         from fastmcp.exceptions import ToolError
 
@@ -89,7 +87,6 @@ class TestErrorHandlingMiddleware:
 
         assert "boom" in str(exc_info.value)
 
-    @pytest.mark.asyncio
     async def test_logs_exception(self, caplog):
         from fastmcp.exceptions import ToolError
 
@@ -102,7 +99,6 @@ class TestErrorHandlingMiddleware:
 
         assert "broken_tool" in caplog.text
 
-    @pytest.mark.asyncio
     async def test_reraises_cancelled_error(self):
         mw = ErrorHandlingMiddleware()
         call_next = AsyncMock(side_effect=asyncio.CancelledError())
@@ -119,7 +115,6 @@ class TestErrorHandlingMiddleware:
 class TestRateLimitingMiddleware:
     """RateLimitingMiddleware should reject calls that exceed the threshold."""
 
-    @pytest.mark.asyncio
     async def test_allows_calls_under_limit(self):
         mw = RateLimitingMiddleware(max_calls=3, period=60)
         call_next = AsyncMock(return_value=_ok_result())
@@ -130,7 +125,6 @@ class TestRateLimitingMiddleware:
 
         assert call_next.await_count == 3
 
-    @pytest.mark.asyncio
     async def test_rejects_calls_over_limit(self):
         mw = RateLimitingMiddleware(max_calls=2, period=60)
         call_next = AsyncMock(return_value=_ok_result())
@@ -145,7 +139,6 @@ class TestRateLimitingMiddleware:
         assert "Rate limit exceeded" in result.content[0].text
         assert call_next.await_count == 2  # third call never reached handler
 
-    @pytest.mark.asyncio
     async def test_sliding_window_expires_old_calls(self):
         mw = RateLimitingMiddleware(max_calls=1, period=60)
         call_next = AsyncMock(return_value=_ok_result())
@@ -170,7 +163,6 @@ class TestRateLimitingMiddleware:
 class TestTimingMiddleware:
     """TimingMiddleware should log elapsed time for every tool call."""
 
-    @pytest.mark.asyncio
     async def test_logs_elapsed_time(self, caplog):
         mw = TimingMiddleware()
         call_next = AsyncMock(return_value=_ok_result())
@@ -182,7 +174,6 @@ class TestTimingMiddleware:
         assert "timed_tool" in caplog.text
         assert "completed in" in caplog.text
 
-    @pytest.mark.asyncio
     async def test_logs_even_when_handler_raises(self, caplog):
         mw = TimingMiddleware()
         call_next = AsyncMock(side_effect=RuntimeError("fail"))
@@ -206,7 +197,6 @@ class TestTimingMiddleware:
 class TestBearerTokenMiddleware:
     """BearerTokenMiddleware should inject bearer tokens into tool arguments."""
 
-    @pytest.mark.asyncio
     async def test_injects_token_from_header(self):
         """Bearer token from header is injected as access_token."""
         mw = BearerTokenMiddleware()
@@ -221,7 +211,6 @@ class TestBearerTokenMiddleware:
 
         assert ctx.message.arguments["access_token"] == "dw_my_token"
 
-    @pytest.mark.asyncio
     async def test_explicit_arg_takes_precedence(self):
         """Explicit access_token tool argument is not overwritten by header."""
         mw = BearerTokenMiddleware()
@@ -238,7 +227,6 @@ class TestBearerTokenMiddleware:
 
         assert ctx.message.arguments["access_token"] == "explicit_token"
 
-    @pytest.mark.asyncio
     async def test_noop_when_no_header(self):
         """No injection when no Authorization header (e.g. stdio transport)."""
         mw = BearerTokenMiddleware()
@@ -253,7 +241,6 @@ class TestBearerTokenMiddleware:
 
         assert "access_token" not in ctx.message.arguments
 
-    @pytest.mark.asyncio
     async def test_noop_for_non_bearer_header(self):
         """No injection for non-Bearer auth schemes."""
         mw = BearerTokenMiddleware()
@@ -268,7 +255,6 @@ class TestBearerTokenMiddleware:
 
         assert "access_token" not in ctx.message.arguments
 
-    @pytest.mark.asyncio
     async def test_noop_when_arguments_is_none(self):
         """No crash when message.arguments is None."""
         mw = BearerTokenMiddleware()
@@ -283,7 +269,6 @@ class TestBearerTokenMiddleware:
 
         assert ctx.message.arguments is None
 
-    @pytest.mark.asyncio
     async def test_no_injection_for_tools_outside_inject_for(self):
         """Token is NOT injected into tools not listed in inject_for.
 
@@ -306,7 +291,6 @@ class TestBearerTokenMiddleware:
 
         assert "access_token" not in ctx.message.arguments
 
-    @pytest.mark.asyncio
     async def test_injects_for_tools_in_inject_for(self):
         """Token IS injected for tools listed in inject_for."""
         mw = BearerTokenMiddleware(inject_for=frozenset({"create_chart"}))

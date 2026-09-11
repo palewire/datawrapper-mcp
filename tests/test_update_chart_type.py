@@ -2,10 +2,7 @@
 
 from unittest.mock import MagicMock, patch
 
-import pytest
 
-
-@pytest.mark.asyncio
 async def test_update_validates_via_setattr(mock_api_token):
     """Test that Pydantic validates attributes via validate_assignment.
 
@@ -46,7 +43,6 @@ async def test_update_validates_via_setattr(mock_api_token):
         assert "chart_id" in metadata
 
 
-@pytest.mark.asyncio
 async def test_update_only_sets_provided_fields(mock_api_token):
     """Test that only fields in chart_config are updated via setattr.
 

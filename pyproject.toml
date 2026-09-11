@@ -50,13 +50,12 @@ dev = [
     "zizmor",
 ]
 test = [
+    "httpx",
     "pytest>=7.0.0",
     "pytest-asyncio>=0.21.0",
-    "pytest-runner",
     "pytest-cov",
     "pytest-env",
     "pytest-timeout",
-    "pytest-vcr",
     "pytest-xdist",
 ]
 
@@ -167,18 +166,23 @@ addopts = [
     "--durations=10",
     "--durations-min=1.0",
 ]
-markers = [
-    "asyncio: mark test as async",
-]
 asyncio_mode = "auto"
 timeout = 60
 xfail_strict = true
+markers = [
+    "integration: exercises a real subprocess or Docker container (slow; run once, not per Python version)",
+]
 
 [tool.coverage.run]
 source = ["datawrapper_mcp"]
 branch = true
 relative_files = true
-omit = ["*/__pycache__/*"]
+omit = ["*/__pycache__/*", "datawrapper_mcp/__main__.py"]
+
+[tool.coverage.report]
+exclude_also = [
+    "if __name__ == .__main__.:",
+]
 
 [tool.ty.environment]
 python-version = "3.10"
