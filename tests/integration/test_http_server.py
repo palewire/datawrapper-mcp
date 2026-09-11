@@ -1,26 +1,34 @@
-"""Integration tests for HTTP server deployment."""
+"""Integration tests for HTTP server deployment.
+
+These start the real `deployment.app` module as a subprocess and talk to it
+over a real TCP socket, unlike tests/test_deployment.py which drives the ASGI
+app in-process. They don't need a real Datawrapper API token: the routes
+under test (health check, discovery) never call the Datawrapper API, so a
+placeholder token is enough to let the server start.
+"""
 
 import os
-import signal
-import time
 from subprocess import PIPE, Popen
 
 import pytest
 import requests
 
+from tests.integration.conftest import free_port, wait_until_ready
+
+# Marked "integration" so CI runs it once instead of once per Python version.
+pytestmark = pytest.mark.integration
+
+STARTUP_TIMEOUT = 15
+
 
 @pytest.fixture(scope="module")
 def http_server():
     """Start HTTP server for testing."""
-    # Check for API token
-    api_token = os.getenv("DATAWRAPPER_ACCESS_TOKEN")
-    if not api_token:
-        pytest.skip("DATAWRAPPER_ACCESS_TOKEN not set")
-
-    # Start server
+    port = free_port()
     env = os.environ.copy()
     env["MCP_SERVER_HOST"] = "127.0.0.1"
-    env["MCP_SERVER_PORT"] = "8502"  # Use different port to avoid conflicts
+    env["MCP_SERVER_PORT"] = str(port)
+    env.setdefault("DATAWRAPPER_ACCESS_TOKEN", "placeholder-token-not-used")
 
     process = Popen(
         ["python", "-m", "deployment.app"],
@@ -29,22 +37,26 @@ def http_server():
         stderr=PIPE,
     )
 
-    # Wait for server to start
-    time.sleep(2)
-
-    # Verify server is running
+    base_url = f"http://127.0.0.1:{port}"
     try:
-        response = requests.get("http://127.0.0.1:8502/healthz", timeout=5)
-        assert response.status_code == 200
-    except Exception as e:
+        wait_until_ready(f"{base_url}/healthz", STARTUP_TIMEOUT)
+    except TimeoutError:
         process.kill()
-        pytest.fail(f"Server failed to start: {e}")
+        stdout, stderr = process.communicate(timeout=5)
+        pytest.fail(
+            f"Server failed to start on port {port}.\n"
+            f"stdout: {stdout.decode(errors='replace')}\n"
+            f"stderr: {stderr.decode(errors='replace')}"
+        )
 
-    yield "http://127.0.0.1:8502"
+    yield base_url
 
-    # Cleanup
-    process.send_signal(signal.SIGTERM)
-    process.wait(timeout=5)
+    process.terminate()
+    try:
+        process.wait(timeout=5)
+    except Exception:
+        process.kill()
+        process.wait(timeout=5)
 
 
 def test_health_check(http_server):
@@ -81,7 +93,6 @@ def test_server_responds_to_requests(http_server):
     for _ in range(5):
         response = requests.get(f"{http_server}/healthz", timeout=5)
         assert response.status_code == 200
-        time.sleep(0.1)
 
 
 def test_well_known_mcp_json(http_server):

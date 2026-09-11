@@ -7,7 +7,6 @@ import pytest
 from datawrapper_mcp.handlers.schema import get_chart_schema
 
 
-@pytest.mark.asyncio
 async def test_get_chart_schema_returns_text_content():
     """Test that get_chart_schema returns a list with one TextContent."""
     result = await get_chart_schema({"chart_type": "bar"})
@@ -18,7 +17,6 @@ async def test_get_chart_schema_returns_text_content():
     assert isinstance(result[0].text, str)
 
 
-@pytest.mark.asyncio
 async def test_get_chart_schema_returns_valid_json():
     """Test that get_chart_schema returns valid JSON."""
     result = await get_chart_schema({"chart_type": "bar"})
@@ -28,7 +26,6 @@ async def test_get_chart_schema_returns_valid_json():
     assert isinstance(data, dict)
 
 
-@pytest.mark.asyncio
 async def test_get_chart_schema_response_structure():
     """Test that response has expected structure."""
     result = await get_chart_schema({"chart_type": "column"})
@@ -48,7 +45,6 @@ async def test_get_chart_schema_response_structure():
     assert "create_chart" in data["usage"].lower()
 
 
-@pytest.mark.asyncio
 async def test_get_chart_schema_json_serializable():
     """Test that the entire result is JSON serializable (no DataFrame errors)."""
     result = await get_chart_schema({"chart_type": "line"})
@@ -61,7 +57,6 @@ async def test_get_chart_schema_json_serializable():
     json.dumps(data)  # Should not raise
 
 
-@pytest.mark.asyncio
 async def test_get_chart_schema_removes_examples():
     """Test that DataFrame examples are removed from schema."""
     result = await get_chart_schema({"chart_type": "bar"})
@@ -71,7 +66,6 @@ async def test_get_chart_schema_removes_examples():
     assert "examples" not in data["schema"]
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "chart_type,expected_class",
     [
@@ -96,21 +90,18 @@ async def test_get_chart_schema_all_chart_types(chart_type, expected_class):
     assert isinstance(data["schema"], dict)
 
 
-@pytest.mark.asyncio
 async def test_get_chart_schema_invalid_chart_type():
     """Test that invalid chart type raises KeyError."""
     with pytest.raises(KeyError):
         await get_chart_schema({"chart_type": "invalid_type"})
 
 
-@pytest.mark.asyncio
 async def test_get_chart_schema_missing_chart_type():
     """Test that missing chart_type argument raises KeyError."""
     with pytest.raises(KeyError):
         await get_chart_schema({})
 
 
-@pytest.mark.asyncio
 async def test_get_chart_schema_has_properties():
     """Test that returned schema contains properties."""
     result = await get_chart_schema({"chart_type": "bar"})
@@ -122,7 +113,6 @@ async def test_get_chart_schema_has_properties():
     assert len(schema["properties"]) > 0
 
 
-@pytest.mark.asyncio
 async def test_get_chart_schema_property_count():
     """Test that schema has a reasonable number of properties."""
     result = await get_chart_schema({"chart_type": "column"})
@@ -133,7 +123,6 @@ async def test_get_chart_schema_property_count():
     assert len(properties) > 10
 
 
-@pytest.mark.asyncio
 async def test_get_chart_schema_has_type():
     """Test that schema has type field."""
     result = await get_chart_schema({"chart_type": "line"})
@@ -144,7 +133,6 @@ async def test_get_chart_schema_has_type():
     assert schema["type"] == "object"
 
 
-@pytest.mark.asyncio
 async def test_get_chart_schema_no_dataframe_in_nested_objects():
     """Test that no DataFrame objects exist anywhere in the result."""
     result = await get_chart_schema({"chart_type": "scatter"})
@@ -158,7 +146,6 @@ async def test_get_chart_schema_no_dataframe_in_nested_objects():
     json.dumps(data, indent=2)
 
 
-@pytest.mark.asyncio
 async def test_get_chart_schema_usage_field_helpful():
     """Test that usage field provides helpful information."""
     result = await get_chart_schema({"chart_type": "area"})

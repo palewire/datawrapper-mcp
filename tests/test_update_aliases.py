@@ -2,10 +2,7 @@
 
 from unittest.mock import MagicMock, patch
 
-import pytest
 
-
-@pytest.mark.asyncio
 async def test_update_with_alias_field_names(mock_api_token):
     """Test that alias field names (e.g., 'base-color') are converted to Python names (e.g., 'base_color')."""
     from datawrapper_mcp.handlers.update import update_chart
@@ -50,7 +47,6 @@ async def test_update_with_alias_field_names(mock_api_token):
         assert "chart_id" in metadata
 
 
-@pytest.mark.asyncio
 async def test_update_with_python_field_names(mock_api_token):
     """Test that Python field names still work (e.g., 'base_color')."""
     from datawrapper_mcp.handlers.update import update_chart
@@ -95,7 +91,6 @@ async def test_update_with_python_field_names(mock_api_token):
         assert "chart_id" in metadata
 
 
-@pytest.mark.asyncio
 async def test_update_with_mixed_alias_and_python_names(mock_api_token):
     """Test that a mix of alias and Python field names works."""
     from datawrapper_mcp.handlers.update import update_chart

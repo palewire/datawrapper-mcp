@@ -3,8 +3,6 @@
 import base64
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 from datawrapper_mcp.handlers.preview import try_export_preview
 
 
@@ -35,7 +33,6 @@ class TestTryExportPreview:
         assert result is None
 
 
-@pytest.mark.asyncio
 class TestCreateChartPreview:
     """Tests for preview integration in create_chart handler."""
 
@@ -113,7 +110,6 @@ class TestCreateChartPreview:
         assert len(images) == 0
 
 
-@pytest.mark.asyncio
 class TestUpdateChartPreview:
     """Tests for preview integration in update_chart handler."""
 

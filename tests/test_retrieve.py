@@ -4,12 +4,10 @@ import json
 from unittest.mock import MagicMock, patch
 
 import pandas as pd
-import pytest
 
 from datawrapper_mcp.handlers.retrieve import get_chart_info
 
 
-@pytest.mark.asyncio
 async def test_get_chart_info_returns_complete_config():
     """Test that get_chart_info returns complete Pydantic configuration."""
     # Mock chart object with complete configuration
@@ -70,7 +68,6 @@ async def test_get_chart_info_returns_complete_config():
     assert config["tooltip_number_format"] == "0.0"
 
 
-@pytest.mark.asyncio
 async def test_get_chart_info_config_can_be_reused():
     """Test that retrieved config can be used to create a new chart."""
     # Mock chart with realistic configuration
@@ -119,7 +116,6 @@ async def test_get_chart_info_config_can_be_reused():
     assert all(isinstance(k, str) for k in config)
 
 
-@pytest.mark.asyncio
 async def test_get_chart_info_includes_all_fields():
     """Test that no fields are excluded from the configuration."""
     mock_chart = MagicMock()
@@ -162,7 +158,6 @@ async def test_get_chart_info_includes_all_fields():
         assert config[key] == complete_config[key]
 
 
-@pytest.mark.asyncio
 async def test_get_chart_info_with_dataframe():
     """Test that DataFrame data is properly serialized to JSON."""
     mock_chart = MagicMock()
@@ -220,7 +215,6 @@ async def test_get_chart_info_with_dataframe():
     assert config["color_category"] == {"A": "#ff0000"}
 
 
-@pytest.mark.asyncio
 async def test_get_chart_info_with_none_data():
     """Test that None data is handled correctly."""
     mock_chart = MagicMock()

@@ -35,7 +35,6 @@ def mock_chart():
 # -- create_chart --
 
 
-@pytest.mark.asyncio
 async def test_create_forwards_token(mock_chart):
     """create_chart passes access_token to chart.create() and preview."""
     mock_class = MagicMock()
@@ -59,7 +58,6 @@ async def test_create_forwards_token(mock_chart):
     mock_preview.assert_called_once_with(mock_chart, access_token=USER_TOKEN)
 
 
-@pytest.mark.asyncio
 async def test_create_normalizes_empty_token(mock_chart):
     """create_chart normalizes empty string to None (env-var fallback)."""
     mock_class = MagicMock()
@@ -86,7 +84,6 @@ async def test_create_normalizes_empty_token(mock_chart):
 # -- update_chart --
 
 
-@pytest.mark.asyncio
 async def test_update_forwards_token(mock_chart):
     """update_chart passes access_token to get_chart, chart.update(), and preview."""
     with (
@@ -112,7 +109,6 @@ async def test_update_forwards_token(mock_chart):
 # -- publish_chart --
 
 
-@pytest.mark.asyncio
 async def test_publish_forwards_token(mock_chart):
     """publish_chart passes access_token to get_chart, chart.publish(), and preview."""
     with (
@@ -137,7 +133,6 @@ async def test_publish_forwards_token(mock_chart):
 # -- delete_chart --
 
 
-@pytest.mark.asyncio
 async def test_delete_forwards_token(mock_chart):
     """delete_chart passes access_token to get_chart and chart.delete()."""
     with patch(
@@ -157,7 +152,6 @@ async def test_delete_forwards_token(mock_chart):
 # -- get_chart_info (retrieve) --
 
 
-@pytest.mark.asyncio
 async def test_retrieve_forwards_token(mock_chart):
     """get_chart_info passes access_token to get_chart."""
     with patch(
@@ -176,7 +170,6 @@ async def test_retrieve_forwards_token(mock_chart):
 # -- export_chart_png --
 
 
-@pytest.mark.asyncio
 async def test_export_forwards_token(mock_chart):
     """export_chart_png passes access_token to get_chart and chart.export_png()."""
     with patch(

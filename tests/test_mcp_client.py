@@ -30,7 +30,6 @@ async def client():
 class TestListChartTypes:
     """list_chart_types is a pure local lookup."""
 
-    @pytest.mark.asyncio
     async def test_returns_chart_types(self, client):
         result = await client.call_tool("list_chart_types", {})
 
@@ -40,7 +39,6 @@ class TestListChartTypes:
         assert "line" in text
         assert "scatter" in text
 
-    @pytest.mark.asyncio
     async def test_includes_usage_hint(self, client):
         result = await client.call_tool("list_chart_types", {})
 
@@ -51,7 +49,6 @@ class TestListChartTypes:
 class TestGetChartSchema:
     """get_chart_schema is a pure local lookup."""
 
-    @pytest.mark.asyncio
     async def test_returns_json_schema(self, client):
         result = await client.call_tool("get_chart_schema", {"chart_type": "bar"})
 
@@ -61,7 +58,6 @@ class TestGetChartSchema:
         assert data["class_name"] == "BarChart"
         assert "properties" in data["schema"]
 
-    @pytest.mark.asyncio
     async def test_invalid_chart_type_raises_error(self, client):
         from fastmcp.exceptions import ToolError
 
@@ -151,10 +147,44 @@ def mock_existing_chart_flow(mock_chart_instance):
         yield mock_chart_instance
 
 
+@pytest.fixture
+def mock_create_flow_with_preview(mock_chart_instance):
+    """Like mock_create_flow, but lets try_export_preview run for real.
+
+    ``mock_chart_instance.export_png`` returns fake PNG bytes, so the real
+    ``try_export_preview`` helper produces an actual ``ImageContent`` instead
+    of the ``None`` the other fixtures force.
+    """
+    with patch(
+        "datawrapper_mcp.config.BarChart.model_validate",
+        return_value=mock_chart_instance,
+    ):
+        yield mock_chart_instance
+
+
+@pytest.fixture
+def mock_existing_chart_flow_with_preview(mock_chart_instance):
+    """Like mock_existing_chart_flow, but lets try_export_preview run for real."""
+    with (
+        patch(
+            "datawrapper_mcp.handlers.publish.get_chart",
+            return_value=mock_chart_instance,
+        ),
+        patch(
+            "datawrapper_mcp.handlers.update.get_chart",
+            return_value=mock_chart_instance,
+        ),
+        patch(
+            "datawrapper_mcp.config.BarChart.model_validate",
+            return_value=mock_chart_instance,
+        ),
+    ):
+        yield mock_chart_instance
+
+
 class TestCreateChart:
     """create_chart through the full MCP stack."""
 
-    @pytest.mark.asyncio
     async def test_creates_chart_and_returns_metadata(
         self, client, mock_api_token, mock_create_flow
     ):
@@ -172,7 +202,6 @@ class TestCreateChart:
         assert "abc123" in text
         assert "Test Chart" in text
 
-    @pytest.mark.asyncio
     async def test_returns_structured_content(
         self, client, mock_api_token, mock_create_flow
     ):
@@ -189,11 +218,60 @@ class TestCreateChart:
         # Apps-capable clients receive structured_content
         assert result.structured_content is not None
 
+    async def test_accepts_data_as_json_string(
+        self, client, mock_api_token, mock_create_flow
+    ):
+        """FastMCP's strict validation means Claude may send `data` as a JSON string."""
+        result = await client.call_tool(
+            "create_chart",
+            {
+                "data": json.dumps([{"year": 2020, "value": 100}]),
+                "chart_type": "bar",
+                "chart_config": {"title": "Test Chart"},
+            },
+        )
+
+        assert not result.is_error
+        assert "abc123" in result.content[0].text
+
+    async def test_forwards_explicit_access_token(self, client, mock_create_flow):
+        """An explicit access_token argument should be forwarded, not just the env var."""
+        result = await client.call_tool(
+            "create_chart",
+            {
+                "data": [{"year": 2020, "value": 100}],
+                "chart_type": "bar",
+                "chart_config": {"title": "Test Chart"},
+                "access_token": "explicit_token_xyz",
+            },
+        )
+
+        assert not result.is_error
+        assert "abc123" in result.content[0].text
+
+    async def test_includes_inline_preview_when_available(
+        self, client, mock_api_token, mock_create_flow_with_preview
+    ):
+        """When a PNG preview export succeeds, it should appear in both the
+        fallback content and the Apps view."""
+        result = await client.call_tool(
+            "create_chart",
+            {
+                "data": [{"year": 2020, "value": 100}],
+                "chart_type": "bar",
+                "chart_config": {"title": "Test Chart"},
+            },
+        )
+
+        assert not result.is_error
+        image_items = [item for item in result.content if item.type == "image"]
+        assert len(image_items) == 1
+        assert image_items[0].mimeType == "image/png"
+
 
 class TestPublishChart:
     """publish_chart through the full MCP stack."""
 
-    @pytest.mark.asyncio
     async def test_publishes_and_returns_url(
         self, client, mock_api_token, mock_existing_chart_flow
     ):
@@ -205,7 +283,6 @@ class TestPublishChart:
         text = result.content[0].text
         assert "abc123" in text
 
-    @pytest.mark.asyncio
     async def test_returns_structured_content(
         self, client, mock_api_token, mock_existing_chart_flow
     ):
@@ -216,11 +293,21 @@ class TestPublishChart:
         assert not result.is_error
         assert result.structured_content is not None
 
+    async def test_includes_inline_preview_when_available(
+        self, client, mock_api_token, mock_existing_chart_flow_with_preview
+    ):
+        mock_existing_chart_flow_with_preview.publish.return_value = None
+
+        result = await client.call_tool("publish_chart", {"chart_id": "abc123"})
+
+        assert not result.is_error
+        image_items = [item for item in result.content if item.type == "image"]
+        assert len(image_items) == 1
+
 
 class TestUpdateChart:
     """update_chart through the full MCP stack."""
 
-    @pytest.mark.asyncio
     async def test_updates_chart(
         self, client, mock_api_token, mock_existing_chart_flow
     ):
@@ -236,7 +323,6 @@ class TestUpdateChart:
         text = result.content[0].text
         assert "abc123" in text
 
-    @pytest.mark.asyncio
     async def test_returns_structured_content(
         self, client, mock_api_token, mock_existing_chart_flow
     ):
@@ -251,11 +337,71 @@ class TestUpdateChart:
         assert not result.is_error
         assert result.structured_content is not None
 
+    async def test_accepts_data_and_json_string_config(
+        self, client, mock_api_token, mock_existing_chart_flow
+    ):
+        """Exercises the `data` argument and a chart_config sent as a JSON string."""
+        result = await client.call_tool(
+            "update_chart",
+            {
+                "chart_id": "abc123",
+                "data": json.dumps([{"year": 2020, "value": 100}]),
+                "chart_config": json.dumps({"title": "Updated Title"}),
+            },
+        )
+
+        assert not result.is_error
+        assert "abc123" in result.content[0].text
+
+    async def test_accepts_data_without_chart_config(
+        self, client, mock_api_token, mock_existing_chart_flow
+    ):
+        """chart_config is optional when only updating the underlying data."""
+        result = await client.call_tool(
+            "update_chart",
+            {
+                "chart_id": "abc123",
+                "data": [{"year": 2020, "value": 100}],
+            },
+        )
+
+        assert not result.is_error
+        assert "abc123" in result.content[0].text
+
+    async def test_forwards_explicit_access_token(
+        self, client, mock_existing_chart_flow
+    ):
+        result = await client.call_tool(
+            "update_chart",
+            {
+                "chart_id": "abc123",
+                "chart_config": {"title": "Updated Title"},
+                "access_token": "explicit_token_xyz",
+            },
+        )
+
+        assert not result.is_error
+        assert "abc123" in result.content[0].text
+
+    async def test_includes_inline_preview_when_available(
+        self, client, mock_api_token, mock_existing_chart_flow_with_preview
+    ):
+        result = await client.call_tool(
+            "update_chart",
+            {
+                "chart_id": "abc123",
+                "chart_config": {"title": "Updated Title"},
+            },
+        )
+
+        assert not result.is_error
+        image_items = [item for item in result.content if item.type == "image"]
+        assert len(image_items) == 1
+
 
 class TestGetChart:
     """get_chart through the full MCP stack."""
 
-    @pytest.mark.asyncio
     async def test_retrieves_chart_info(
         self, client, mock_api_token, mock_existing_chart_flow
     ):
@@ -269,7 +415,6 @@ class TestGetChart:
 class TestDeleteChart:
     """delete_chart through the full MCP stack."""
 
-    @pytest.mark.asyncio
     async def test_deletes_chart(
         self, client, mock_api_token, mock_existing_chart_flow
     ):
@@ -280,3 +425,52 @@ class TestDeleteChart:
         assert not result.is_error
         text = result.content[0].text
         assert "abc123" in text
+
+
+class TestExportChartPng:
+    """export_chart_png through the full MCP stack."""
+
+    async def test_exports_with_only_required_args(
+        self, client, mock_api_token, mock_existing_chart_flow
+    ):
+        result = await client.call_tool("export_chart_png", {"chart_id": "abc123"})
+
+        assert not result.is_error
+        image_items = [item for item in result.content if item.type == "image"]
+        assert len(image_items) == 1
+        assert image_items[0].mimeType == "image/png"
+
+    async def test_exports_with_all_optional_args(
+        self, client, mock_api_token, mock_existing_chart_flow
+    ):
+        result = await client.call_tool(
+            "export_chart_png",
+            {
+                "chart_id": "abc123",
+                "width": 800,
+                "height": 600,
+                "plain": True,
+                "zoom": 2,
+                "transparent": True,
+                "border_width": 5,
+                "border_color": "#FFFFFF",
+                "access_token": "explicit_token_xyz",
+            },
+        )
+
+        assert not result.is_error
+        image_items = [item for item in result.content if item.type == "image"]
+        assert len(image_items) == 1
+
+
+class TestChartTypesResource:
+    """The datawrapper://chart-types resource."""
+
+    async def test_lists_chart_schemas(self, client):
+        result = await client.read_resource("datawrapper://chart-types")
+
+        assert len(result) == 1
+        data = json.loads(result[0].text)
+        assert "bar" in data
+        assert "class_name" in data["bar"]
+        assert "schema" in data["bar"]

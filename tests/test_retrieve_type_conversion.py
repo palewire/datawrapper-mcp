@@ -9,7 +9,6 @@ from datawrapper_mcp.config import API_TYPE_TO_SIMPLIFIED, CHART_CLASSES
 from datawrapper_mcp.handlers.retrieve import get_chart_info
 
 
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "simplified_name,api_type",
     [
@@ -58,7 +57,6 @@ async def test_get_chart_info_returns_simplified_type(simplified_name, api_type)
     assert response_data["title"] == "Test Chart"
 
 
-@pytest.mark.asyncio
 async def test_get_chart_info_handles_unknown_type():
     """Test that get_chart_info handles unknown API types gracefully."""
     # Create a mock chart with an unknown type
