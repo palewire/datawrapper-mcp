@@ -7,6 +7,9 @@ from typing import cast
 from unittest.mock import AsyncMock, patch
 
 import pytest
+from fastmcp.server.middleware import MiddlewareContext
+from fastmcp.tools import ToolResult
+from mcp.types import TextContent
 
 from datawrapper_mcp.middleware import (
     BearerTokenMiddleware,
@@ -14,9 +17,6 @@ from datawrapper_mcp.middleware import (
     RateLimitingMiddleware,
     TimingMiddleware,
 )
-from fastmcp.server.middleware import MiddlewareContext
-from fastmcp.tools import ToolResult
-from mcp.types import TextContent
 
 
 @dataclass
@@ -40,7 +40,7 @@ def _make_context_with_args(
 ) -> MiddlewareContext:
     """Build a MiddlewareContext that also carries ``.message.arguments``."""
     return cast(
-        MiddlewareContext,
+        "MiddlewareContext",
         _FakeContext(message=_FakeMessage(name=tool_name, arguments=arguments)),
     )
 
@@ -52,7 +52,7 @@ def _make_context(tool_name: str = "test_tool") -> MiddlewareContext:
     We only need ``.message.name`` for the middleware under test, so we
     construct a minimal fake and cast it to satisfy static type checkers.
     """
-    return cast(MiddlewareContext, _FakeContext(message=_FakeMessage(name=tool_name)))
+    return cast("MiddlewareContext", _FakeContext(message=_FakeMessage(name=tool_name)))
 
 
 def _ok_result() -> ToolResult:

@@ -1,12 +1,12 @@
 """Handler for exporting Datawrapper charts."""
 
 import base64
-from typing import Any, cast
+from typing import Any
 
 from datawrapper import get_chart
 from mcp.types import ImageContent
 
-from ..types import ExportChartPngArgs
+from datawrapper_mcp.types import ExportChartPngArgs
 
 
 async def export_chart_png(arguments: ExportChartPngArgs) -> list[ImageContent]:
@@ -38,7 +38,7 @@ async def export_chart_png(arguments: ExportChartPngArgs) -> list[ImageContent]:
 
     # Export PNG using Pydantic instance method
     png_bytes = chart.export_png(
-        **cast(dict[str, Any], export_params),
+        **export_params,
         access_token=token,
     )
 

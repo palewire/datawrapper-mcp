@@ -38,6 +38,7 @@ Example for `server.py`:
 ```python
 from mcp.types import ToolAnnotations
 
+
 @mcp.tool(
     annotations=ToolAnnotations(
         readOnlyHint=True,
@@ -46,8 +47,8 @@ from mcp.types import ToolAnnotations
         openWorldHint=False,
     )
 )
-async def list_chart_types() -> Sequence[TextContent | ImageContent]:
-    ...
+async def list_chart_types() -> Sequence[TextContent | ImageContent]: ...
+
 
 @mcp.tool(
     annotations=ToolAnnotations(
@@ -57,8 +58,7 @@ async def list_chart_types() -> Sequence[TextContent | ImageContent]:
         openWorldHint=True,
     )
 )
-async def delete_chart(chart_id: str) -> str:
-    ...
+async def delete_chart(chart_id: str) -> str: ...
 ```
 
 If FastMCP 3.x wraps this differently (e.g. via its own decorator kwargs), use its
@@ -137,6 +137,7 @@ from fastmcp.server.middleware import Middleware, MiddlewareContext
 
 logger = logging.getLogger("datawrapper_mcp.audit")
 
+
 class AuditMiddleware(Middleware):
     async def on_call_tool(self, context: MiddlewareContext, call_next):
         tool_name = context.message.params.name
@@ -174,19 +175,17 @@ Add a route to `deployment/app.py` that returns your server's MCP endpoint metad
 ```python
 @mcp.custom_route("/.well-known/mcp.json", methods=["GET"])
 async def well_known_mcp(request):
-    return JSONResponse({
-        "mcp": {
-            "versions": ["2025-11-25"],
-            "endpoint": "/mcp",
-            "name": "datawrapper-mcp",
-            "description": "Create Datawrapper charts via MCP",
-            "capabilities": {
-                "tools": True,
-                "resources": True,
-                "apps": True
+    return JSONResponse(
+        {
+            "mcp": {
+                "versions": ["2025-11-25"],
+                "endpoint": "/mcp",
+                "name": "datawrapper-mcp",
+                "description": "Create Datawrapper charts via MCP",
+                "capabilities": {"tools": True, "resources": True, "apps": True},
             }
         }
-    })
+    )
 ```
 
 ### 3b. Update `server.json` for the official MCP Registry
@@ -268,22 +267,28 @@ import pytest
 from fastmcp import Client
 from datawrapper_mcp.server import mcp
 
+
 @pytest.fixture
 async def client():
     async with Client(transport=mcp) as c:
         yield c
+
 
 async def test_list_chart_types(client):
     result = await client.call_tool("list_chart_types", {})
     assert not result.isError
     assert "bar" in result.content[0].text
 
+
 async def test_create_chart_returns_chart_id(client):
-    result = await client.call_tool("create_chart", {
-        "data": [{"year": 2020, "value": 100}],
-        "chart_type": "bar",
-        "chart_config": {"title": "Test Chart"},
-    })
+    result = await client.call_tool(
+        "create_chart",
+        {
+            "data": [{"year": 2020, "value": 100}],
+            "chart_type": "bar",
+            "chart_config": {"title": "Test Chart"},
+        },
+    )
     assert not result.isError
     # VCR cassette handles the Datawrapper API call
 ```
@@ -306,11 +311,14 @@ and structured content:
 
 ```python
 async def test_create_chart_returns_structured_content(client):
-    result = await client.call_tool("create_chart", {
-        "data": [{"year": 2020, "value": 100}],
-        "chart_type": "bar",
-        "chart_config": {"title": "Test"},
-    })
+    result = await client.call_tool(
+        "create_chart",
+        {
+            "data": [{"year": 2020, "value": 100}],
+            "chart_type": "bar",
+            "chart_config": {"title": "Test"},
+        },
+    )
     # Text fallback exists
     text_items = [c for c in result.content if c.type == "text"]
     assert len(text_items) >= 1

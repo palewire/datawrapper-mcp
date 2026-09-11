@@ -68,15 +68,15 @@ Changes from the current file:
 4. After building the text response, call `try_export_preview(chart)` and append the result if not `None`
 
 ```python
-    response: list[TextContent | ImageContent] = [
-        TextContent(type="text", text=json.dumps(result, indent=2))
-    ]
+response: list[TextContent | ImageContent] = [
+    TextContent(type="text", text=json.dumps(result, indent=2))
+]
 
-    preview = try_export_preview(chart)
-    if preview:
-        response.append(preview)
+preview = try_export_preview(chart)
+if preview:
+    response.append(preview)
 
-    return response
+return response
 ```
 
 ### Step 3: Update `datawrapper_mcp/handlers/update.py`
@@ -84,15 +84,15 @@ Changes from the current file:
 Same pattern as Step 2 — import the helper, change the return type, and append the preview.
 
 ```python
-    response: list[TextContent | ImageContent] = [
-        TextContent(type="text", text=json.dumps(result, indent=2))
-    ]
+response: list[TextContent | ImageContent] = [
+    TextContent(type="text", text=json.dumps(result, indent=2))
+]
 
-    preview = try_export_preview(chart)
-    if preview:
-        response.append(preview)
+preview = try_export_preview(chart)
+if preview:
+    response.append(preview)
 
-    return response
+return response
 ```
 
 ### Step 4: Update `datawrapper_mcp/server.py`
@@ -134,6 +134,7 @@ async def create_chart(
     except Exception as e:
         return f"Error creating chart of type '{chart_type}': {str(e)}"
 
+
 # AFTER
 async def create_chart(
     data: str | list | dict,
@@ -152,7 +153,12 @@ async def create_chart(
         )
         return await create_chart_handler(arguments)
     except Exception as e:
-        return [TextContent(type="text", text=f"Error creating chart of type '{chart_type}': {str(e)}")]
+        return [
+            TextContent(
+                type="text",
+                text=f"Error creating chart of type '{chart_type}': {str(e)}",
+            )
+        ]
 ```
 
 #### 4b. Change the `update_chart` wrapper
@@ -173,6 +179,7 @@ async def update_chart(
     except Exception as e:
         return f"Error updating chart with ID '{chart_id}': {str(e)}"
 
+
 # AFTER
 async def update_chart(
     chart_id: str,
@@ -183,7 +190,11 @@ async def update_chart(
     try:
         return await update_chart_handler(cast(UpdateChartArgs, arguments))
     except Exception as e:
-        return [TextContent(type="text", text=f"Error updating chart with ID '{chart_id}': {str(e)}")]
+        return [
+            TextContent(
+                type="text", text=f"Error updating chart with ID '{chart_id}': {str(e)}"
+            )
+        ]
 ```
 
 ## What stays the same

@@ -2,11 +2,15 @@
 
 Clone the repository. Move into the directory on your terminal.
 
-Install dependencies for development.
+Prepare the checkout and install all dependency groups.
 
 ```sh
-uv sync --all-extras
+make bootstrap
 ```
+
+The command can be run in either the primary checkout or a linked worktree
+(e.g. `git worktree add`). See `scripts/worktree_bootstrap.py` for its
+environment-file behavior.
 
 Install pre-commit to run a battery of automatic quick fixes against your work.
 
@@ -14,11 +18,27 @@ Install pre-commit to run a battery of automatic quick fixes against your work.
 uv run pre-commit install
 ```
 
-Run tests.
+Run the fast, non-mutating checks (Ruff lint/format, `ty` static typing,
+Deptry dependency checks, Zizmor workflow audits).
 
 ```sh
-uv run pytest
+make check
 ```
+
+Run the complete local verification suite, including tests, the manifest
+check, and a package build, before opening a pull request.
+
+```sh
+make verify
+```
+
+Run just the tests.
+
+```sh
+make test
+```
+
+See `make help` for the full list of available commands.
 
 Before you release your package, be sure to customize the `setup.py` file to fit your project.
 

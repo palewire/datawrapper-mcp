@@ -17,6 +17,7 @@ FastMCP's QR Code example (the official MCP Apps reference at https://gofastmcp.
 ```python
 from fastmcp.tools import ToolResult
 
+
 @mcp.tool(app=AppConfig(resource_uri=VIEW_URI))
 def generate_qr(text: str = "https://gofastmcp.com") -> ToolResult:
     """Generate a QR code from text."""
@@ -69,8 +70,10 @@ async def create_chart(
             )
         ]
 
+
 # After
 from fastmcp.tools import ToolResult
+
 
 @mcp.tool(app=CHART_VIEW_APP)
 async def create_chart(
@@ -134,6 +137,7 @@ async def update_chart(
                 text=f"Error updating chart with ID '{chart_id}': {str(e)}",
             )
         ]
+
 
 # After
 @mcp.tool(app=CHART_VIEW_APP)

@@ -9,13 +9,13 @@ from datawrapper_mcp.server import mcp
 
 
 @mcp.custom_route("/healthz", methods=["GET"])
-async def health_check(request: Request):
+async def health_check(request: Request) -> JSONResponse:
     """Health check endpoint for Kubernetes liveness/readiness probes."""
     return JSONResponse({"status": "healthy", "service": "datawrapper-mcp"})
 
 
 @mcp.custom_route("/.well-known/mcp.json", methods=["GET"])
-async def well_known_mcp(request: Request):
+async def well_known_mcp(request: Request) -> JSONResponse:
     """MCP server discovery endpoint (SEP-1960)."""
     return JSONResponse(
         {
@@ -36,7 +36,7 @@ async def well_known_mcp(request: Request):
 
 if __name__ == "__main__":
     # Get configuration from environment variables
-    host = os.getenv("MCP_SERVER_HOST", "0.0.0.0")
+    host = os.getenv("MCP_SERVER_HOST", "0.0.0.0")  # noqa: S104 - container listens on all interfaces
     port = int(os.getenv("MCP_SERVER_PORT", "8501"))
 
     # Log server start information

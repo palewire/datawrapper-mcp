@@ -9,14 +9,21 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   lint-python:
     name: Lint Python code
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - id: checkout
         name: Checkout
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - id: check-ruff
         name: Check with Ruff
@@ -30,13 +37,17 @@ jobs:
         with:
           args: 'format --check --verbose'
 
-  mypy-python:
-    name: Check Python static typing
+  static-analysis:
+    name: Static analysis (types, deps, workflows)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - id: checkout
         name: Checkout
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - id: install-uv
         name: Install uv
@@ -52,21 +63,37 @@ jobs:
 
       - id: install-python-dependencies
         name: Install Python dependencies
-        run: uv sync --extra mypy
+        run: uv sync --group dev --locked
 
-      - id: mypy
-        name: Run mypy
-        run: uv run mypy ./ --ignore-missing-imports
+      - id: type-check
+        name: Check static types with ty
+        run: uv run ty check
+
+      - id: dependency-check
+        name: Check dependency declarations with Deptry
+        run: uv run deptry .
+
+      - id: dead-code-check
+        name: Check for dead code with Vulture
+        run: uv run vulture datawrapper_mcp deployment
+
+      - id: workflow-check
+        name: Audit GitHub Actions workflows with Zizmor
+        run: uv run zizmor .github/workflows
 
   test-python:
     name: Test Python code
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       matrix:
         python: ['3.10', '3.11', '3.12', '3.13',]
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - id: install-uv
         name: Install uv
@@ -82,19 +109,23 @@ jobs:
 
       - id: install-python-dependencies
         name: Install Python dependencies
-        run: uv sync --extra test --python ${{ matrix.python }}
+        run: uv sync --group test --locked --python ${{ matrix.python }}
 
       - id: tests
         name: Run tests
-        run: uv run pytest --cov -sv
+        run: uv run --python ${{ matrix.python }} pytest --cov -sv
 
   mcp-inspector:
     name: Smoke-test with MCP Inspector
     runs-on: ubuntu-latest
     needs: [test-python]
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - id: install-uv
         name: Install uv
@@ -128,9 +159,13 @@ jobs:
     name: Build release candidate
     runs-on: ubuntu-latest
     needs: [test-python]
+    permissions:
+      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - id: install-uv
         name: Install uv
@@ -177,7 +212,7 @@ jobs:
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
           verbose: true
-          verify_metadata: false
+          verify-metadata: false
 
   publish-mcp-registry:
     name: Publish to MCP Registry
@@ -190,6 +225,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - name: Install mcp-publisher
         run: |
@@ -216,6 +253,8 @@ jobs:
       contents: read
     steps:
       - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
       - uses: superfly/flyctl-actions/setup-flyctl@master
       - run: flyctl deploy --remote-only
         env:

@@ -5,8 +5,8 @@ from typing import Any
 
 from mcp.types import TextContent
 
-from ..config import CHART_CLASSES
-from ..types import GetChartSchemaArgs
+from datawrapper_mcp.config import CHART_CLASSES
+from datawrapper_mcp.types import GetChartSchemaArgs
 
 
 async def get_chart_schema(arguments: GetChartSchemaArgs) -> list[TextContent]:

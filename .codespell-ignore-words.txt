@@ -1,0 +1,7 @@
+# Python terms
+pytest
+codespell
+venv
+uv
+__pycache__
+.pytest_cache

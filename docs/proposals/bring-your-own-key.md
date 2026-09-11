@@ -43,29 +43,29 @@ class CreateChartArgs(TypedDict):
     data: str | list[dict] | dict[str, list]
     chart_type: str
     chart_config: dict[str, Any]
-    access_token: NotRequired[str]          # ← add
+    access_token: NotRequired[str]  # ← add
 
 
 class UpdateChartArgs(TypedDict):
     chart_id: str
     data: NotRequired[str | list[dict] | dict[str, list]]
     chart_config: NotRequired[dict[str, Any]]
-    access_token: NotRequired[str]          # ← add
+    access_token: NotRequired[str]  # ← add
 
 
 class PublishChartArgs(TypedDict):
     chart_id: str
-    access_token: NotRequired[str]          # ← add
+    access_token: NotRequired[str]  # ← add
 
 
 class GetChartArgs(TypedDict):
     chart_id: str
-    access_token: NotRequired[str]          # ← add
+    access_token: NotRequired[str]  # ← add
 
 
 class DeleteChartArgs(TypedDict):
     chart_id: str
-    access_token: NotRequired[str]          # ← add
+    access_token: NotRequired[str]  # ← add
 
 
 class ExportChartPngArgs(TypedDict):
@@ -77,7 +77,7 @@ class ExportChartPngArgs(TypedDict):
     transparent: NotRequired[bool]
     border_width: NotRequired[int]
     border_color: NotRequired[str]
-    access_token: NotRequired[str]          # ← add
+    access_token: NotRequired[str]  # ← add
 ```
 
 `GetChartSchemaArgs` is read-only (no API calls), so leave it unchanged.
@@ -111,7 +111,7 @@ async def create_chart(arguments: CreateChartArgs) -> list[TextContent]:
         raise ValueError(...)
 
     chart.data = df
-    chart.create(access_token=token)               # ← pass token
+    chart.create(access_token=token)  # ← pass token
     ...
 ```
 
@@ -120,7 +120,7 @@ async def create_chart(arguments: CreateChartArgs) -> list[TextContent]:
 ```python
 async def update_chart(arguments: UpdateChartArgs) -> list[TextContent]:
     chart_id = arguments["chart_id"]
-    token = arguments.get("access_token")          # ← add
+    token = arguments.get("access_token")  # ← add
 
     chart = get_chart(chart_id, access_token=token)  # ← pass token
 
@@ -130,7 +130,7 @@ async def update_chart(arguments: UpdateChartArgs) -> list[TextContent]:
     if "chart_config" in arguments:
         ...
 
-    chart.update(access_token=token)               # ← pass token
+    chart.update(access_token=token)  # ← pass token
     ...
 ```
 
@@ -139,10 +139,10 @@ async def update_chart(arguments: UpdateChartArgs) -> list[TextContent]:
 ```python
 async def publish_chart(arguments: PublishChartArgs) -> list[TextContent]:
     chart_id = arguments["chart_id"]
-    token = arguments.get("access_token")          # ← add
+    token = arguments.get("access_token")  # ← add
 
     chart = get_chart(chart_id, access_token=token)  # ← pass token
-    chart.publish(access_token=token)              # ← pass token
+    chart.publish(access_token=token)  # ← pass token
     ...
 ```
 
@@ -151,10 +151,10 @@ async def publish_chart(arguments: PublishChartArgs) -> list[TextContent]:
 ```python
 async def delete_chart(arguments: DeleteChartArgs) -> list[TextContent]:
     chart_id = arguments["chart_id"]
-    token = arguments.get("access_token")          # ← add
+    token = arguments.get("access_token")  # ← add
 
     chart = get_chart(chart_id, access_token=token)  # ← pass token
-    chart.delete(access_token=token)               # ← pass token
+    chart.delete(access_token=token)  # ← pass token
     ...
 ```
 
@@ -163,7 +163,7 @@ async def delete_chart(arguments: DeleteChartArgs) -> list[TextContent]:
 ```python
 async def get_chart_info(arguments: GetChartArgs) -> list[TextContent]:
     chart_id = arguments["chart_id"]
-    token = arguments.get("access_token")          # ← add
+    token = arguments.get("access_token")  # ← add
 
     chart = get_chart(chart_id, access_token=token)  # ← pass token
     ...
@@ -174,7 +174,7 @@ async def get_chart_info(arguments: GetChartArgs) -> list[TextContent]:
 ```python
 async def export_chart_png(arguments: ExportChartPngArgs) -> list[ImageContent]:
     chart_id = arguments["chart_id"]
-    token = arguments.get("access_token")          # ← add
+    token = arguments.get("access_token")  # ← add
 
     chart = get_chart(chart_id, access_token=token)  # ← pass token
 
@@ -183,7 +183,7 @@ async def export_chart_png(arguments: ExportChartPngArgs) -> list[ImageContent]:
 
     png_bytes = chart.export_png(
         **cast(dict[str, Any], export_params),
-        access_token=token,                        # ← pass token
+        access_token=token,  # ← pass token
     )
     ...
 ```
@@ -228,7 +228,7 @@ async def create_chart(
     data: str | list | dict,
     chart_type: str,
     chart_config: dict,
-    access_token: str | None = None,    # ← add
+    access_token: str | None = None,  # ← add
 ) -> str:
     """
     ...existing docstring...

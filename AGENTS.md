@@ -32,24 +32,26 @@ export DATAWRAPPER_ACCESS_TOKEN="your-token-here"
 ## Build and Test Commands
 
 ```bash
-# Install package in development mode
-pip install -e .
+# Prepare the checkout and install all dependency groups
+make bootstrap
 
 # Run the MCP server
-datawrapper-mcp
+uv run datawrapper-mcp
 
 # Run tests
-pytest
+make test
 
-# Run tests with coverage
-pytest --cov=datawrapper_mcp
+# Run tests with a coverage report
+make coverage
 
-# Type checking
-mypy datawrapper_mcp
+# Fast, non-mutating checks (Ruff lint/format, ty, Deptry, Zizmor)
+make check
 
-# Linting
-ruff check datawrapper_mcp
+# Full local verification suite (check + test + manifest + build)
+make verify
 ```
+
+See `make help` for the complete list of available commands.
 
 ## Project Structure
 
@@ -158,11 +160,11 @@ Always use Pydantic class instance methods:
 
 ```python
 # Correct
-chart.create()      # Create chart
-chart.publish()     # Publish chart
-chart.update()      # Update chart
-chart.delete()      # Delete chart
-get_chart(chart_id) # Retrieve chart (factory function)
+chart.create()  # Create chart
+chart.publish()  # Publish chart
+chart.update()  # Update chart
+chart.delete()  # Delete chart
+get_chart(chart_id)  # Retrieve chart (factory function)
 ```
 
 Never use deprecated methods:
@@ -187,15 +189,13 @@ dw.get_chart()
 ### Type Annotations
 
 ```python
-# Required for mypy - annotate chart classes as type[Any]
+# Required for ty - annotate chart classes as type[Any]
 from typing import Any
+
 chart_class: type[Any] = CHART_CLASSES[chart_type]
 ```
 
-Install `pandas-stubs` for pandas type checking:
-```bash
-pip install pandas-stubs
-```
+Run `make type-check` (or `uv run ty check`) to check static types.
 
 ## Testing Guidelines
 
@@ -238,11 +238,11 @@ mock_get_chart.side_effect = FailedRequestError(mock_response)
 
 Common styling patterns:
 ```python
-color_category={"column_name": "#hex_color"}
-lines=[{"column": "name", "width": "style1", "interpolation": "curved"}]
-custom_range_y=[min, max]
-y_grid_format="0"
-tooltip_number_format="00.00"
+color_category = {"column_name": "#hex_color"}
+lines = [{"column": "name", "width": "style1", "interpolation": "curved"}]
+custom_range_y = [min, max]
+y_grid_format = "0"
+tooltip_number_format = "00.00"
 ```
 
 ## Common Issues

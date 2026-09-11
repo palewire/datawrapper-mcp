@@ -72,6 +72,7 @@ from contextvars import ContextVar
 # Session-scoped token storage
 _session_token: ContextVar[str | None] = ContextVar("datawrapper_token", default=None)
 
+
 @mcp.tool()
 async def set_datawrapper_token(token: str) -> str:
     """Set your Datawrapper API token for this session.
@@ -84,6 +85,7 @@ async def set_datawrapper_token(token: str) -> str:
     _session_token.set(token)
     return "Datawrapper token set for this session."
 
+
 def get_current_token() -> str:
     """Get the current session's Datawrapper token, falling back to env var."""
     session_token = _session_token.get()
@@ -91,6 +93,7 @@ def get_current_token() -> str:
         return session_token
 
     import os
+
     env_token = os.environ.get("DATAWRAPPER_ACCESS_TOKEN")
     if env_token:
         return env_token
@@ -250,9 +253,11 @@ from contextvars import ContextVar
 
 _session_token: ContextVar[str | None] = ContextVar("datawrapper_token", default=None)
 
+
 def set_session_token(token: str) -> None:
     """Set the Datawrapper token for the current session."""
     _session_token.set(token)
+
 
 def get_current_token() -> str:
     """Get the current session's token, falling back to environment variable."""
@@ -261,6 +266,7 @@ def get_current_token() -> str:
         return token
 
     import os
+
     token = os.environ.get("DATAWRAPPER_ACCESS_TOKEN")
     if token:
         return token

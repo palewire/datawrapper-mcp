@@ -1,12 +1,13 @@
 """Utility functions for the Datawrapper MCP server."""
 
 import json
-import os
+from pathlib import Path
+from typing import Any
 
 import pandas as pd
 
 
-def json_to_dataframe(data: str | list | dict) -> pd.DataFrame:
+def json_to_dataframe(data: str | list[Any] | dict[str, Any]) -> pd.DataFrame:
     """Convert JSON data to a pandas DataFrame.
 
     Args:
@@ -28,21 +29,20 @@ def json_to_dataframe(data: str | list | dict) -> pd.DataFrame:
     """
     if isinstance(data, str):
         # Check if it's a file path that exists
-        if os.path.isfile(data):
+        if Path(data).is_file():
             if data.endswith(".csv"):
                 return pd.read_csv(data)
-            elif data.endswith(".json"):
-                with open(data) as f:
+            if data.endswith(".json"):
+                with Path(data).open() as f:
                     file_data = json.load(f)
                 # Recursively process the loaded JSON data
                 return json_to_dataframe(file_data)
-            else:
-                raise ValueError(
-                    f"Unsupported file type: {data}\n\n"
-                    "Supported file types:\n"
-                    "  - .csv (CSV files)\n"
-                    "  - .json (JSON files containing list of dicts or dict of arrays)"
-                )
+            raise ValueError(
+                f"Unsupported file type: {data}\n\n"
+                "Supported file types:\n"
+                "  - .csv (CSV files)\n"
+                "  - .json (JSON files containing list of dicts or dict of arrays)"
+            )
 
         # Check if it looks like CSV content (not a file path)
         if "\n" in data and "," in data and not data.strip().startswith(("[", "{")):
@@ -66,7 +66,7 @@ def json_to_dataframe(data: str | list | dict) -> pd.DataFrame:
                 "  1. File path: '/path/to/data.csv' or '/path/to/data.json'\n"
                 '  2. JSON string: \'[{"year": 2020, "value": 100}, ...]\'\n'
                 '  3. JSON string: \'{"year": [2020, 2021], "value": [100, 150]}\''
-            )
+            ) from e
 
     if isinstance(data, list):
         if not data:
@@ -82,7 +82,7 @@ def json_to_dataframe(data: str | list | dict) -> pd.DataFrame:
             )
         # List of records: [{"col1": val1, "col2": val2}, ...]
         return pd.DataFrame(data)
-    elif isinstance(data, dict):
+    if isinstance(data, dict):
         if not data:
             raise ValueError(
                 "Data dict is empty. Please provide at least one column of data."
@@ -98,11 +98,10 @@ def json_to_dataframe(data: str | list | dict) -> pd.DataFrame:
             )
         # Dict of arrays: {"col1": [val1, val2], "col2": [val3, val4]}
         return pd.DataFrame(data)
-    else:
-        raise ValueError(
-            f"Unsupported data type: {type(data).__name__}\n\n"
-            "Data must be one of:\n"
-            '  1. List of dicts: [{"year": 2020, "value": 100}, ...]\n'
-            '  2. Dict of arrays: {"year": [2020, 2021], "value": [100, 150]}\n'
-            "  3. JSON string in either format above"
-        )
+    raise ValueError(
+        f"Unsupported data type: {type(data).__name__}\n\n"
+        "Data must be one of:\n"
+        '  1. List of dicts: [{"year": 2020, "value": 100}, ...]\n'
+        '  2. Dict of arrays: {"year": [2020, 2021], "value": [100, 150]}\n'
+        "  3. JSON string in either format above"
+    )

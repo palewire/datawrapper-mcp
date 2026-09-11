@@ -116,7 +116,7 @@ async def test_get_chart_info_config_can_be_reused():
     # Verify the config structure is suitable for create_chart
     # (it should be a dict that can be passed as chart_config parameter)
     assert isinstance(config, dict)
-    assert all(isinstance(k, str) for k in config.keys())
+    assert all(isinstance(k, str) for k in config)
 
 
 @pytest.mark.asyncio

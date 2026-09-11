@@ -1,4 +1,26 @@
-include LICENSE
-include README.md
+include .codespell-ignore-words.txt
+include .editorconfig
+include .env.example
+include .gitattributes
+include .pre-commit-config.yaml
+include .python-version
+include AGENTS.md
 include CODE_OF_CONDUCT.md
 include CONTRIBUTING.md
+include Dockerfile
+include INSTALLATION.md
+include LICENSE
+include Makefile
+include README.md
+include fly.toml
+include server.json
+include uv.lock
+include zizmor.yml
+recursive-include .devcontainer *
+recursive-include .github *
+recursive-include datawrapper_mcp *.py
+recursive-include datawrapper_mcp py.typed
+recursive-include deployment *.py *.txt
+recursive-include docs *.md
+recursive-include scripts *.py
+recursive-include tests *.py

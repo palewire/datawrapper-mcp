@@ -9,8 +9,10 @@ requires-python = ">=3.10"
 dependencies = [
     "datawrapper>=2.0.14",
     "fastmcp[apps]==3.2.4",
+    "mcp>=1.26.0",
     "prefab-ui==0.18.1",
     "pandas>=2.0.0",
+    "starlette>=0.50.0",
     'exceptiongroup; python_version<"3.11"',
     'typing_extensions>=4.0.0; python_version<"3.11"',
 ]
@@ -34,10 +36,18 @@ classifiers = [
 ]
 keywords = ["datawrapper", "mcp", "model-context-protocol", "charts", "visualization", "ai"]
 
-[project.optional-dependencies]
+[dependency-groups]
 dev = [
+    "check-manifest",
+    "check-wheel-contents",
+    "deptry",
     "pre-commit",
+    "ruff",
     "setuptools-scm",
+    "twine",
+    "ty",
+    "vulture",
+    "zizmor",
 ]
 test = [
     "pytest>=7.0.0",
@@ -45,13 +55,9 @@ test = [
     "pytest-runner",
     "pytest-cov",
     "pytest-env",
+    "pytest-timeout",
     "pytest-vcr",
     "pytest-xdist",
-]
-mypy = [
-    "mypy",
-    "pandas-stubs",
-    "types-requests",
 ]
 
 [project.urls]
@@ -62,13 +68,91 @@ Issues = "https://github.com/palewire/datawrapper-mcp/issues/"
 [project.scripts]
 datawrapper-mcp = "datawrapper_mcp.server:main"
 
-[tool.setuptools]
-packages = ["datawrapper_mcp"]
+[tool.setuptools.packages.find]
+include = ["datawrapper_mcp*"]
 
 [tool.setuptools.package-data]
 datawrapper_mcp = ["py.typed"]
 
 [tool.setuptools_scm]
+
+[tool.vulture]
+min_confidence = 80
+# Starlette route handlers must accept `request` even when unused.
+ignore_names = ["request"]
+
+[tool.deptry.per_rule_ignores]
+# Backport used implicitly by asyncio's exception-group handling on Python <3.11.
+DEP002 = ["exceptiongroup"]
+
+[tool.ruff]
+target-version = "py310"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle
+    "F",    # pyflakes
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions - comprehension improvements
+    "DTZ",  # flake8-datetimez - timezone-aware datetimes
+    "G",    # flake8-logging-format - logging formatting
+    "LOG",  # flake8-logging - logging best practices
+    "W",    # pycodestyle warnings
+    "I",    # isort - import sorting
+    "UP",   # pyupgrade - modern Python idioms
+    "N",    # pep8-naming - naming conventions
+    "ANN",  # flake8-annotations - type annotations
+    "YTT",  # flake8-2020 - sys.version_info checks
+    "S",    # flake8-bandit - security issues
+    "BLE",  # flake8-blind-except - blind except statements
+    "FA",   # flake8-future-annotations - future annotations
+    "ICN",  # flake8-import-conventions - import conventions
+    "PIE",  # flake8-pie - misc lints
+    "Q",    # flake8-quotes - quote consistency
+    "RSE",  # flake8-raise - raise statement improvements
+    "RET",  # flake8-return - return statement improvements
+    "SLOT", # flake8-slots - __slots__ usage
+    "SIM",  # flake8-simplify - code simplification
+    "TID",  # flake8-tidy-imports - tidy imports
+    "PTH",  # flake8-use-pathlib - pathlib usage
+    "PT",   # flake8-pytest-style - pytest conventions
+    "TC",   # flake8-type-checking - type-only imports
+    "FLY",  # flynt - f-string conversion
+    "PERF", # perflint - performance improvements
+    "RUF",  # ruff-specific rules
+]
+ignore = [
+    "E501",    # Line length
+    "UP046",   # Generic class `Loader` uses `Generic` subclass instead of type parameters
+    "S101",    # Allow assert
+    "SIM103",  # Allow for True/False returns after a test
+    "SIM108",  # Don't force ternary expressions
+    "SIM117",  # Allow for nested with statements
+    "PERF401", # For for appending to a list
+    "RUF001",  # Allow for curly quotes
+    "RUF005",  # Allow for adding lists
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = [
+    "ANN",     # Annotations
+    "S105",    # Possible hardcoded password
+    "S108",    # Temp directory
+    "BLE001",  # Broad excepts are used deliberately to assert on error messages
+    "PT006",   # Existing parametrize ids use comma-separated strings
+    "PT011",   # pytest.raises without match= is acceptable in this suite
+    "PT017",   # Asserting on a caught exception is used deliberately here
+    "S603",    # Test fixtures shell out to trusted, hardcoded commands
+    "S607",    # Test fixtures invoke trusted commands by name
+    "SIM105",  # contextlib.suppress isn't required for test setup/teardown
+    "TC001",   # TypedDict variable annotations are evaluated at runtime here
+]
+"datawrapper_mcp/server.py" = [
+    "TC001",   # These types are consumed at runtime by FastMCP's schema introspection
+]
+
+[tool.ruff.format]
+docstring-code-format = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
@@ -77,10 +161,49 @@ python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = [
     "-v",
+    "--strict-config",
     "--strict-markers",
     "--tb=short",
+    "--durations=10",
+    "--durations-min=1.0",
 ]
 markers = [
     "asyncio: mark test as async",
 ]
 asyncio_mode = "auto"
+timeout = 60
+xfail_strict = true
+
+[tool.coverage.run]
+source = ["datawrapper_mcp"]
+branch = true
+relative_files = true
+omit = ["*/__pycache__/*"]
+
+[tool.ty.environment]
+python-version = "3.10"
+
+[tool.ty.src]
+include = ["datawrapper_mcp"]
+exclude = [
+    "tests/**",
+    "build/**",
+    ".venv/**",
+    ".github/**",
+    ".vscode/**",
+    "**/__pycache__",
+]
+
+[tool.ty.rules]
+invalid-argument-type = "error"
+invalid-return-type = "error"
+invalid-key = "error"
+invalid-assignment = "error"
+invalid-method-override = "error"
+unresolved-attribute = "error"
+possibly-missing-attribute = "error"
+missing-type-argument = "error"
+no-matching-overload = "error"
+unsound-return-statement = "error"
+possibly-unresolved-reference = "warn"
+unused-ignore-comment = "error"
