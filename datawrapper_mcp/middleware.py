@@ -7,6 +7,7 @@ built on the FastMCP Middleware base class.
 import asyncio
 import logging
 import time
+from typing import cast
 
 from fastmcp.exceptions import ToolError
 from fastmcp.server.dependencies import get_http_headers
@@ -48,10 +49,15 @@ class BearerTokenMiddleware(Middleware):
         auth = headers.get("authorization", "")
         if auth.startswith("Bearer ") and context.message:
             token = auth.removeprefix("Bearer ").strip()
-            if token and context.message.arguments is not None:
-                if self._inject_for is None or context.message.name in self._inject_for:
-                    context.message.arguments.setdefault("access_token", token)
-        return await call_next(context)
+            if (
+                token
+                and context.message.arguments is not None
+                and (
+                    self._inject_for is None or context.message.name in self._inject_for
+                )
+            ):
+                context.message.arguments.setdefault("access_token", token)
+        return cast("ToolResult", await call_next(context))
 
 
 class ErrorHandlingMiddleware(Middleware):
@@ -63,7 +69,7 @@ class ErrorHandlingMiddleware(Middleware):
         call_next: CallNext,
     ) -> ToolResult:
         try:
-            return await call_next(context)
+            return cast("ToolResult", await call_next(context))
         except asyncio.CancelledError:
             raise
         except Exception as e:
@@ -114,7 +120,7 @@ class RateLimitingMiddleware(Middleware):
             )
 
         self._timestamps.append(now)
-        return await call_next(context)
+        return cast("ToolResult", await call_next(context))
 
 
 class TimingMiddleware(Middleware):
@@ -128,7 +134,7 @@ class TimingMiddleware(Middleware):
         tool_name = context.message.name if context.message else "unknown"
         start = time.monotonic()
         try:
-            return await call_next(context)
+            return cast("ToolResult", await call_next(context))
         finally:
             elapsed = time.monotonic() - start
             logger.info("Tool '%s' completed in %.3fs", tool_name, elapsed)

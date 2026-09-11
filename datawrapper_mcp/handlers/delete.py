@@ -2,10 +2,10 @@
 
 import json
 
-from mcp.types import TextContent
 from datawrapper import get_chart
+from mcp.types import TextContent
 
-from ..types import DeleteChartArgs
+from datawrapper_mcp.types import DeleteChartArgs
 
 
 async def delete_chart(arguments: DeleteChartArgs) -> list[TextContent]:

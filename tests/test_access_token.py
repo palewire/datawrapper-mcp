@@ -11,7 +11,6 @@ from datawrapper_mcp.handlers.publish import publish_chart
 from datawrapper_mcp.handlers.retrieve import get_chart_info
 from datawrapper_mcp.handlers.update import update_chart
 
-
 USER_TOKEN = "user_token_xyz"
 
 

@@ -5,7 +5,8 @@ from typing import Any
 from datawrapper import get_chart
 from mcp.types import ImageContent
 
-from ..types import PublishChartArgs
+from datawrapper_mcp.types import PublishChartArgs
+
 from .preview import try_export_preview
 
 

@@ -5,8 +5,9 @@ from typing import Any
 from datawrapper import get_chart
 from mcp.types import ImageContent
 
-from ..types import UpdateChartArgs
-from ..utils import json_to_dataframe
+from datawrapper_mcp.types import UpdateChartArgs
+from datawrapper_mcp.utils import json_to_dataframe
+
 from .preview import try_export_preview
 
 
@@ -50,10 +51,10 @@ async def update_chart(
 
         except Exception as e:
             raise ValueError(
-                f"Invalid chart configuration: {str(e)}\n\n"
+                f"Invalid chart configuration: {e!s}\n\n"
                 f"Use get_chart_schema to see the valid schema for this chart type. "
                 f"Only high-level Pydantic fields are accepted."
-            )
+            ) from e
 
     # Update using Pydantic instance method
     chart.update(access_token=token)

@@ -1,8 +1,8 @@
 """Tests for file path support in json_to_dataframe."""
 
 import json
-import os
 import tempfile
+from pathlib import Path
 
 import pandas as pd
 import pytest
@@ -34,7 +34,7 @@ class TestFilePathSupport:
             assert df["value"].tolist() == [100, 150, 200]
         finally:
             # Clean up
-            os.unlink(csv_path)
+            Path(csv_path).unlink()
 
     def test_json_file_path_list_of_dicts(self):
         """Test loading data from a JSON file (list of dicts format)."""
@@ -60,7 +60,7 @@ class TestFilePathSupport:
             assert df["value"].tolist() == [100, 150, 200]
         finally:
             # Clean up
-            os.unlink(json_path)
+            Path(json_path).unlink()
 
     def test_json_file_path_dict_of_arrays(self):
         """Test loading data from a JSON file (dict of arrays format)."""
@@ -82,7 +82,7 @@ class TestFilePathSupport:
             assert df["value"].tolist() == [100, 150, 200]
         finally:
             # Clean up
-            os.unlink(json_path)
+            Path(json_path).unlink()
 
     def test_large_json_file(self):
         """Test loading a large JSON file (1000+ rows)."""
@@ -107,7 +107,7 @@ class TestFilePathSupport:
             assert df["value"].iloc[-1] == 10050
         finally:
             # Clean up
-            os.unlink(json_path)
+            Path(json_path).unlink()
 
     def test_json_file_with_null_values(self):
         """Test loading JSON file with null values."""
@@ -135,7 +135,7 @@ class TestFilePathSupport:
             assert df["value"].iloc[2] == 200
         finally:
             # Clean up
-            os.unlink(json_path)
+            Path(json_path).unlink()
 
     def test_unsupported_file_type(self):
         """Test that unsupported file types raise an error."""
@@ -149,7 +149,7 @@ class TestFilePathSupport:
                 json_to_dataframe(txt_path)
         finally:
             # Clean up
-            os.unlink(txt_path)
+            Path(txt_path).unlink()
 
     def test_nonexistent_file_path(self):
         """Test that nonexistent file paths are treated as JSON strings."""

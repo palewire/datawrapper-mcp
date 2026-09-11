@@ -197,6 +197,7 @@ async def update_chart(
 ```python
 from .views import get_chart_view_html
 
+
 @mcp.resource(
     CHART_VIEW_URI,
     app=AppConfig(
@@ -253,6 +254,7 @@ from pathlib import Path
 
 _DIR = Path(__file__).parent
 
+
 @lru_cache(maxsize=1)
 def get_chart_view_html() -> str:
     """Assemble the View HTML with the vendored SDK inlined.
@@ -262,6 +264,7 @@ def get_chart_view_html() -> str:
     sdk_js = (_DIR / "vendor" / "ext-apps.js").read_text()
     html = CHART_VIEW_TEMPLATE.replace("/* VENDOR:EXT_APPS_SDK */", sdk_js)
     return html
+
 
 CHART_VIEW_TEMPLATE = """\
 <!DOCTYPE html>

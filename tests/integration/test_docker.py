@@ -1,10 +1,15 @@
 """Integration tests for Docker deployment."""
 
 import os
+import subprocess
 import time
+
 import pytest
 import requests
-import subprocess
+
+# Building and starting a Docker image is much slower than the suite's
+# default 60s timeout, so give this module's tests more room to run.
+pytestmark = pytest.mark.timeout(300)
 
 
 @pytest.fixture(scope="module")
@@ -115,10 +120,8 @@ def test_docker_container_logs(docker_container):
 
     # Check for successful startup indicators
     # (Adjust these based on your actual log output)
-    assert (
-        "error" not in logs.lower()
-        or "error" in logs.lower()
-        and "0 errors" in logs.lower()
+    assert "error" not in logs.lower() or (
+        "error" in logs.lower() and "0 errors" in logs.lower()
     )
 
 
@@ -169,7 +172,7 @@ def test_docker_well_known_mcp_json(docker_container):
 
 def test_docker_multiple_requests(docker_container):
     """Test that Docker container handles multiple requests."""
-    for i in range(10):
+    for _ in range(10):
         response = requests.get("http://localhost:8503/healthz", timeout=5)
         assert response.status_code == 200
         time.sleep(0.1)

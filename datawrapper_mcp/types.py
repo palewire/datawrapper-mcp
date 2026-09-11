@@ -12,7 +12,7 @@ else:
 class CreateChartArgs(TypedDict):
     """Arguments for create_chart handler."""
 
-    data: str | list[dict] | dict[str, list]
+    data: str | list[dict[str, Any]] | dict[str, list[Any]]
     chart_type: str
     chart_config: dict[str, Any]
     access_token: NotRequired[str]
@@ -22,7 +22,7 @@ class UpdateChartArgs(TypedDict):
     """Arguments for update_chart handler."""
 
     chart_id: str
-    data: NotRequired[str | list[dict] | dict[str, list]]
+    data: NotRequired[str | list[dict[str, Any]] | dict[str, list[Any]]]
     chart_config: NotRequired[dict[str, Any]]
     access_token: NotRequired[str]
 

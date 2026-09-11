@@ -1,7 +1,9 @@
 """Main MCP server implementation for Datawrapper chart creation."""
 
+import contextlib
 import json
-from typing import Any, Sequence, cast
+from collections.abc import Sequence
+from typing import Any, cast
 
 from fastmcp import FastMCP
 from fastmcp.tools import ToolResult
@@ -10,12 +12,6 @@ from prefab_ui.app import PrefabApp
 from prefab_ui.components import Column, Image, Text
 
 from .config import CHART_CLASSES
-from .middleware import (
-    BearerTokenMiddleware,
-    ErrorHandlingMiddleware,
-    RateLimitingMiddleware,
-    TimingMiddleware,
-)
 from .handlers import create_chart as create_chart_handler
 from .handlers import delete_chart as delete_chart_handler
 from .handlers import export_chart_png as export_chart_png_handler
@@ -23,6 +19,12 @@ from .handlers import get_chart_info as get_chart_info_handler
 from .handlers import get_chart_schema as get_chart_schema_handler
 from .handlers import publish_chart as publish_chart_handler
 from .handlers import update_chart as update_chart_handler
+from .middleware import (
+    BearerTokenMiddleware,
+    ErrorHandlingMiddleware,
+    RateLimitingMiddleware,
+    TimingMiddleware,
+)
 from .types import (
     CreateChartArgs,
     DeleteChartArgs,
@@ -150,7 +152,7 @@ async def get_chart_schema(chart_type: str) -> str:
     Returns:
         JSON schema for the chart type
     """
-    arguments = cast(GetChartSchemaArgs, {"chart_type": chart_type})
+    arguments = cast("GetChartSchemaArgs", {"chart_type": chart_type})
     result = await get_chart_schema_handler(arguments)
     return result[0].text
 
@@ -165,9 +167,9 @@ async def get_chart_schema(chart_type: str) -> str:
     ),
 )
 async def create_chart(
-    data: str | list | dict,
+    data: str | list[Any] | dict[str, Any],
     chart_type: str,
-    chart_config: dict | str,
+    chart_config: dict[str, Any] | str,
     access_token: str | None = None,
 ) -> ToolResult:
     """⚠️ THIS IS THE DATAWRAPPER INTEGRATION ⚠️
@@ -262,10 +264,9 @@ async def create_chart(
         json.loads(chart_config) if isinstance(chart_config, str) else chart_config
     )
     if isinstance(data, str):
-        try:
+        # It's a file path or CSV string, not JSON, if this doesn't parse.
+        with contextlib.suppress(json.JSONDecodeError, TypeError):
             data = json.loads(data)
-        except (json.JSONDecodeError, TypeError):
-            pass  # It's a file path or CSV string, not JSON
 
     args: dict[str, Any] = {
         "data": data,
@@ -274,7 +275,7 @@ async def create_chart(
     }
     if access_token:
         args["access_token"] = access_token
-    arguments = cast(CreateChartArgs, args)
+    arguments = cast("CreateChartArgs", args)
     chart_data, images = await create_chart_handler(arguments)
 
     chart_id = chart_data["chart_id"]
@@ -341,7 +342,7 @@ async def publish_chart(chart_id: str, access_token: str | None = None) -> ToolR
         Public URL plus an inline preview when available
     """
     arguments = cast(
-        PublishChartArgs,
+        "PublishChartArgs",
         {
             "chart_id": chart_id,
             **({"access_token": access_token} if access_token else {}),
@@ -434,7 +435,7 @@ async def get_chart(chart_id: str, access_token: str | None = None) -> str:
         Chart information including complete configuration and URLs
     """
     arguments = cast(
-        GetChartArgs,
+        "GetChartArgs",
         {
             "chart_id": chart_id,
             **({"access_token": access_token} if access_token else {}),
@@ -455,8 +456,8 @@ async def get_chart(chart_id: str, access_token: str | None = None) -> str:
 )
 async def update_chart(
     chart_id: str,
-    data: str | list | dict | None = None,
-    chart_config: dict | str | None = None,
+    data: str | list[Any] | dict[str, Any] | None = None,
+    chart_config: dict[str, Any] | str | None = None,
     access_token: str | None = None,
 ) -> ToolResult:
     """⚠️ DATAWRAPPER MCP TOOL ⚠️
@@ -511,10 +512,9 @@ async def update_chart(
         json.loads(chart_config) if isinstance(chart_config, str) else chart_config
     )
     if isinstance(data, str):
-        try:
+        # It's a file path or CSV string, not JSON, if this doesn't parse.
+        with contextlib.suppress(json.JSONDecodeError, TypeError):
             data = json.loads(data)
-        except (json.JSONDecodeError, TypeError):
-            pass  # It's a file path or CSV string, not JSON
 
     arguments: dict[str, Any] = {"chart_id": chart_id}
     if data is not None:
@@ -524,7 +524,7 @@ async def update_chart(
     if access_token:
         arguments["access_token"] = access_token
 
-    chart_data, images = await update_chart_handler(cast(UpdateChartArgs, arguments))
+    chart_data, images = await update_chart_handler(cast("UpdateChartArgs", arguments))
 
     edit_url = chart_data.get("edit_url", "")
     title = chart_data.get("title", "")
@@ -587,7 +587,7 @@ async def delete_chart(chart_id: str, access_token: str | None = None) -> str:
     """
     result = await delete_chart_handler(
         cast(
-            DeleteChartArgs,
+            "DeleteChartArgs",
             {
                 "chart_id": chart_id,
                 **({"access_token": access_token} if access_token else {}),
@@ -659,10 +659,10 @@ async def export_chart_png(
     if access_token:
         args["access_token"] = access_token
 
-    return await export_chart_png_handler(cast(ExportChartPngArgs, args))
+    return await export_chart_png_handler(cast("ExportChartPngArgs", args))
 
 
-def main():
+def main() -> None:
     """Run the MCP server with stdio transport."""
     mcp.run(transport="stdio")
 

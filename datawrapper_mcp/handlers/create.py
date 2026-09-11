@@ -4,9 +4,10 @@ from typing import Any
 
 from mcp.types import ImageContent
 
-from ..config import CHART_CLASSES
-from ..types import CreateChartArgs
-from ..utils import json_to_dataframe
+from datawrapper_mcp.config import CHART_CLASSES
+from datawrapper_mcp.types import CreateChartArgs
+from datawrapper_mcp.utils import json_to_dataframe
+
 from .preview import try_export_preview
 
 
@@ -32,10 +33,10 @@ async def create_chart(
         chart = chart_class.model_validate(arguments["chart_config"])
     except Exception as e:
         raise ValueError(
-            f"Invalid chart configuration: {str(e)}\n\n"
+            f"Invalid chart configuration: {e!s}\n\n"
             f"Use get_chart_schema with chart_type '{chart_type}' "
             f"to see the valid schema."
-        )
+        ) from e
 
     # Set data on chart instance
     chart.data = df

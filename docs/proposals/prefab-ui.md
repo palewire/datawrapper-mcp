@@ -106,10 +106,20 @@ The tools change from returning `Sequence[TextContent | ImageContent]` to return
 ```python
 from prefab_ui.app import PrefabApp
 from prefab_ui.components import (
-    Column, Row, Text, Button, Image, Link, Badge, Card, CardContent, CardFooter,
+    Column,
+    Row,
+    Text,
+    Button,
+    Image,
+    Link,
+    Badge,
+    Card,
+    CardContent,
+    CardFooter,
 )
 from prefab_ui.actions.mcp import CallTool
 from fastmcp.tools import ToolResult
+
 
 @mcp.tool(app=True)
 async def create_chart(

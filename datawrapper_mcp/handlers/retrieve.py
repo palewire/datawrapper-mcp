@@ -2,11 +2,11 @@
 
 import json
 
-from mcp.types import TextContent
 from datawrapper import get_chart
+from mcp.types import TextContent
 
-from ..config import API_TYPE_TO_SIMPLIFIED
-from ..types import GetChartArgs
+from datawrapper_mcp.config import API_TYPE_TO_SIMPLIFIED
+from datawrapper_mcp.types import GetChartArgs
 
 
 async def get_chart_info(arguments: GetChartArgs) -> list[TextContent]:
