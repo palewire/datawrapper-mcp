@@ -23,4 +23,4 @@ recursive-include datawrapper_mcp py.typed
 recursive-include deployment *.py *.txt
 recursive-include docs *.md
 recursive-include scripts *.py
-recursive-include tests *.py
+recursive-include tests *.json *.py

@@ -1,0 +1,531 @@
+{
+  "resources": {
+    "datawrapper://chart-types": {
+      "description": "List of available Datawrapper chart types and their Pydantic schemas.",
+      "meta": {
+        "fastmcp": {
+          "tags": []
+        }
+      },
+      "mime_type": "text/plain",
+      "name": "chart_types_resource",
+      "uri": "datawrapper://chart-types"
+    },
+    "ui://prefab/tool/0e81d0d02e3f/renderer.html": {
+      "meta": {
+        "fastmcp": {
+          "tags": []
+        },
+        "ui": {
+          "csp": {
+            "resourceDomains": [
+              "https://cdn.jsdelivr.net"
+            ]
+          }
+        }
+      },
+      "mime_type": "text/html;profile=mcp-app",
+      "name": "Prefab Renderer (update_chart)",
+      "uri": "ui://prefab/tool/0e81d0d02e3f/renderer.html"
+    },
+    "ui://prefab/tool/4751e697a18d/renderer.html": {
+      "meta": {
+        "fastmcp": {
+          "tags": []
+        },
+        "ui": {
+          "csp": {
+            "resourceDomains": [
+              "https://cdn.jsdelivr.net"
+            ]
+          }
+        }
+      },
+      "mime_type": "text/html;profile=mcp-app",
+      "name": "Prefab Renderer (create_chart)",
+      "uri": "ui://prefab/tool/4751e697a18d/renderer.html"
+    },
+    "ui://prefab/tool/7e3fba315d34/renderer.html": {
+      "meta": {
+        "fastmcp": {
+          "tags": []
+        },
+        "ui": {
+          "csp": {
+            "resourceDomains": [
+              "https://cdn.jsdelivr.net"
+            ]
+          }
+        }
+      },
+      "mime_type": "text/html;profile=mcp-app",
+      "name": "Prefab Renderer (publish_chart)",
+      "uri": "ui://prefab/tool/7e3fba315d34/renderer.html"
+    }
+  },
+  "tools": {
+    "create_chart": {
+      "annotations": {
+        "destructive_hint": false,
+        "idempotent_hint": false,
+        "open_world_hint": true,
+        "read_only_hint": false
+      },
+      "description": "\u26a0\ufe0f THIS IS THE DATAWRAPPER INTEGRATION \u26a0\ufe0f\nUse this MCP tool for ALL Datawrapper chart creation.\n\nDO NOT:\n\u274c Install the 'datawrapper' Python package\n\u274c Use the Datawrapper API directly\n\u274c Import 'from datawrapper import ...'\n\u274c Run pip install datawrapper\n\nThis MCP server IS the complete Datawrapper integration. All Datawrapper operations\nshould use the MCP tools provided by this server.\n\n---\n\nCreate a Datawrapper chart with full control using Pydantic models.\nThis allows you to specify all chart properties including title, description,\nvisualization settings, axes, colors, and more. The chart_config should\nbe a complete Pydantic model dict matching the schema for the chosen chart type.\n\nBEST PRACTICES:\n- Start simple, then add customization based on user feedback\n- Only apply styling when requested or when it significantly improves readability\n- Let Datawrapper handle axis scaling automatically unless there's a specific reason to override\n\nQUICK EXAMPLES:\n\n1. Basic chart with title:\n   chart_config = {\n       \"title\": \"Monthly Sales\",\n       \"intro\": \"Sales data for Q1 2024\"\n   }\n\n2. Chart with custom colors:\n   chart_config = {\n       \"title\": \"Product Comparison\",\n       \"color_category\": {\n           \"Product A\": \"#1f77b4\",\n           \"Product B\": \"#ff7f0e\"\n       }\n   }\n\n3. Styled line chart:\n   chart_config = {\n       \"title\": \"Sales Trends\",\n       \"lines\": [\n           {\"column\": \"sales\", \"width\": \"style2\", \"interpolation\": \"curved\"}\n       ],\n       \"custom_range_y\": [0, 1000]\n   }\n\nSTYLING WORKFLOW:\n1. Use list_chart_types to see available chart types\n2. Use get_chart_schema to explore all options for your chosen type\n3. Refer to https://datawrapper.readthedocs.io/en/latest/ for detailed examples\n4. Build your chart_config with the desired styling properties\n\nCommon styling patterns:\n- Colors: {\"color_category\": {\"sales\": \"#1d81a2\", \"profit\": \"#15607a\"}}\n- Line styling: {\"lines\": [{\"column\": \"sales\", \"width\": \"style1\", \"interpolation\": \"curved\"}]}\n- Axis ranges: {\"custom_range_y\": [0, 100], \"custom_range_x\": [2020, 2024]}\n    NOTE: Datawrapper's automatic axis scaling is excellent. Only set custom ranges when\n    you need specific customization (e.g., comparing multiple charts, forcing zero baseline\n    for specific analytical reasons, or matching a house style guide).\n- Grid formatting: {\"y_grid_format\": \"0\", \"x_grid\": \"on\", \"y_grid\": \"on\"}\n- Tooltips: {\"tooltip_number_format\": \"00.00\", \"tooltip_x_format\": \"YYYY\"}\n- Annotations: {\"text_annotations\": [{\"x\": \"2023\", \"y\": 50, \"text\": \"Peak\"}]}\n\nSee the documentation for chart-type specific examples and advanced patterns.",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "access_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional Datawrapper API token. When provided, charts are\n          created in the caller's account (recommended). When omitted,\n          falls back to the server's DATAWRAPPER_ACCESS_TOKEN env var."
+          },
+          "chart_config": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "description": "Complete chart configuration as a Pydantic model dict"
+          },
+          "chart_type": {
+            "description": "Type of chart to create. Use list_chart_types to see all available types.\nCommon types: bar, line, area, arrow, column, multiple_column, scatter, stacked_bar",
+            "type": "string"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {},
+                "type": "array"
+              },
+              {
+                "additionalProperties": true,
+                "type": "object"
+              }
+            ],
+            "description": "Chart data. RECOMMENDED: Pass data inline as a list or dict.\nPREFERRED FORMATS (use these first):\n1. List of records (RECOMMENDED): [{\"year\": 2020, \"sales\": 100}, {\"year\": 2021, \"sales\": 150}]\n2. Dict of arrays: {\"year\": [2020, 2021], \"sales\": [100, 150]}\n3. JSON string of format 1 or 2: '[{\"year\": 2020, \"sales\": 100}]'\nALTERNATIVE (only for extremely large datasets where inline data is impractical):\n4. File path to CSV or JSON: \"/path/to/data.csv\" or \"/path/to/data.json\""
+          }
+        },
+        "required": [
+          "data",
+          "chart_type",
+          "chart_config"
+        ],
+        "type": "object"
+      },
+      "meta": {
+        "fastmcp": {
+          "tags": []
+        },
+        "ui": {
+          "resourceUri": "ui://prefab/tool/4751e697a18d/renderer.html"
+        }
+      },
+      "name": "create_chart",
+      "title": "Create Chart"
+    },
+    "delete_chart": {
+      "annotations": {
+        "destructive_hint": true,
+        "idempotent_hint": true,
+        "open_world_hint": true,
+        "read_only_hint": false
+      },
+      "description": "\u26a0\ufe0f DATAWRAPPER MCP TOOL \u26a0\ufe0f\nThis is part of the Datawrapper MCP server integration.\n\n---\n\nDelete a Datawrapper chart permanently.",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "access_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional Datawrapper API token. When provided, uses the\n          caller's account. When omitted, falls back to the server's\n          DATAWRAPPER_ACCESS_TOKEN env var."
+          },
+          "chart_id": {
+            "description": "ID of the chart to delete",
+            "type": "string"
+          }
+        },
+        "required": [
+          "chart_id"
+        ],
+        "type": "object"
+      },
+      "meta": {
+        "fastmcp": {
+          "tags": []
+        }
+      },
+      "name": "delete_chart",
+      "output_schema": {
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "x-fastmcp-wrap-result": true
+      },
+      "title": "Delete Chart"
+    },
+    "export_chart_png": {
+      "annotations": {
+        "destructive_hint": false,
+        "idempotent_hint": true,
+        "open_world_hint": true,
+        "read_only_hint": true
+      },
+      "description": "\u26a0\ufe0f DATAWRAPPER MCP TOOL \u26a0\ufe0f\nThis is part of the Datawrapper MCP server integration.\n\n---\n\nExport a Datawrapper chart as PNG and display it inline.\nThe chart must be created first using create_chart.\nSupports high-resolution output via the zoom parameter.\nIMPORTANT: Only use this tool when the user explicitly requests to see the chart image\nor export it as PNG. Do not automatically export charts after creation unless specifically asked.",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "access_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional Datawrapper API token. When provided, uses the\n          caller's account. When omitted, falls back to the server's\n          DATAWRAPPER_ACCESS_TOKEN env var."
+          },
+          "border_color": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Color of the border, e.g., '#FFFFFF' (optional)"
+          },
+          "border_width": {
+            "default": 0,
+            "description": "Margin around visualization in pixels",
+            "type": "integer"
+          },
+          "chart_id": {
+            "description": "ID of the chart to export",
+            "type": "string"
+          },
+          "height": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Height of the image in pixels (optional)"
+          },
+          "plain": {
+            "default": false,
+            "description": "If true, exports only the visualization without header/footer",
+            "type": "boolean"
+          },
+          "transparent": {
+            "default": false,
+            "description": "If true, exports with transparent background",
+            "type": "boolean"
+          },
+          "width": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Width of the image in pixels (optional)"
+          },
+          "zoom": {
+            "default": 2,
+            "description": "Scale multiplier for resolution, e.g., 2 = 2x resolution",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "chart_id"
+        ],
+        "type": "object"
+      },
+      "meta": {
+        "fastmcp": {
+          "tags": []
+        }
+      },
+      "name": "export_chart_png",
+      "title": "Export Chart Png"
+    },
+    "get_chart": {
+      "annotations": {
+        "destructive_hint": false,
+        "idempotent_hint": true,
+        "open_world_hint": true,
+        "read_only_hint": true
+      },
+      "description": "\u26a0\ufe0f DATAWRAPPER MCP TOOL \u26a0\ufe0f\nThis is part of the Datawrapper MCP server integration.\n\n---\n\nGet information about an existing Datawrapper chart,\nincluding its complete configuration, metadata, and URLs.\n\nThe returned configuration can be used to:\n- Understand how a chart is styled and configured\n- Adapt the configuration to a new dataset\n- Clone a chart's styling to create similar visualizations\n\nReturns:\n- chart_id: The chart's unique identifier\n- title: Chart title\n- type: Simplified chart type name (bar, line, stacked_bar, etc.) - same format\n        as used in list_chart_types and create_chart\n- config: Complete Pydantic model configuration including all styling,\n          colors, axes, tooltips, annotations, and other properties\n- public_url: Public URL if published\n- edit_url: Editor URL",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "access_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional Datawrapper API token. When provided, uses the\n          caller's account. When omitted, falls back to the server's\n          DATAWRAPPER_ACCESS_TOKEN env var."
+          },
+          "chart_id": {
+            "description": "ID of the chart to retrieve",
+            "type": "string"
+          }
+        },
+        "required": [
+          "chart_id"
+        ],
+        "type": "object"
+      },
+      "meta": {
+        "fastmcp": {
+          "tags": []
+        }
+      },
+      "name": "get_chart",
+      "output_schema": {
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "x-fastmcp-wrap-result": true
+      },
+      "title": "Get Chart"
+    },
+    "get_chart_schema": {
+      "annotations": {
+        "destructive_hint": false,
+        "idempotent_hint": true,
+        "open_world_hint": false,
+        "read_only_hint": true
+      },
+      "description": "\u26a0\ufe0f DATAWRAPPER MCP TOOL \u26a0\ufe0f\nThis is part of the Datawrapper MCP server integration.\n\n---\n\nGet the Pydantic JSON schema for a specific chart type. This is your primary tool\nfor discovering styling and configuration options.\n\nThe schema shows:\n- All available properties and their types\n- Enum values (e.g., line widths, interpolation methods)\n- Default values\n- Detailed descriptions for each property\n\nWORKFLOW: Use this tool first to explore options, then refer to\nhttps://datawrapper.readthedocs.io/en/latest/ for detailed examples and patterns\nshowing how to use these properties in practice.",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "chart_type": {
+            "description": "Chart type to get schema for",
+            "type": "string"
+          }
+        },
+        "required": [
+          "chart_type"
+        ],
+        "type": "object"
+      },
+      "meta": {
+        "fastmcp": {
+          "tags": []
+        }
+      },
+      "name": "get_chart_schema",
+      "output_schema": {
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "x-fastmcp-wrap-result": true
+      },
+      "title": "Get Chart Schema"
+    },
+    "list_chart_types": {
+      "annotations": {
+        "destructive_hint": false,
+        "idempotent_hint": true,
+        "open_world_hint": false,
+        "read_only_hint": true
+      },
+      "description": "\u26a0\ufe0f DATAWRAPPER MCP TOOL \u26a0\ufe0f\nThis is part of the Datawrapper MCP server integration.\n\n---\n\nList all available Datawrapper chart types with brief descriptions.\n\nUse this tool to discover which chart types you can create. After choosing a type,\nuse get_chart_schema(chart_type) to explore detailed configuration options.\n\nReturns:\n    List of available chart types with descriptions",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {},
+        "type": "object"
+      },
+      "meta": {
+        "fastmcp": {
+          "tags": []
+        }
+      },
+      "name": "list_chart_types",
+      "title": "List Chart Types"
+    },
+    "publish_chart": {
+      "annotations": {
+        "destructive_hint": false,
+        "idempotent_hint": true,
+        "open_world_hint": true,
+        "read_only_hint": false
+      },
+      "description": "\u26a0\ufe0f DATAWRAPPER MCP TOOL \u26a0\ufe0f\nThis is part of the Datawrapper MCP server integration.\n\n---\n\nPublish a Datawrapper chart to make it publicly accessible and render a preview in chat.\nIMPORTANT: Only use this tool when the user explicitly requests to publish the chart.\nDo not automatically publish charts after creation unless specifically asked.",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "access_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional Datawrapper API token. When provided, uses the\n          caller's account. When omitted, falls back to the server's\n          DATAWRAPPER_ACCESS_TOKEN env var."
+          },
+          "chart_id": {
+            "description": "ID of the chart to publish",
+            "type": "string"
+          }
+        },
+        "required": [
+          "chart_id"
+        ],
+        "type": "object"
+      },
+      "meta": {
+        "fastmcp": {
+          "tags": []
+        },
+        "ui": {
+          "resourceUri": "ui://prefab/tool/7e3fba315d34/renderer.html"
+        }
+      },
+      "name": "publish_chart",
+      "title": "Publish Chart"
+    },
+    "update_chart": {
+      "annotations": {
+        "destructive_hint": false,
+        "idempotent_hint": true,
+        "open_world_hint": true,
+        "read_only_hint": false
+      },
+      "description": "\u26a0\ufe0f DATAWRAPPER MCP TOOL \u26a0\ufe0f\nThis is part of the Datawrapper MCP server integration.\n\n---\n\nUpdate an existing Datawrapper chart's data or configuration using Pydantic models.\n\n\u26a0\ufe0f IMPORTANT LIMITATION: You CANNOT change the chart type with this tool.\nChart types are immutable once created. To change from one chart type to another\n(e.g., column \u2192 stacked_bar, or line \u2192 area), you must create a new chart instead.\n\nWHAT YOU CAN UPDATE:\n\u2022 Chart data (add/modify/replace data points)\n\u2022 Title, intro, byline, source information\n\u2022 Colors, styling, axes configuration\n\u2022 Tooltips, annotations, labels\n\u2022 Any other configuration options for the existing chart type\n\nWHAT YOU CANNOT UPDATE:\n\u2717 Chart type (bar, line, column, etc.) - this is permanent\n\nThe chart_config must use high-level Pydantic fields only (title, intro,\nbyline, source_name, source_url, etc.). Do NOT use low-level serialized structures\nlike 'metadata', 'visualize', or other internal API fields.\n\nSTYLING UPDATES:\nUse get_chart_schema to see available fields, then apply styling changes:\n- Colors: {\"color_category\": {\"sales\": \"#ff0000\"}}\n- Line properties: {\"lines\": [{\"column\": \"sales\", \"width\": \"style2\"}]}\n- Axis settings: {\"custom_range_y\": [0, 200], \"y_grid_format\": \"0,0\"}\n- Tooltips: {\"tooltip_number_format\": \"0.0\"}\n\nSee https://datawrapper.readthedocs.io/en/latest/ for detailed examples.\nThe provided config will be validated through Pydantic and merged with the existing\nchart configuration.",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "access_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional Datawrapper API token. When provided, uses the\n          caller's account. When omitted, falls back to the server's\n          DATAWRAPPER_ACCESS_TOKEN env var."
+          },
+          "chart_config": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Updated chart configuration using high-level Pydantic fields (optional)"
+          },
+          "chart_id": {
+            "description": "ID of the chart to update",
+            "type": "string"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "items": {},
+                "type": "array"
+              },
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "New chart data (optional). Same formats as create_chart."
+          }
+        },
+        "required": [
+          "chart_id"
+        ],
+        "type": "object"
+      },
+      "meta": {
+        "fastmcp": {
+          "tags": []
+        },
+        "ui": {
+          "resourceUri": "ui://prefab/tool/0e81d0d02e3f/renderer.html"
+        }
+      },
+      "name": "update_chart",
+      "title": "Update Chart"
+    }
+  }
+}

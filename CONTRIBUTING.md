@@ -40,6 +40,14 @@ make test
 
 See `make help` for the full list of available commands.
 
+`make test` includes a golden-snapshot test (`tests/test_schema_snapshot.py`)
+that compares the live MCP tool/resource schema against
+`tests/snapshots/mcp_schema.json`, to catch wire-format drift from FastMCP or
+MCP SDK upgrades. If a diff there is expected — a deliberate tool/resource
+change, or a dependency upgrade that legitimately changes the schema —
+regenerate it with `make update-schema-snapshot` and review the diff before
+committing it.
+
 Before you release your package, be sure to customize the `setup.py` file to fit your project.
 
 ## Releasing
