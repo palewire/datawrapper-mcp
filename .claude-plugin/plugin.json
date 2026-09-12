@@ -1,7 +1,7 @@
 {
   "name": "datawrapper-mcp",
   "description": "Create, update and publish Datawrapper charts from an AI assistant",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "author": {
     "name": "Ben Welsh",
     "email": "b@palewi.re"
@@ -10,21 +10,12 @@
   "repository": "https://github.com/palewire/datawrapper-mcp",
   "license": "MIT",
   "keywords": ["datawrapper", "charts", "visualization", "mcp"],
-  "userConfig": {
-    "datawrapper_token": {
-      "type": "string",
-      "title": "Datawrapper API Token",
-      "description": "Your personal Datawrapper API token, from Settings > API Tokens in your Datawrapper account",
-      "sensitive": true,
-      "required": true
-    }
-  },
   "mcpServers": {
     "datawrapper": {
       "command": "uvx",
       "args": ["datawrapper-mcp"],
       "env": {
-        "DATAWRAPPER_ACCESS_TOKEN": "${user_config.datawrapper_token}"
+        "DATAWRAPPER_ACCESS_TOKEN": "${DATAWRAPPER_ACCESS_TOKEN}"
       }
     }
   }
