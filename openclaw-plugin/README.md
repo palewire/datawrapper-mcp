@@ -31,15 +31,15 @@ openclaw gateway restart
 
 ## What this plugin does
 
-This is a manifest-only native OpenClaw plugin, not a reimplementation: its
-`openclaw.plugin.json` declares a single static `mcpServers` entry that tells
-OpenClaw to launch `datawrapper-mcp` (installed on demand via `uvx`) as a
-stdio MCP server. There is no plugin code — OpenClaw includes the server
-directly from that manifest field while the plugin is enabled, exposing every
-tool the server implements — creating, updating, publishing, exporting and
-deleting charts. See the [main repository](https://github.com/palewire/datawrapper-mcp)
-for the full tool list and how the server itself works.
+This is a thin wrapper, not a reimplementation: its `openclaw.plugin.json`
+declares a single static `mcpServers` entry that tells OpenClaw to launch
+`datawrapper-mcp` (installed on demand via `uvx`) as a stdio MCP server.
+OpenClaw includes the server directly from that manifest field while the
+plugin is enabled, exposing every tool the server implements — creating,
+updating, publishing, exporting and deleting charts. See the
+[main repository](https://github.com/palewire/datawrapper-mcp) for the full
+tool list and how the server itself works.
 
-`clawhub package validate` reports one expected warning
-(`package-openclaw-entry-missing`) since there is intentionally no runtime
-entrypoint to declare.
+`index.js` registers no capabilities of its own — it exists only because
+ClawHub's registry requires a declared entrypoint for a published plugin
+package.
