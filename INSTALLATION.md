@@ -307,6 +307,71 @@ Add this to `openclaw.json`:
 }
 ```
 
+## Linked-Account Mode (org-wide connectors)
+
+If you're registering this server as a **single, admin-provisioned custom
+connector** shared by an entire Claude Team/Enterprise org (rather than each
+person adding their own connector with their own header), Claude's connector
+model has no way to attach a different credential per user to that one
+connector — request-header auth (`static_headers`) is explicitly a single
+credential shared by everyone who uses it. If everyone should still create
+charts under their *own* Datawrapper account rather than one shared one,
+turn on linked-account mode instead.
+
+In this mode the server presents Claude with a small OAuth-shaped
+authorization flow: the first time a user calls a tool, Claude redirects
+them to a page that asks them to paste their own Datawrapper API token, then
+exchanges that for an opaque access token Claude uses from then on. The
+server resolves that opaque token back to the real Datawrapper token
+internally — see `datawrapper_mcp/oauth/__init__.py` for the full design
+rationale. Datawrapper itself has no OAuth server or SSO integration, so
+this exists purely to satisfy what an OAuth-based MCP client expects; there
+is no actual third-party sign-in step, just a form.
+
+### Enabling it
+
+Set these environment variables (in addition to the usual `MCP_SERVER_HOST`/
+`MCP_SERVER_PORT`):
+
+```bash
+REQUIRE_LINKED_ACCOUNT=true
+TOKEN_ENCRYPTION_KEY=<a Fernet key - see below>
+OAUTH_STORE_PATH=/data/oauth_store.db   # must be on persistent storage
+```
+
+Generate a key for `TOKEN_ENCRYPTION_KEY` once, and keep it secret and
+stable across restarts (rotating it invalidates every linked account):
+
+```bash
+python -c "from datawrapper_mcp.oauth.storage import generate_encryption_key as g; print(g())"
+```
+
+### Persistent storage is required
+
+`OAUTH_STORE_PATH` points to a SQLite file holding every user's linked
+Datawrapper token (encrypted at rest with `TOKEN_ENCRYPTION_KEY`). **This
+path must be on a persistent volume.** On a container platform with an
+ephemeral filesystem (the default on most, including Fly.io machines without
+a mounted volume), every linked account is lost on the next restart or
+redeploy, and every user has to re-link.
+
+### Known limitations (v1)
+
+- No refresh-token grant: issued access tokens are long-lived (1 year)
+  rather than short-lived-and-refreshed, since a Datawrapper API token
+  doesn't expire on its own either. A user who wants to revoke their link
+  today needs the operator to delete their row from the store directly;
+  there's no self-service revocation UI yet.
+- No identity verification beyond "whoever clicks through this specific
+  authorization link": the form doesn't verify the person pasting a token is
+  who they claim to be beyond the fact that they're the one who initiated
+  the Claude connection in the first place. This is adequate as a
+  self-service link (the user only ever registers *their own* token, in
+  *their own* browser session), but hasn't been hardened against more
+  sophisticated identity-spoofing scenarios.
+- Storage is a single SQLite file, which is fine for a single-instance
+  deployment but doesn't support multiple replicas sharing state.
+
 ## Kubernetes Deployment
 
 For enterprise deployments, this server can be deployed to Kubernetes using HTTP transport.

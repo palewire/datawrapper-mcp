@@ -14,3 +14,6 @@ prefab-ui==0.20.2
 # HTTP server dependencies (included with mcp[cli] but explicit for clarity)
 starlette>=1.0.1
 uvicorn>=0.23.0
+
+# Linked-account OAuth flow (datawrapper_mcp.oauth)
+cryptography>=42.0.0
