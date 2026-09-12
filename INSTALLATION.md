@@ -47,22 +47,49 @@ Then add this to `claude_desktop_config.json`:
 
 Restart Claude Desktop after editing the file.
 
-## Claude.ai
+## Claude (Claude.ai, Desktop, and mobile via a remote connector)
 
-Claude.ai only connects to servers reachable over HTTPS, so this requires a running
-streamable-http deployment (see [Kubernetes Deployment](#kubernetes-deployment) below,
-or run `deployment/app.py` behind any HTTPS-capable host).
+Adding this as a **remote connector** (rather than the local `claude_desktop_config.json`
+method above) works identically across Claude.ai, Claude Desktop, and Claude
+mobile — they share the same connector infrastructure and account settings. It
+requires a running streamable-http deployment (see
+[Kubernetes Deployment](#kubernetes-deployment) below, or run `deployment/app.py`
+behind any HTTPS-capable host).
 
-1. Go to Settings > Connectors (or, for Team/Enterprise plans, Organization Settings > Connectors)
+**Personal connector, your own Datawrapper account (works today, no admin needed)**
+
+This is the option to reach for when you want each person to create charts
+under *their own* Datawrapper account rather than one shared credential, and
+you're not relying on an organization admin to provision a single connector for
+everyone. Each person does this once, for their own account:
+
+1. Go to **Customize > Connectors** (this is a personal setting, separate from
+   anything an organization admin may have already added for you)
 2. Click **Add custom connector**
 3. Enter a name and your server's `/mcp` URL, e.g. `https://your-domain.example/mcp`
-4. Click **Add**
-5. In a chat, click the **+** button, choose **Connectors**, and enable `datawrapper`
+4. Continue to the authentication step and choose **No sign-in**
+5. Under **Request headers**, add a header named `Authorization` with the value
+   `Bearer <your-datawrapper-api-token>` (get a token from
+   [app.datawrapper.de/account/api-tokens](https://app.datawrapper.de/account/api-tokens)) —
+   include the word `Bearer` and the space; Claude sends the value exactly as entered
+6. Mark the header **Required**, then click **Add**
+7. In a chat, click **+** > **Connectors**, and enable it
 
-To use your own Datawrapper account rather than the server operator's, see
-[Using Your Own Token](README.md#using-your-own-token-hosted-deployments) for the
-`Authorization: Bearer` header pattern — Claude.ai's Advanced settings let you set
-custom headers when adding the connector.
+Claude stores the header value securely and never displays it again. Note: the
+**Request headers** option is currently in beta and may not be visible to every
+account yet — if you don't see it, only the shared-credential option below is
+available to you for now.
+
+**Shared connector, everyone uses the same credential (admin-provisioned)**
+
+If an organization admin is adding this once for the whole org (Team/Enterprise
+**Organization Settings > Connectors**), the same **No sign-in** + **Request
+headers** flow above works there too — but the credential is shared by
+everyone who uses that connector, not per-person. Claude has no way to attach
+a different header value per user to a single connector, so if you need
+per-person Datawrapper accounts on an admin-provisioned, org-wide connector
+instead, an OAuth-based "linked account" mode that solves this is in
+development — see [issue #57](https://github.com/palewire/datawrapper-mcp/issues/57).
 
 ## Claude Code
 
