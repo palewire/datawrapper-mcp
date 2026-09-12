@@ -1,5 +1,6 @@
 """Handler for deleting Datawrapper charts."""
 
+import asyncio
 import json
 
 from datawrapper import get_chart
@@ -13,9 +14,11 @@ async def delete_chart(arguments: DeleteChartArgs) -> list[TextContent]:
     chart_id = arguments["chart_id"]
     token = arguments.get("access_token")
 
-    # Get chart and delete using Pydantic instance method
-    chart = get_chart(chart_id, access_token=token)
-    chart.delete(access_token=token)
+    # Get chart and delete using Pydantic instance method. Both are
+    # synchronous and network-bound, so run them off the event loop
+    # (see export.py/preview.py).
+    chart = await asyncio.to_thread(get_chart, chart_id, access_token=token)
+    await asyncio.to_thread(chart.delete, access_token=token)
 
     result = {
         "chart_id": chart_id,

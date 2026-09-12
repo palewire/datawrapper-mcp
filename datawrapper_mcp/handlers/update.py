@@ -1,5 +1,6 @@
 """Handler for updating Datawrapper charts."""
 
+import asyncio
 from typing import Any
 
 from datawrapper import get_chart
@@ -22,8 +23,10 @@ async def update_chart(
     chart_id = arguments["chart_id"]
     token = arguments.get("access_token")
 
-    # Get chart using factory function - returns correct Pydantic class instance
-    chart = get_chart(chart_id, access_token=token)
+    # Get chart using factory function - returns correct Pydantic class
+    # instance. Synchronous and network-bound, so run it off the event loop
+    # (see export.py/preview.py).
+    chart = await asyncio.to_thread(get_chart, chart_id, access_token=token)
 
     # Update data if provided
     if "data" in arguments:
@@ -57,7 +60,7 @@ async def update_chart(
             ) from e
 
     # Update using Pydantic instance method
-    chart.update(access_token=token)
+    await asyncio.to_thread(chart.update, access_token=token)
 
     metadata: dict[str, Any] = {
         "chart_id": chart.chart_id,

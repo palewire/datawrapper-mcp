@@ -1,5 +1,6 @@
 """Handler for retrieving chart information."""
 
+import asyncio
 import json
 
 from datawrapper import get_chart
@@ -14,8 +15,9 @@ async def get_chart_info(arguments: GetChartArgs) -> list[TextContent]:
     chart_id = arguments["chart_id"]
     token = arguments.get("access_token")
 
-    # Get chart using factory function
-    chart = get_chart(chart_id, access_token=token)
+    # Get chart using factory function. Synchronous and network-bound, so
+    # run it off the event loop (see export.py/preview.py).
+    chart = await asyncio.to_thread(get_chart, chart_id, access_token=token)
 
     # Get the complete config
     config = chart.model_dump()
