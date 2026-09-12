@@ -120,4 +120,4 @@ over the header. When neither is provided, the server falls back to its
 | Cursor          | `.cursor/mcp.json`           | stdio or streamable-http |
 | ChatGPT         | Dev Mode settings            | streamable-http only     |
 | OpenAI Codex    | `~/.codex/config.toml`       | stdio                    |
-| OpenClaw        | `openclaw.json`              | stdio                    |
+| OpenClaw        | [ClawHub plugin](https://clawhub.ai/palewire/plugins/datawrapper-mcp) or `openclaw.json` | stdio |
