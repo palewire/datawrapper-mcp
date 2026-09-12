@@ -440,6 +440,60 @@ class TestDeleteChart:
         assert "abc123" in text
 
 
+class TestCheckDatawrapperConnection:
+    """check_datawrapper_connection through the full MCP stack."""
+
+    async def test_reports_authenticated_account(self, client, mock_api_token):
+        mock_account = MagicMock()
+        mock_account.get_my_account.return_value = {
+            "id": 7,
+            "email": "ben@example.com",
+            "name": "Ben",
+        }
+
+        with patch(
+            "datawrapper_mcp.handlers.whoami.Datawrapper", return_value=mock_account
+        ):
+            result = await client.call_tool("check_datawrapper_connection", {})
+
+        assert not result.is_error
+        data = json.loads(result.content[0].text)
+        assert data["email"] == "ben@example.com"
+        assert data["connected"] is True
+
+    async def test_uses_explicit_access_token_over_header(self, client):
+        """An explicit access_token argument should be forwarded, like other tools."""
+        mock_account = MagicMock()
+        mock_account.get_my_account.return_value = {"id": 1, "email": "x@example.com"}
+
+        with patch(
+            "datawrapper_mcp.handlers.whoami.Datawrapper", return_value=mock_account
+        ) as mock_class:
+            result = await client.call_tool(
+                "check_datawrapper_connection",
+                {"access_token": "explicit_token_xyz"},
+            )
+
+        assert not result.is_error
+        mock_class.assert_called_once_with(access_token="explicit_token_xyz")
+
+    async def test_rejected_token_raises_troubleshooting_error(self, client):
+        from fastmcp.exceptions import ToolError
+
+        mock_account = MagicMock()
+        mock_account.get_my_account.side_effect = Exception(
+            "Request failed with status code 401. Response content: b''"
+        )
+
+        with patch(
+            "datawrapper_mcp.handlers.whoami.Datawrapper", return_value=mock_account
+        ):
+            with pytest.raises(ToolError, match="rejected this token"):
+                await client.call_tool(
+                    "check_datawrapper_connection", {"access_token": "bad"}
+                )
+
+
 class TestExportChartPng:
     """export_chart_png through the full MCP stack."""
 
