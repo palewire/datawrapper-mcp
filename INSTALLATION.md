@@ -88,8 +88,8 @@ headers** flow above works there too — but the credential is shared by
 everyone who uses that connector, not per-person. Claude has no way to attach
 a different header value per user to a single connector, so if you need
 per-person Datawrapper accounts on an admin-provisioned, org-wide connector
-instead, an OAuth-based "linked account" mode that solves this is in
-development — see [issue #57](https://github.com/palewire/datawrapper-mcp/issues/57).
+instead, see [Linked-Account Mode](#linked-account-mode-org-wide-connectors)
+below, which solves this with an OAuth-based per-user token exchange.
 
 ## Claude Code
 
