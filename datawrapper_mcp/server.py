@@ -5,7 +5,8 @@ import json
 from collections.abc import Sequence
 from typing import Any, cast
 
-from fastmcp import FastMCP
+from fastmcp import Context, FastMCP
+from fastmcp.exceptions import ToolError
 from fastmcp.tools import ToolResult
 from mcp.types import ImageContent, TextContent, ToolAnnotations
 from prefab_ui.app import PrefabApp
@@ -617,13 +618,18 @@ async def update_chart(
         open_world_hint=True,
     )
 )
-async def delete_chart(chart_id: str, access_token: str | None = None) -> str:
+async def delete_chart(
+    chart_id: str,
+    access_token: str | None = None,
+    ctx: Context = None,  # type: ignore[assignment]  # ty: ignore[invalid-parameter-default]
+) -> str:
     """⚠️ DATAWRAPPER MCP TOOL ⚠️
     This is part of the Datawrapper MCP server integration.
 
     ---
 
-    Delete a Datawrapper chart permanently.
+    Delete a Datawrapper chart permanently. Asks the user to confirm first,
+    when the client supports it.
 
     Args:
         chart_id: ID of the chart to delete
@@ -634,6 +640,23 @@ async def delete_chart(chart_id: str, access_token: str | None = None) -> str:
     Returns:
         Confirmation message
     """
+    try:
+        confirmation = await ctx.elicit(
+            f"Permanently delete chart {chart_id}? This cannot be undone.",
+            response_type=bool,
+        )
+    except ToolError:
+        # Elicitation isn't available on this connection (e.g. the client's
+        # negotiated MCP protocol version has no server-initiated back-channel
+        # for it). Fall back to the pre-elicitation behavior rather than
+        # blocking deletion entirely.
+        confirmation = None
+
+    if confirmation is not None and (
+        confirmation.action != "accept" or confirmation.data is not True
+    ):
+        return f"Deletion of chart {chart_id} was not confirmed. Nothing was deleted."
+
     result = await delete_chart_handler(
         cast(
             "DeleteChartArgs",

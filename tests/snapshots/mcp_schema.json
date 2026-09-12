@@ -191,7 +191,7 @@
         "open_world_hint": true,
         "read_only_hint": false
       },
-      "description": "\u26a0\ufe0f DATAWRAPPER MCP TOOL \u26a0\ufe0f\nThis is part of the Datawrapper MCP server integration.\n\n---\n\nDelete a Datawrapper chart permanently.",
+      "description": "\u26a0\ufe0f DATAWRAPPER MCP TOOL \u26a0\ufe0f\nThis is part of the Datawrapper MCP server integration.\n\n---\n\nDelete a Datawrapper chart permanently. Asks the user to confirm first,\nwhen the client supports it.",
       "input_schema": {
         "additionalProperties": false,
         "properties": {

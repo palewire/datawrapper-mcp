@@ -6,11 +6,16 @@ middleware (error handling, rate limiting, timing), and content serialization.
 """
 
 import json
-from unittest.mock import MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 from datawrapper import BarChart
 from fastmcp import Client
+from fastmcp.server.elicitation import (
+    AcceptedElicitation,
+    CancelledElicitation,
+    DeclinedElicitation,
+)
 
 from datawrapper_mcp.server import mcp
 
@@ -438,6 +443,87 @@ class TestDeleteChart:
         assert not result.is_error
         text = result.content[0].text
         assert "abc123" in text
+
+    async def test_falls_back_to_deleting_when_elicitation_unavailable(
+        self, client, mock_api_token, mock_existing_chart_flow
+    ):
+        # No elicitation handler is registered on this client, matching a
+        # client whose negotiated MCP protocol has no back-channel for
+        # server-initiated elicitation. ctx.elicit() should raise ToolError
+        # internally, and the tool should fall back to its pre-elicitation
+        # behavior rather than blocking deletion entirely.
+        mock_existing_chart_flow.delete.return_value = None
+
+        result = await client.call_tool("delete_chart", {"chart_id": "abc123"})
+
+        assert not result.is_error
+        mock_existing_chart_flow.delete.assert_called_once()
+
+    async def test_confirmed_deletion_proceeds(
+        self, mock_api_token, mock_existing_chart_flow
+    ):
+        mock_existing_chart_flow.delete.return_value = None
+
+        with patch(
+            "fastmcp.Context.elicit",
+            new=AsyncMock(return_value=AcceptedElicitation(data=True)),
+        ):
+            async with Client(transport=mcp) as confirming_client:
+                result = await confirming_client.call_tool(
+                    "delete_chart", {"chart_id": "abc123"}
+                )
+
+        assert not result.is_error
+        mock_existing_chart_flow.delete.assert_called_once()
+
+    async def test_declined_deletion_is_not_performed(
+        self, mock_api_token, mock_existing_chart_flow
+    ):
+        with patch(
+            "fastmcp.Context.elicit",
+            new=AsyncMock(return_value=DeclinedElicitation()),
+        ):
+            async with Client(transport=mcp) as declining_client:
+                result = await declining_client.call_tool(
+                    "delete_chart", {"chart_id": "abc123"}
+                )
+
+        assert not result.is_error
+        assert "not confirmed" in result.content[0].text.lower()
+        mock_existing_chart_flow.delete.assert_not_called()
+
+    async def test_rejecting_confirmation_is_not_performed(
+        self, mock_api_token, mock_existing_chart_flow
+    ):
+        # Accepted, but with data=False (e.g. an unusual client that surfaces
+        # the boolean prompt as an accepted form with a "no" value).
+        with patch(
+            "fastmcp.Context.elicit",
+            new=AsyncMock(return_value=AcceptedElicitation(data=False)),
+        ):
+            async with Client(transport=mcp) as declining_client:
+                result = await declining_client.call_tool(
+                    "delete_chart", {"chart_id": "abc123"}
+                )
+
+        assert not result.is_error
+        assert "not confirmed" in result.content[0].text.lower()
+        mock_existing_chart_flow.delete.assert_not_called()
+
+    async def test_cancelled_deletion_is_not_performed(
+        self, mock_api_token, mock_existing_chart_flow
+    ):
+        with patch(
+            "fastmcp.Context.elicit",
+            new=AsyncMock(return_value=CancelledElicitation()),
+        ):
+            async with Client(transport=mcp) as cancelling_client:
+                result = await cancelling_client.call_tool(
+                    "delete_chart", {"chart_id": "abc123"}
+                )
+
+        assert not result.is_error
+        mock_existing_chart_flow.delete.assert_not_called()
 
 
 class TestCheckDatawrapperConnection:
