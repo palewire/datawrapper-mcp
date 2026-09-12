@@ -1,6 +1,6 @@
 {
   "name": "datawrapper-mcp",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Create, update and publish Datawrapper charts from an AI assistant",
   "main": "index.js",
   "openclaw": {
