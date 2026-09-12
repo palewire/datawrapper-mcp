@@ -100,13 +100,16 @@ claude plugin marketplace add palewire/datawrapper-mcp
 claude plugin install datawrapper-mcp@datawrapper-mcp
 ```
 
-You should be prompted for your Datawrapper API token during install. If
-you aren't prompted (or need to change it later), set `DATAWRAPPER_ACCESS_TOKEN`
-in your environment before starting Claude Code instead — see the "Using
-uvx" section below for the plain `.mcp.json` equivalent, which accepts a
-literal token value with no environment variable required. See
-[`.claude-plugin/`](.claude-plugin/) in this repository for what gets
-installed.
+Set `DATAWRAPPER_ACCESS_TOKEN` in your environment before starting Claude
+Code. On macOS, a GUI-launched app (not started from a terminal) won't see
+a variable set in your shell profile — run `launchctl setenv
+DATAWRAPPER_ACCESS_TOKEN your-token-here` once, then fully quit and
+relaunch the app. See [`.claude-plugin/`](.claude-plugin/) in this
+repository for what gets installed.
+
+If you'd rather avoid environment variables entirely, skip the plugin and
+use the plain `.mcp.json` method in the "Using uvx" section below, which
+accepts a literal token value with no environment variable required.
 
 **Using uvx**
 
