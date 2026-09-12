@@ -7,6 +7,7 @@ name = "datawrapper-mcp"
 dynamic = ["version"]
 requires-python = ">=3.10"
 dependencies = [
+    "cryptography>=42.0.0",
     "datawrapper>=2.0.14",
     "fastmcp[apps]==4.0.3",
     "mcp>=2.0.0,<3.0.0",
