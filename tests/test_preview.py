@@ -18,7 +18,7 @@ class TestTryExportPreview:
 
         assert result is not None
         assert result.type == "image"
-        assert result.mimeType == "image/png"
+        assert result.mime_type == "image/png"
         expected_base64 = base64.b64encode(b"PNG_IMAGE_DATA").decode("utf-8")
         assert result.data == expected_base64
         mock_chart.export_png.assert_called_once_with(zoom=1, access_token=None)
@@ -72,7 +72,7 @@ class TestCreateChartPreview:
         assert metadata["title"] == "Test Chart"
         assert len(images) == 1
         assert images[0].type == "image"
-        assert images[0].mimeType == "image/png"
+        assert images[0].mime_type == "image/png"
 
     async def test_create_without_preview_on_export_failure(self, mock_api_token):
         """Test that create_chart returns only metadata when export fails."""
@@ -131,7 +131,7 @@ class TestUpdateChartPreview:
         assert "chart_id" in metadata
         assert len(images) == 1
         assert images[0].type == "image"
-        assert images[0].mimeType == "image/png"
+        assert images[0].mime_type == "image/png"
 
     async def test_update_without_preview_on_export_failure(
         self, mock_api_token, mock_get_chart

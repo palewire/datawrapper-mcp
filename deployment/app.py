@@ -2,6 +2,7 @@
 
 import os
 
+from mcp.types import LATEST_PROTOCOL_VERSION
 from starlette.requests import Request
 from starlette.responses import JSONResponse
 
@@ -20,7 +21,8 @@ async def well_known_mcp(request: Request) -> JSONResponse:
     return JSONResponse(
         {
             "mcp": {
-                "versions": ["2025-11-25"],
+                # Read from the installed SDK so this never goes stale across upgrades.
+                "versions": [LATEST_PROTOCOL_VERSION],
                 "endpoint": "/mcp",
                 "name": "datawrapper-mcp",
                 "description": "Create Datawrapper charts via MCP",

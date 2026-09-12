@@ -42,7 +42,7 @@ class TestExportChartPng:
             # Verify result
             assert len(result) == 1
             assert result[0].type == "image"
-            assert result[0].mimeType == "image/png"
+            assert result[0].mime_type == "image/png"
             expected_base64 = base64.b64encode(b"PNG_IMAGE_DATA").decode("utf-8")
             assert result[0].data == expected_base64
 
@@ -85,7 +85,7 @@ class TestExportChartPng:
             # Verify result
             assert len(result) == 1
             assert result[0].type == "image"
-            assert result[0].mimeType == "image/png"
+            assert result[0].mime_type == "image/png"
 
     async def test_export_without_border_parameters(self):
         """Test export_chart_png without border parameters."""
@@ -136,7 +136,7 @@ class TestExportChartPng:
             # Verify result
             assert len(result) == 1
             assert result[0].type == "image"
-            assert result[0].mimeType == "image/png"
+            assert result[0].mime_type == "image/png"
 
     async def test_export_with_only_border_width(self):
         """Test export_chart_png with only border_width (no color)."""
