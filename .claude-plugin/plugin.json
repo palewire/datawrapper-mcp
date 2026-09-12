@@ -1,7 +1,7 @@
 {
   "name": "datawrapper-mcp",
   "description": "Create, update and publish Datawrapper charts from an AI assistant",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "author": {
     "name": "Ben Welsh",
     "email": "b@palewi.re"
