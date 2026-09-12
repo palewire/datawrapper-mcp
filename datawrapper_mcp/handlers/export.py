@@ -49,6 +49,6 @@ async def export_chart_png(arguments: ExportChartPngArgs) -> list[ImageContent]:
         ImageContent(
             type="image",
             data=base64_data,
-            mimeType="image/png",
+            mime_type="image/png",
         )
     ]

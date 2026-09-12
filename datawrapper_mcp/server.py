@@ -79,10 +79,10 @@ async def chart_types_resource() -> str:
 
 @mcp.tool(
     annotations=ToolAnnotations(
-        readOnlyHint=True,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=False,
+        read_only_hint=True,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=False,
     )
 )
 async def list_chart_types() -> Sequence[TextContent | ImageContent]:
@@ -122,10 +122,10 @@ async def list_chart_types() -> Sequence[TextContent | ImageContent]:
 
 @mcp.tool(
     annotations=ToolAnnotations(
-        readOnlyHint=True,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=False,
+        read_only_hint=True,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=False,
     )
 )
 async def get_chart_schema(chart_type: str) -> str:
@@ -161,10 +161,10 @@ async def get_chart_schema(chart_type: str) -> str:
 @mcp.tool(
     app=True,
     annotations=ToolAnnotations(
-        readOnlyHint=False,
-        destructiveHint=False,
-        idempotentHint=False,
-        openWorldHint=True,
+        read_only_hint=False,
+        destructive_hint=False,
+        idempotent_hint=False,
+        open_world_hint=True,
     ),
 )
 async def create_chart(
@@ -298,7 +298,7 @@ async def create_chart(
     with Column(gap=4, css_class="p-4") as view:  # type: ignore[call-arg]
         if image_item and len(image_item.data) <= MAX_PREVIEW_BYTES:
             Image(
-                src=f"data:{image_item.mimeType};base64,{image_item.data}",
+                src=f"data:{image_item.mime_type};base64,{image_item.data}",
                 alt=title,
                 css_class="w-full rounded",  # type: ignore[call-arg]
             )
@@ -317,10 +317,10 @@ async def create_chart(
 @mcp.tool(
     app=True,
     annotations=ToolAnnotations(
-        readOnlyHint=False,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=False,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     ),
 )
 async def publish_chart(chart_id: str, access_token: str | None = None) -> ToolResult:
@@ -374,7 +374,7 @@ async def publish_chart(chart_id: str, access_token: str | None = None) -> ToolR
     with Column(gap=4, css_class="p-4") as view:  # type: ignore[call-arg]
         if image_item and len(image_item.data) <= MAX_PREVIEW_BYTES:
             Image(
-                src=f"data:{image_item.mimeType};base64,{image_item.data}",
+                src=f"data:{image_item.mime_type};base64,{image_item.data}",
                 alt=title or f"Chart {chart_id}",
                 css_class="w-full rounded",  # type: ignore[call-arg]
             )
@@ -396,10 +396,10 @@ async def publish_chart(chart_id: str, access_token: str | None = None) -> ToolR
 
 @mcp.tool(
     annotations=ToolAnnotations(
-        readOnlyHint=True,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=True,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
 async def get_chart(chart_id: str, access_token: str | None = None) -> str:
@@ -449,10 +449,10 @@ async def get_chart(chart_id: str, access_token: str | None = None) -> str:
 @mcp.tool(
     app=True,
     annotations=ToolAnnotations(
-        readOnlyHint=False,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=False,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     ),
 )
 async def update_chart(
@@ -545,7 +545,7 @@ async def update_chart(
     with Column(gap=4, css_class="p-4") as view:  # type: ignore[call-arg]
         if image_item and len(image_item.data) <= MAX_PREVIEW_BYTES:
             Image(
-                src=f"data:{image_item.mimeType};base64,{image_item.data}",
+                src=f"data:{image_item.mime_type};base64,{image_item.data}",
                 alt=title,
                 css_class="w-full rounded",  # type: ignore[call-arg]
             )
@@ -563,10 +563,10 @@ async def update_chart(
 
 @mcp.tool(
     annotations=ToolAnnotations(
-        readOnlyHint=False,
-        destructiveHint=True,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=False,
+        destructive_hint=True,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
 async def delete_chart(chart_id: str, access_token: str | None = None) -> str:
@@ -600,10 +600,10 @@ async def delete_chart(chart_id: str, access_token: str | None = None) -> str:
 
 @mcp.tool(
     annotations=ToolAnnotations(
-        readOnlyHint=True,
-        destructiveHint=False,
-        idempotentHint=True,
-        openWorldHint=True,
+        read_only_hint=True,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
     )
 )
 async def export_chart_png(

@@ -19,7 +19,7 @@ def try_export_preview(
         return ImageContent(
             type="image",
             data=base64_data,
-            mimeType="image/png",
+            mime_type="image/png",
         )
     except Exception:
         logger.warning("Failed to auto-export PNG preview", exc_info=True)

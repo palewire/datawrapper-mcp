@@ -266,7 +266,7 @@ class TestCreateChart:
         assert not result.is_error
         image_items = [item for item in result.content if item.type == "image"]
         assert len(image_items) == 1
-        assert image_items[0].mimeType == "image/png"
+        assert image_items[0].mime_type == "image/png"
 
 
 class TestPublishChart:
@@ -438,7 +438,7 @@ class TestExportChartPng:
         assert not result.is_error
         image_items = [item for item in result.content if item.type == "image"]
         assert len(image_items) == 1
-        assert image_items[0].mimeType == "image/png"
+        assert image_items[0].mime_type == "image/png"
 
     async def test_exports_with_all_optional_args(
         self, client, mock_api_token, mock_existing_chart_flow
