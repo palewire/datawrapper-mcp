@@ -13,7 +13,7 @@ async def test_invalid_chart_config_raises_helpful_value_error():
     mock_class = MagicMock()
     mock_class.model_validate.side_effect = ValueError("bad field: nope")
 
-    with patch("datawrapper_mcp.handlers.create.CHART_CLASSES", {"bar": mock_class}):
+    with patch("datawrapper_mcp.config.CHART_CLASSES", {"bar": mock_class}):
         with pytest.raises(ValueError, match="Invalid chart configuration") as exc_info:
             await create_chart(
                 {

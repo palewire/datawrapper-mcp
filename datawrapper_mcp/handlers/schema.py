@@ -5,7 +5,7 @@ from typing import Any
 
 from mcp.types import TextContent
 
-from datawrapper_mcp.config import CHART_CLASSES
+from datawrapper_mcp.config import resolve_chart_type
 from datawrapper_mcp.types import GetChartSchemaArgs
 
 
@@ -18,7 +18,7 @@ def clean_chart_schema(schema: dict[str, Any]) -> dict[str, Any]:
 async def get_chart_schema(arguments: GetChartSchemaArgs) -> list[TextContent]:
     """Get the Pydantic schema for a chart type."""
     chart_type = arguments["chart_type"]
-    chart_class: type[Any] = CHART_CLASSES[chart_type]
+    chart_class: type[Any] = resolve_chart_type(chart_type)
 
     schema = clean_chart_schema(chart_class.model_json_schema())
 

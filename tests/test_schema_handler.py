@@ -91,9 +91,19 @@ async def test_get_chart_schema_all_chart_types(chart_type, expected_class):
 
 
 async def test_get_chart_schema_invalid_chart_type():
-    """Test that invalid chart type raises KeyError."""
-    with pytest.raises(KeyError):
+    """An unknown chart type raises a helpful ValueError, not a raw KeyError."""
+    with pytest.raises(ValueError, match="Unknown chart_type") as exc_info:
         await get_chart_schema({"chart_type": "invalid_type"})
+
+    assert "Valid chart types" in str(exc_info.value)
+
+
+async def test_get_chart_schema_invalid_chart_type_suggests_close_match():
+    """A near-miss chart type gets a "did you mean" suggestion."""
+    with pytest.raises(ValueError, match="Did you mean: stacked_bar") as exc_info:
+        await get_chart_schema({"chart_type": "stackedbar"})
+
+    assert "stacked_bar" in str(exc_info.value)
 
 
 async def test_get_chart_schema_missing_chart_type():
