@@ -5,6 +5,7 @@ built on the FastMCP Middleware base class.
 """
 
 import asyncio
+import hashlib
 import logging
 import time
 from typing import cast
@@ -78,32 +79,67 @@ class ErrorHandlingMiddleware(Middleware):
             raise ToolError(f"Error in {tool_name}: {e}") from e
 
 
+DEFAULT_RATE_LIMIT_KEY = "__default__"
+
+
 class RateLimitingMiddleware(Middleware):
     """Protect against runaway LLM loops that hammer the Datawrapper API.
 
-    Uses a sliding-window counter: tracks call timestamps within the
-    current period and rejects calls that exceed the limit.
+    Uses a sliding-window counter per rate-limit key: tracks call timestamps
+    within the current period and rejects calls that exceed the limit.
+
+    Calls are keyed by the Datawrapper access token they'll actually affect,
+    so one caller's runaway loop can't exhaust another caller's budget on a
+    shared HTTP deployment. This middleware must run after
+    BearerTokenMiddleware so an injected token is already present in
+    ``context.message.arguments`` by the time it executes. Calls with no
+    token (stdio, or an HTTP caller with no BYOK header) share one bucket,
+    since they all fall back to the server's own DATAWRAPPER_ACCESS_TOKEN and
+    so legitimately draw from the same account.
     """
 
     def __init__(self, max_calls: int = 60, period: float = 60.0) -> None:
         self.max_calls = max_calls
         self.period = period
-        self._timestamps: list[float] = []
+        self._timestamps: dict[str, list[float]] = {}
+
+    @staticmethod
+    def _rate_limit_key(context: MiddlewareContext) -> str:
+        """Derive a rate-limit bucket from the call's access token, if any."""
+        arguments = context.message.arguments if context.message else None
+        token = arguments.get("access_token") if arguments else None
+        if not token:
+            return DEFAULT_RATE_LIMIT_KEY
+        # Hash rather than store the token itself, so a secret doesn't sit
+        # around in memory any longer than the request needs it to.
+        digest = hashlib.sha256(token.encode()).hexdigest()[:16]
+        return f"token:{digest}"
 
     async def on_call_tool(
         self,
         context: MiddlewareContext,
         call_next: CallNext,
     ) -> ToolResult:
+        key = self._rate_limit_key(context)
         now = time.monotonic()
         cutoff = now - self.period
-        self._timestamps = [t for t in self._timestamps if t > cutoff]
 
-        if len(self._timestamps) >= self.max_calls:
+        # Opportunistically sweep every bucket so keys for tokens that have
+        # gone quiet don't accumulate in memory over a long-running process.
+        for other_key in list(self._timestamps):
+            pruned = [t for t in self._timestamps[other_key] if t > cutoff]
+            if pruned:
+                self._timestamps[other_key] = pruned
+            else:
+                del self._timestamps[other_key]
+
+        timestamps = self._timestamps.get(key, [])
+        if len(timestamps) >= self.max_calls:
             tool_name = context.message.name if context.message else "unknown"
             logger.warning(
-                "Rate limit exceeded for tool '%s': %d calls in %.0fs",
+                "Rate limit exceeded for tool '%s' (key=%s): %d calls in %.0fs",
                 tool_name,
+                key,
                 self.max_calls,
                 self.period,
             )
@@ -119,7 +155,8 @@ class RateLimitingMiddleware(Middleware):
                 ],
             )
 
-        self._timestamps.append(now)
+        timestamps.append(now)
+        self._timestamps[key] = timestamps
         return cast("ToolResult", await call_next(context))
 
 

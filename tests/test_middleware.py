@@ -147,12 +147,64 @@ class TestRateLimitingMiddleware:
         await mw.on_call_tool(_make_context(), call_next)
 
         # Simulate the timestamp being old enough to fall outside the window
-        mw._timestamps = [mw._timestamps[0] - 120]
+        key = next(iter(mw._timestamps))
+        mw._timestamps[key] = [mw._timestamps[key][0] - 120]
 
         # Next call should succeed because the old one expired
         result = await mw.on_call_tool(_make_context(), call_next)
         assert result.content[0].text == "ok"
         assert call_next.await_count == 2
+
+    async def test_calls_with_different_tokens_have_separate_budgets(self):
+        """A runaway loop on one token shouldn't starve another token's budget."""
+        mw = RateLimitingMiddleware(max_calls=1, period=60)
+        call_next = AsyncMock(return_value=_ok_result())
+
+        ctx_a = _make_context_with_args(arguments={"access_token": "token-a"})
+        ctx_b = _make_context_with_args(arguments={"access_token": "token-b"})
+
+        result_a1 = await mw.on_call_tool(ctx_a, call_next)
+        result_b1 = await mw.on_call_tool(ctx_b, call_next)
+        assert result_a1.content[0].text == "ok"
+        assert result_b1.content[0].text == "ok"
+
+        # token-a is now over budget, but token-b should be unaffected
+        result_a2 = await mw.on_call_tool(ctx_a, call_next)
+        result_b2 = await mw.on_call_tool(ctx_b, call_next)
+        assert "Rate limit exceeded" in result_a2.content[0].text
+        assert "Rate limit exceeded" in result_b2.content[0].text
+        assert call_next.await_count == 2
+
+    async def test_calls_with_no_token_share_the_default_budget(self):
+        """Calls that fall back to the server's own token share one bucket."""
+        mw = RateLimitingMiddleware(max_calls=1, period=60)
+        call_next = AsyncMock(return_value=_ok_result())
+
+        await mw.on_call_tool(_make_context_with_args(arguments={}), call_next)
+        result = await mw.on_call_tool(_make_context(), call_next)
+
+        assert "Rate limit exceeded" in result.content[0].text
+        assert call_next.await_count == 1
+
+    async def test_stale_token_buckets_are_pruned(self):
+        """Buckets for tokens that have gone quiet shouldn't accumulate forever."""
+        mw = RateLimitingMiddleware(max_calls=10, period=60)
+        call_next = AsyncMock(return_value=_ok_result())
+
+        stale_ctx = _make_context_with_args(arguments={"access_token": "stale-token"})
+        await mw.on_call_tool(stale_ctx, call_next)
+        stale_key = mw._rate_limit_key(stale_ctx)
+        assert stale_key in mw._timestamps
+
+        # Age the stale token's timestamp out of the window, then make an
+        # unrelated call - the sweep should drop the stale bucket entirely.
+        mw._timestamps[stale_key] = [mw._timestamps[stale_key][0] - 120]
+        fresh_ctx = _make_context_with_args(arguments={"access_token": "fresh-token"})
+        await mw.on_call_tool(fresh_ctx, call_next)
+
+        assert stale_key not in mw._timestamps
+        assert mw._rate_limit_key(fresh_ctx) in mw._timestamps
+        assert len(mw._timestamps) == 1
 
 
 # ---------------------------------------------------------------------------
@@ -307,3 +359,25 @@ class TestBearerTokenMiddleware:
             await mw.on_call_tool(ctx, call_next)
 
         assert ctx.message.arguments["access_token"] == "dw_my_token"
+
+
+# ---------------------------------------------------------------------------
+# Middleware ordering (as configured on the real server)
+# ---------------------------------------------------------------------------
+
+
+class TestMiddlewareOrder:
+    """FastMCP executes middleware in list order (first = outermost).
+
+    RateLimitingMiddleware reads context.message.arguments["access_token"],
+    which only exists if BearerTokenMiddleware has already run - so it must
+    be listed first. This guards against that ordering silently regressing.
+    """
+
+    def test_bearer_token_runs_before_rate_limiting(self):
+        from datawrapper_mcp.server import mcp
+
+        names = [type(m).__name__ for m in mcp.middleware]
+        assert names.index("BearerTokenMiddleware") < names.index(
+            "RateLimitingMiddleware"
+        )
