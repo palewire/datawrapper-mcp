@@ -263,3 +263,15 @@ tooltip_number_format = "00.00"
 - `datawrapper>=2.0.7`: Python wrapper with Pydantic models
 - `mcp[cli]>=1.20.0`: Model Context Protocol SDK
 - `pandas>=2.0.0`: Data manipulation
+
+## Releasing
+
+A tagged GitHub release publishes to PyPI, the MCP Registry, ClawHub, and
+Docker Hub — see [CONTRIBUTING.md](CONTRIBUTING.md#what-else-gets-published)
+for the full process. One thing that will NOT happen automatically: bump
+`.claude-plugin/plugin.json`'s `version` field to match the new release tag
+in the same PR. Every other version-bearing file (`server.json`,
+`openclaw-plugin/package.json`) is bumped by CI in an ephemeral checkout at
+publish time, so their committed values lagging behind is expected and not a
+bug — only `.claude-plugin/plugin.json` is read directly from the repo with
+no publish step to correct it.

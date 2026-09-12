@@ -310,6 +310,27 @@ jobs:
           --family code-plugin --owner palewire
           --source-path openclaw-plugin --wait
 
+  check-claude-plugin-version:
+    name: Check Claude Code plugin version
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags')
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Compare .claude-plugin/plugin.json version to the release tag
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          PLUGIN_VERSION=$(jq -r '.version' .claude-plugin/plugin.json)
+          if [ "$VERSION" != "$PLUGIN_VERSION" ]; then
+            echo "::error file=.claude-plugin/plugin.json::version is '$PLUGIN_VERSION', but this release is '$VERSION'. Unlike server.json and openclaw-plugin/package.json, nothing bumps this file automatically - open a follow-up PR to update it."
+            exit 1
+          fi
+
   fly-deploy:
     name: Deploy to Fly.io
     runs-on: ubuntu-latest
