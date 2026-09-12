@@ -1,0 +1,20 @@
+{
+  "id": "datawrapper-mcp",
+  "name": "Datawrapper",
+  "description": "Create, update and publish Datawrapper charts from an AI assistant",
+  "configSchema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {}
+  },
+  "mcpServers": {
+    "datawrapper": {
+      "transport": "stdio",
+      "command": "uvx",
+      "args": ["datawrapper-mcp"],
+      "env": {
+        "DATAWRAPPER_ACCESS_TOKEN": "${DATAWRAPPER_ACCESS_TOKEN}"
+      }
+    }
+  }
+}
