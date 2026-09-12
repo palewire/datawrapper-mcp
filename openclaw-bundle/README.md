@@ -1,7 +1,7 @@
 # datawrapper-mcp for OpenClaw
 
 Wires the [datawrapper-mcp](https://github.com/palewire/datawrapper-mcp) server
-into OpenClaw so an agent can create, update, and publish
+into OpenClaw so an agent can create, update and publish
 [Datawrapper](https://www.datawrapper.de/) charts.
 
 ## Prerequisites
@@ -34,6 +34,6 @@ openclaw gateway restart
 This is a thin wrapper, not a reimplementation: it ships a single `.mcp.json`
 that tells OpenClaw to launch `datawrapper-mcp` (installed on demand via
 `uvx`) as a stdio MCP server, and exposes every tool the server
-implements — creating, updating, publishing, exporting, and deleting charts.
+implements — creating, updating, publishing, exporting and deleting charts.
 See the [main repository](https://github.com/palewire/datawrapper-mcp) for
 the full tool list and how the server itself works.
