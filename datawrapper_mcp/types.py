@@ -66,3 +66,4 @@ class ExportChartPngArgs(TypedDict):
     border_width: NotRequired[int]
     border_color: NotRequired[str]
     access_token: NotRequired[str]
+    timeout: NotRequired[int]

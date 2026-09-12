@@ -619,6 +619,7 @@ async def export_chart_png(
     border_width: int = 0,
     border_color: str | None = None,
     access_token: str | None = None,
+    timeout: int | None = None,
 ) -> Sequence[TextContent | ImageContent]:
     """⚠️ DATAWRAPPER MCP TOOL ⚠️
     This is part of the Datawrapper MCP server integration.
@@ -643,6 +644,9 @@ async def export_chart_png(
         access_token: Optional Datawrapper API token. When provided, uses the
                       caller's account. When omitted, falls back to the server's
                       DATAWRAPPER_ACCESS_TOKEN env var.
+        timeout: Seconds to wait for the export before giving up (optional).
+                 Defaults to 30s. Large or complex charts (e.g. high zoom values)
+                 may need a longer timeout to finish rendering server-side.
 
     Returns:
         PNG image content
@@ -662,6 +666,8 @@ async def export_chart_png(
         args["border_color"] = border_color
     if access_token:
         args["access_token"] = access_token
+    if timeout is not None:
+        args["timeout"] = timeout
 
     return await export_chart_png_handler(cast("ExportChartPngArgs", args))
 

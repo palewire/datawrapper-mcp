@@ -468,6 +468,7 @@ class TestExportChartPng:
                 "border_width": 5,
                 "border_color": "#FFFFFF",
                 "access_token": "explicit_token_xyz",
+                "timeout": 90,
             },
         )
 

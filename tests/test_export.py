@@ -1,6 +1,8 @@
 """Tests for export handler."""
 
+import asyncio
 import base64
+import time
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -86,6 +88,53 @@ class TestExportChartPng:
             assert len(result) == 1
             assert result[0].type == "image"
             assert result[0].mime_type == "image/png"
+
+    async def test_export_forwards_custom_timeout(self):
+        """A custom timeout argument is forwarded to chart.export_png."""
+        mock_chart = MagicMock()
+        mock_chart.export_png.return_value = b"PNG_IMAGE_DATA"
+
+        with patch("datawrapper_mcp.handlers.export.get_chart") as mock_get_chart:
+            mock_get_chart.return_value = mock_chart
+
+            args: ExportChartPngArgs = {"chart_id": "test123", "timeout": 90}
+
+            await export_chart_png(args)
+
+            mock_chart.export_png.assert_called_once_with(timeout=90, access_token=None)
+
+    async def test_export_runs_off_the_event_loop(self):
+        """export_chart_png shouldn't block the event loop while it waits.
+
+        Regression test for the bug where a slow, synchronous Datawrapper
+        API call would freeze every other concurrent tool call on the
+        server. A concurrently-scheduled task should be able to make
+        progress while the (mocked, slow) export is in flight.
+        """
+        released_at: dict[str, float] = {}
+
+        def slow_export(**_kwargs):
+            time.sleep(0.2)
+            return b"PNG_IMAGE_DATA"
+
+        async def other_task():
+            await asyncio.sleep(0.05)
+            released_at["other_task"] = time.monotonic()
+
+        mock_chart = MagicMock()
+        mock_chart.export_png.side_effect = slow_export
+
+        with patch("datawrapper_mcp.handlers.export.get_chart") as mock_get_chart:
+            mock_get_chart.return_value = mock_chart
+
+            start = time.monotonic()
+            other = asyncio.create_task(other_task())
+            await export_chart_png({"chart_id": "test123"})
+            await other
+
+        # The unrelated task should have completed well before the slow
+        # export finished, proving the event loop wasn't blocked.
+        assert released_at["other_task"] - start < 0.15
 
     async def test_export_without_border_parameters(self):
         """Test export_chart_png without border parameters."""

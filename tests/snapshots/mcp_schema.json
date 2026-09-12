@@ -252,6 +252,18 @@
             "description": "If true, exports only the visualization without header/footer",
             "type": "boolean"
           },
+          "timeout": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Seconds to wait for the export before giving up (optional).\n     Defaults to 30s. Large or complex charts (e.g. high zoom values)\n     may need a longer timeout to finish rendering server-side."
+          },
           "transparent": {
             "default": false,
             "description": "If true, exports with transparent background",

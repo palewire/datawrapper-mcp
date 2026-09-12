@@ -1,5 +1,6 @@
 """Handler for creating Datawrapper charts."""
 
+import asyncio
 from typing import Any
 
 from mcp.types import ImageContent
@@ -41,8 +42,9 @@ async def create_chart(
     # Set data on chart instance
     chart.data = df
 
-    # Create chart using Pydantic instance method
-    chart.create(access_token=token)
+    # Create chart using Pydantic instance method. Synchronous and
+    # network-bound, so run it off the event loop (see export.py/preview.py).
+    await asyncio.to_thread(chart.create, access_token=token)
 
     metadata: dict[str, Any] = {
         "chart_id": chart.chart_id,
@@ -52,7 +54,7 @@ async def create_chart(
     }
 
     images: list[ImageContent] = []
-    preview = try_export_preview(chart, access_token=token)
+    preview = await try_export_preview(chart, access_token=token)
     if preview:
         images.append(preview)
 

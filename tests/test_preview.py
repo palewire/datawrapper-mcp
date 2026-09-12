@@ -3,32 +3,37 @@
 import base64
 from unittest.mock import MagicMock, patch
 
-from datawrapper_mcp.handlers.preview import try_export_preview
+from datawrapper_mcp.handlers.preview import (
+    PREVIEW_EXPORT_TIMEOUT,
+    try_export_preview,
+)
 
 
 class TestTryExportPreview:
     """Tests for the try_export_preview helper."""
 
-    def test_returns_image_content_on_success(self):
+    async def test_returns_image_content_on_success(self):
         """Test that a successful export returns ImageContent."""
         mock_chart = MagicMock()
         mock_chart.export_png.return_value = b"PNG_IMAGE_DATA"
 
-        result = try_export_preview(mock_chart)
+        result = await try_export_preview(mock_chart)
 
         assert result is not None
         assert result.type == "image"
         assert result.mime_type == "image/png"
         expected_base64 = base64.b64encode(b"PNG_IMAGE_DATA").decode("utf-8")
         assert result.data == expected_base64
-        mock_chart.export_png.assert_called_once_with(zoom=1, access_token=None)
+        mock_chart.export_png.assert_called_once_with(
+            zoom=1, access_token=None, timeout=PREVIEW_EXPORT_TIMEOUT
+        )
 
-    def test_returns_none_on_failure(self):
+    async def test_returns_none_on_failure(self):
         """Test that a failed export returns None and logs a warning."""
         mock_chart = MagicMock()
         mock_chart.export_png.side_effect = Exception("Export failed")
 
-        result = try_export_preview(mock_chart)
+        result = await try_export_preview(mock_chart)
 
         assert result is None
 

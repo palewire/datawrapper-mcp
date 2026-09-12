@@ -1,5 +1,6 @@
 """Handler for publishing Datawrapper charts."""
 
+import asyncio
 from typing import Any
 
 from datawrapper import get_chart
@@ -17,9 +18,11 @@ async def publish_chart(
     chart_id = arguments["chart_id"]
     token = arguments.get("access_token")
 
-    # Get chart and publish using Pydantic instance method
-    chart = get_chart(chart_id, access_token=token)
-    chart.publish(access_token=token)
+    # Get chart and publish using Pydantic instance method. Both are
+    # synchronous and network-bound, so run them off the event loop
+    # (see export.py/preview.py).
+    chart = await asyncio.to_thread(get_chart, chart_id, access_token=token)
+    await asyncio.to_thread(chart.publish, access_token=token)
 
     metadata: dict[str, Any] = {
         "chart_id": chart.chart_id,
@@ -30,7 +33,7 @@ async def publish_chart(
     }
 
     images: list[ImageContent] = []
-    preview = try_export_preview(chart, access_token=token)
+    preview = await try_export_preview(chart, access_token=token)
     if preview:
         images.append(preview)
 
