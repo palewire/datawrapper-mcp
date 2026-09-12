@@ -90,7 +90,7 @@ Use `list_chart_types` to see descriptions, then `get_chart_schema` to explore c
 }
 ```
 
-For other clients (Claude Desktop, Cursor, VS Code Copilot, ChatGPT, OpenAI Codex) and Kubernetes deployment, see the [installation guide](INSTALLATION.md).
+For other clients (Claude Desktop, Claude.ai, Cursor, VS Code Copilot, ChatGPT, OpenAI Codex, OpenClaw) and Kubernetes deployment, see the [installation guide](INSTALLATION.md).
 
 ### Using Your Own Token (Hosted Deployments)
 
@@ -115,8 +115,9 @@ over the header. When neither is provided, the server falls back to its
 | --------------- | ---------------------------- | ------------------------ |
 | Claude Desktop  | `claude_desktop_config.json` | stdio or streamable-http |
 | Claude.ai       | Managed connector            | streamable-http          |
-| Claude Code     | `.claude/settings.json`      | stdio                    |
+| Claude Code     | `.mcp.json`                  | stdio                    |
 | VS Code Copilot | `.vscode/mcp.json`           | stdio                    |
 | Cursor          | `.cursor/mcp.json`           | stdio or streamable-http |
 | ChatGPT         | Dev Mode settings            | streamable-http only     |
 | OpenAI Codex    | `~/.codex/config.toml`       | stdio                    |
+| OpenClaw        | `openclaw.json`              | stdio                    |

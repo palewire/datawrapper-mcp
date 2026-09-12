@@ -2,11 +2,11 @@
 
 Detailed setup instructions for each supported MCP client, plus Docker and Kubernetes deployment.
 
-## Claude Code
+## Claude Desktop
 
 **Using uvx (recommended)**
 
-Configure your MCP client in `claude_desktop_config.json`:
+Open Settings > Developer > Edit Config, which opens (or creates) `claude_desktop_config.json`:
 
 ```json
 {
@@ -30,7 +30,7 @@ First install the package:
 pip install datawrapper-mcp
 ```
 
-Then configure your MCP client in `claude_desktop_config.json`:
+Then add this to `claude_desktop_config.json`:
 
 ```json
 {
@@ -44,6 +44,159 @@ Then configure your MCP client in `claude_desktop_config.json`:
   }
 }
 ```
+
+Restart Claude Desktop after editing the file.
+
+## Claude.ai
+
+Claude.ai only connects to servers reachable over HTTPS, so this requires a running
+streamable-http deployment (see [Kubernetes Deployment](#kubernetes-deployment) below,
+or run `deployment/app.py` behind any HTTPS-capable host).
+
+1. Go to Settings > Connectors (or, for Team/Enterprise plans, Organization Settings > Connectors)
+2. Click **Add custom connector**
+3. Enter a name and your server's `/mcp` URL, e.g. `https://your-domain.example/mcp`
+4. Click **Add**
+5. In a chat, click the **+** button, choose **Connectors**, and enable `datawrapper`
+
+To use your own Datawrapper account rather than the server operator's, see
+[Using Your Own Token](README.md#using-your-own-token-hosted-deployments) for the
+`Authorization: Bearer` header pattern — Claude.ai's Advanced settings let you set
+custom headers when adding the connector.
+
+## Claude Code
+
+**Using uvx (recommended)**
+
+Add this to `.mcp.json` in your project root:
+
+```json
+{
+  "mcpServers": {
+    "datawrapper": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["datawrapper-mcp"],
+      "env": {
+        "DATAWRAPPER_ACCESS_TOKEN": "your-token-here"
+      }
+    }
+  }
+}
+```
+
+**Using pip**
+
+First install the package:
+
+```bash
+pip install datawrapper-mcp
+```
+
+Then add this to `.mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "datawrapper": {
+      "type": "stdio",
+      "command": "datawrapper-mcp",
+      "env": {
+        "DATAWRAPPER_ACCESS_TOKEN": "your-token-here"
+      }
+    }
+  }
+}
+```
+
+**Secure secrets**
+
+Claude Code expands `${VAR}` in `.mcp.json`, so you can reference an environment
+variable already set in your shell instead of writing the token into a file that
+might get committed:
+
+```json
+{
+  "mcpServers": {
+    "datawrapper": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["datawrapper-mcp"],
+      "env": {
+        "DATAWRAPPER_ACCESS_TOKEN": "${DATAWRAPPER_ACCESS_TOKEN}"
+      }
+    }
+  }
+}
+```
+
+Verify with `claude mcp list` after adding the server; the first use requires
+interactive approval.
+
+## VS Code Copilot
+
+Add this to `.vscode/mcp.json` in your workspace (or run **MCP: Open User
+Configuration** to add it for every workspace):
+
+```json
+{
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "datawrapper-token",
+      "description": "Datawrapper API token",
+      "password": true
+    }
+  ],
+  "servers": {
+    "datawrapper": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["datawrapper-mcp"],
+      "env": {
+        "DATAWRAPPER_ACCESS_TOKEN": "${input:datawrapper-token}"
+      }
+    }
+  }
+}
+```
+
+The `inputs` block prompts for your token the first time the server starts and
+keeps it out of version control instead of hardcoding it in `env`.
+
+## Cursor
+
+Add this to `.cursor/mcp.json`:
+
+```json
+{
+  "mcpServers": {
+    "datawrapper": {
+      "command": "uvx",
+      "args": ["datawrapper-mcp"],
+      "env": {
+        "DATAWRAPPER_ACCESS_TOKEN": "your-token-here"
+      }
+    }
+  }
+}
+```
+
+Cursor doesn't expand environment variables in `mcp.json`, so the token has to be
+a literal value here — consider adding `.cursor/mcp.json` to `.gitignore` if the
+file will hold a real token.
+
+## ChatGPT
+
+ChatGPT's MCP support (Developer Mode) only speaks HTTP, not stdio, so this
+requires a running streamable-http deployment (see
+[Kubernetes Deployment](#kubernetes-deployment) below).
+
+1. Go to Settings > Apps & Connectors > Advanced Settings and toggle **Developer mode** on
+2. Go to Settings > Connectors, click **Add custom connector**
+3. Enter a name, description, and your server's `/mcp` URL, e.g. `https://your-domain.example/mcp`
+4. Choose an auth method (OAuth, API key, or none) and click **Save**
+5. In a chat, click **+** > **More** > **Developer Mode** and select the connector
 
 ## OpenAI Codex
 
@@ -108,6 +261,24 @@ If you're using the [Codex Desktop Application](https://openai.com/codex/), you 
 5. Under Arguments, add `datawrapper-mcp`
 6. Under Environment variables, add `DATAWRAPPER_ACCESS_TOKEN` as the key and your token as the value
 7. Click Save
+
+## OpenClaw
+
+Add this to `openclaw.json`:
+
+```json
+{
+  "mcpServers": {
+    "datawrapper": {
+      "command": "uvx",
+      "args": ["datawrapper-mcp"],
+      "env": {
+        "DATAWRAPPER_ACCESS_TOKEN": "your-token-here"
+      }
+    }
+  }
+}
+```
 
 ## Kubernetes Deployment
 
