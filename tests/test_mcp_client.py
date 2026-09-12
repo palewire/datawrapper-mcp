@@ -268,6 +268,19 @@ class TestCreateChart:
         assert len(image_items) == 1
         assert image_items[0].mime_type == "image/png"
 
+    async def test_invalid_chart_type_suggests_close_match(self, client):
+        from fastmcp.exceptions import ToolError
+
+        with pytest.raises(ToolError, match="Did you mean: stacked_bar"):
+            await client.call_tool(
+                "create_chart",
+                {
+                    "data": [{"year": 2020, "value": 100}],
+                    "chart_type": "stackedbar",
+                    "chart_config": {"title": "Test Chart"},
+                },
+            )
+
 
 class TestPublishChart:
     """publish_chart through the full MCP stack."""

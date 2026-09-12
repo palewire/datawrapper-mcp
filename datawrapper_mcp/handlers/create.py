@@ -4,7 +4,7 @@ from typing import Any
 
 from mcp.types import ImageContent
 
-from datawrapper_mcp.config import CHART_CLASSES
+from datawrapper_mcp.config import resolve_chart_type
 from datawrapper_mcp.types import CreateChartArgs
 from datawrapper_mcp.utils import json_to_dataframe
 
@@ -26,7 +26,7 @@ async def create_chart(
     df = json_to_dataframe(arguments["data"])
 
     # Get chart class and validate config
-    chart_class: type[Any] = CHART_CLASSES[chart_type]
+    chart_class: type[Any] = resolve_chart_type(chart_type)
 
     # Validate and create chart using Pydantic model
     try:

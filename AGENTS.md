@@ -192,7 +192,10 @@ dw.get_chart()
 # Required for ty - annotate chart classes as type[Any]
 from typing import Any
 
-chart_class: type[Any] = CHART_CLASSES[chart_type]
+# Use resolve_chart_type(), not CHART_CLASSES[chart_type] directly - it
+# raises a helpful ValueError with "did you mean" suggestions instead of a
+# bare KeyError.
+chart_class: type[Any] = resolve_chart_type(chart_type)
 ```
 
 Run `make type-check` (or `uv run ty check`) to check static types.

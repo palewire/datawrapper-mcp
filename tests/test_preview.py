@@ -52,7 +52,7 @@ class TestCreateChartPreview:
         chart_cls.model_validate.return_value = mock_instance
         with (
             patch(
-                "datawrapper_mcp.handlers.create.CHART_CLASSES",
+                "datawrapper_mcp.config.CHART_CLASSES",
                 {"bar": chart_cls},
             ),
             patch(
@@ -90,7 +90,7 @@ class TestCreateChartPreview:
         chart_cls.model_validate.return_value = mock_instance
         with (
             patch(
-                "datawrapper_mcp.handlers.create.CHART_CLASSES",
+                "datawrapper_mcp.config.CHART_CLASSES",
                 {"bar": chart_cls},
             ),
             patch(

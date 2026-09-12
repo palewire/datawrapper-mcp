@@ -41,7 +41,7 @@ async def test_create_forwards_token(mock_chart):
     mock_class.model_validate.return_value = mock_chart
 
     with (
-        patch("datawrapper_mcp.handlers.create.CHART_CLASSES", {"bar": mock_class}),
+        patch("datawrapper_mcp.config.CHART_CLASSES", {"bar": mock_class}),
         patch("datawrapper_mcp.handlers.create.try_export_preview") as mock_preview,
     ):
         mock_preview.return_value = None
@@ -64,7 +64,7 @@ async def test_create_normalizes_empty_token(mock_chart):
     mock_class.model_validate.return_value = mock_chart
 
     with (
-        patch("datawrapper_mcp.handlers.create.CHART_CLASSES", {"bar": mock_class}),
+        patch("datawrapper_mcp.config.CHART_CLASSES", {"bar": mock_class}),
         patch("datawrapper_mcp.handlers.create.try_export_preview") as mock_preview,
     ):
         mock_preview.return_value = None
