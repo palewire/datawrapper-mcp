@@ -128,3 +128,16 @@ That will take you to the Actions monitoring page. The task charged with publish
 After a few minutes, the process there should finish and show a green check mark. When it does, visit your package’s page on [PyPI](https://pypi.org/), where you should see the latest version displayed at the top of the page.
 
 If the action fails, something has gone wrong with the deployment process. You can click into its debugging panel to search for the cause or ask the project maintainers for help.
+
+## What else gets published
+
+A single tagged release also publishes this package to the [MCP Registry](https://registry.modelcontextprotocol.io/), [ClawHub](https://clawhub.ai/palewire/plugins/datawrapper-mcp) (for OpenClaw), and Docker Hub, and updates the Docker tar attached to the release. Each of those uses a version number of its own, and they don't all stay in sync automatically:
+
+| File                             | What it's for                          | Bumped by                                                                         |
+| --------------------------------- | --------------------------------------- | ---------------------------------------------------------------------------------- |
+| (no file — derived from the git tag) | PyPI package version                | Automatic. `setuptools_scm` reads the tag at build time; nothing to edit.          |
+| `server.json`                     | MCP Registry listing                    | Automatic, but only in CI's ephemeral checkout — the committed file is expected to lag behind and show an old version. That's fine; it isn't what actually gets published. |
+| `openclaw-plugin/package.json`    | ClawHub / OpenClaw plugin                | Same as `server.json` — CI bumps its own ephemeral copy before publishing. The committed value drifting behind the latest release is expected. |
+| `.claude-plugin/plugin.json`      | Claude Code plugin marketplace          | **Manual.** Nothing bumps this file automatically, and it's read directly from the repo — a stale version here is a real, user-visible bug, not cosmetic drift. Bump it in the same PR that prepares a release. |
+
+If you forget the last one, CI will fail the `check-claude-plugin-version` job on the tag push (it doesn't block the PyPI/MCP Registry/ClawHub publishes, which don't depend on that file) — fix it with a follow-up PR bumping `.claude-plugin/plugin.json`'s `version` field to match the release tag.
