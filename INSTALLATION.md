@@ -291,7 +291,7 @@ If you're using the [Codex Desktop Application](https://openai.com/codex/), you 
 
 ## OpenClaw
 
-**Using the ClawHub bundle (recommended)**
+**Using the ClawHub plugin (recommended)**
 
 ```bash
 openclaw plugins install clawhub:datawrapper-mcp
@@ -299,8 +299,8 @@ openclaw plugins install clawhub:datawrapper-mcp
 
 Set `DATAWRAPPER_ACCESS_TOKEN` in your environment before starting the
 gateway, then run `openclaw gateway restart`. See
-[`openclaw-bundle/`](openclaw-bundle/) in this repository for what the bundle
-contains.
+[`openclaw-plugin/`](openclaw-plugin/) in this repository for what gets
+installed.
 
 **Manual configuration**
 
