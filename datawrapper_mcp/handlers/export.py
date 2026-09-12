@@ -1,5 +1,6 @@
 """Handler for exporting Datawrapper charts."""
 
+import asyncio
 import base64
 from typing import Any
 
@@ -32,12 +33,18 @@ async def export_chart_png(arguments: ExportChartPngArgs) -> list[ImageContent]:
         export_params["border_width"] = border_width
     if "border_color" in arguments:
         export_params["border_color"] = arguments["border_color"]
+    if "timeout" in arguments:
+        export_params["timeout"] = arguments["timeout"]
 
-    # Get chart using factory function
-    chart = get_chart(chart_id, access_token=token)
+    # Get chart using factory function. Both this and export_png below are
+    # synchronous, network-bound calls into the Datawrapper API - run them in
+    # a thread so a slow request doesn't block the event loop, and therefore
+    # every other concurrent tool call on this server, while it waits.
+    chart = await asyncio.to_thread(get_chart, chart_id, access_token=token)
 
     # Export PNG using Pydantic instance method
-    png_bytes = chart.export_png(
+    png_bytes = await asyncio.to_thread(
+        chart.export_png,
         **export_params,
         access_token=token,
     )
