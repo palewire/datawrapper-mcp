@@ -41,12 +41,14 @@ from .types import (
 MAX_PREVIEW_BYTES = 200_000
 
 # Initialize the FastMCP server with production middleware.
-# Order matters: ErrorHandlingMiddleware is outermost (last in list, first to catch).
+# Order matters: the first entry is outermost (runs first on the way in, last
+# on the way out), so ErrorHandlingMiddleware wraps everything below it,
+# BearerTokenMiddleware injects the token before RateLimitingMiddleware keys
+# off it, and TimingMiddleware sits innermost to time the tool call alone.
 mcp = FastMCP(
     "datawrapper-mcp",
     middleware=[
-        TimingMiddleware(),
-        RateLimitingMiddleware(max_calls=200, period=60),
+        ErrorHandlingMiddleware(),
         BearerTokenMiddleware(
             inject_for=frozenset(
                 {
@@ -59,7 +61,8 @@ mcp = FastMCP(
                 }
             ),
         ),
-        ErrorHandlingMiddleware(),
+        RateLimitingMiddleware(max_calls=200, period=60),
+        TimingMiddleware(),
     ],
 )
 
