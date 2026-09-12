@@ -7,8 +7,10 @@ from .publish import publish_chart
 from .retrieve import get_chart_info
 from .schema import get_chart_schema
 from .update import update_chart
+from .whoami import check_datawrapper_connection
 
 __all__ = [
+    "check_datawrapper_connection",
     "create_chart",
     "delete_chart",
     "export_chart_png",

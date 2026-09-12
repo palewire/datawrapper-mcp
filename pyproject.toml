@@ -136,6 +136,7 @@ ignore = [
 "tests/*" = [
     "ANN",     # Annotations
     "S105",    # Possible hardcoded password
+    "S106",    # Possible hardcoded password as a keyword argument
     "S108",    # Temp directory
     "BLE001",  # Broad excepts are used deliberately to assert on error messages
     "PT006",   # Existing parametrize ids use comma-separated strings

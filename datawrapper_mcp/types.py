@@ -54,6 +54,12 @@ class GetChartSchemaArgs(TypedDict):
     chart_type: str
 
 
+class CheckDatawrapperConnectionArgs(TypedDict):
+    """Arguments for check_datawrapper_connection handler."""
+
+    access_token: NotRequired[str]
+
+
 class ExportChartPngArgs(TypedDict):
     """Arguments for export_chart_png handler."""
 

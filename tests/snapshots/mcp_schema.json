@@ -64,6 +64,52 @@
     }
   },
   "tools": {
+    "check_datawrapper_connection": {
+      "annotations": {
+        "destructive_hint": false,
+        "idempotent_hint": true,
+        "open_world_hint": true,
+        "read_only_hint": true
+      },
+      "description": "\u26a0\ufe0f DATAWRAPPER MCP TOOL \u26a0\ufe0f\nThis is part of the Datawrapper MCP server integration.\n\n---\n\nCheck which Datawrapper account is currently authenticated, without creating,\nmodifying, or deleting anything. Use this to troubleshoot access issues -\nespecially when connected through a personal Claude connector using a\nper-user Authorization header, where a misconfigured header silently falls\nback to a different account instead of raising an error. If the reported\nemail isn't the one you expected, the header isn't reaching the server\ncorrectly.",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "access_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional Datawrapper API token. When provided, checks that\n          token specifically. When omitted, checks whichever\n          credential this call would otherwise use (the BYOK header,\n          or the server's DATAWRAPPER_ACCESS_TOKEN env var)."
+          }
+        },
+        "type": "object"
+      },
+      "meta": {
+        "fastmcp": {
+          "tags": []
+        }
+      },
+      "name": "check_datawrapper_connection",
+      "output_schema": {
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "x-fastmcp-wrap-result": true
+      },
+      "title": "Check Datawrapper Connection"
+    },
     "create_chart": {
       "annotations": {
         "destructive_hint": false,

@@ -12,6 +12,9 @@ from prefab_ui.app import PrefabApp
 from prefab_ui.components import Column, Image, Text
 
 from .config import CHART_CLASSES
+from .handlers import (
+    check_datawrapper_connection as check_datawrapper_connection_handler,
+)
 from .handlers import create_chart as create_chart_handler
 from .handlers import delete_chart as delete_chart_handler
 from .handlers import export_chart_png as export_chart_png_handler
@@ -27,6 +30,7 @@ from .middleware import (
     TimingMiddleware,
 )
 from .types import (
+    CheckDatawrapperConnectionArgs,
     CreateChartArgs,
     DeleteChartArgs,
     ExportChartPngArgs,
@@ -58,6 +62,7 @@ mcp = FastMCP(
                     "update_chart",
                     "delete_chart",
                     "export_chart_png",
+                    "check_datawrapper_connection",
                 }
             ),
         ),
@@ -158,6 +163,46 @@ async def get_chart_schema(chart_type: str) -> str:
     """
     arguments = cast("GetChartSchemaArgs", {"chart_type": chart_type})
     result = await get_chart_schema_handler(arguments)
+    return result[0].text
+
+
+@mcp.tool(
+    annotations=ToolAnnotations(
+        read_only_hint=True,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
+    )
+)
+async def check_datawrapper_connection(access_token: str | None = None) -> str:
+    """⚠️ DATAWRAPPER MCP TOOL ⚠️
+    This is part of the Datawrapper MCP server integration.
+
+    ---
+
+    Check which Datawrapper account is currently authenticated, without creating,
+    modifying, or deleting anything. Use this to troubleshoot access issues -
+    especially when connected through a personal Claude connector using a
+    per-user Authorization header, where a misconfigured header silently falls
+    back to a different account instead of raising an error. If the reported
+    email isn't the one you expected, the header isn't reaching the server
+    correctly.
+
+    Args:
+        access_token: Optional Datawrapper API token. When provided, checks that
+                      token specifically. When omitted, checks whichever
+                      credential this call would otherwise use (the BYOK header,
+                      or the server's DATAWRAPPER_ACCESS_TOKEN env var).
+
+    Returns:
+        The authenticated account's email, name, and ID as JSON, or a
+        troubleshooting-oriented error if the token was rejected.
+    """
+    arguments = cast(
+        "CheckDatawrapperConnectionArgs",
+        {"access_token": access_token} if access_token else {},
+    )
+    result = await check_datawrapper_connection_handler(arguments)
     return result[0].text
 
 
