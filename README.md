@@ -115,7 +115,7 @@ over the header. When neither is provided, the server falls back to its
 | --------------- | ---------------------------- | ------------------------ |
 | Claude Desktop  | `claude_desktop_config.json` | stdio or streamable-http |
 | Claude.ai       | Personal or org connector    | streamable-http          |
-| Claude Code     | `.mcp.json`                  | stdio                    |
+| Claude Code     | [Plugin marketplace](https://github.com/palewire/datawrapper-mcp) or `.mcp.json` | stdio |
 | VS Code Copilot | `.vscode/mcp.json`           | stdio                    |
 | Cursor          | `.cursor/mcp.json`           | stdio or streamable-http |
 | ChatGPT         | Dev Mode settings            | streamable-http only     |

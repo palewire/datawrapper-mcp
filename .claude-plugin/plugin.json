@@ -1,0 +1,22 @@
+{
+  "name": "datawrapper-mcp",
+  "description": "Create, update and publish Datawrapper charts from an AI assistant",
+  "version": "0.3.0",
+  "author": {
+    "name": "Ben Welsh",
+    "email": "b@palewi.re"
+  },
+  "homepage": "https://github.com/palewire/datawrapper-mcp",
+  "repository": "https://github.com/palewire/datawrapper-mcp",
+  "license": "MIT",
+  "keywords": ["datawrapper", "charts", "visualization", "mcp"],
+  "mcpServers": {
+    "datawrapper": {
+      "command": "uvx",
+      "args": ["datawrapper-mcp"],
+      "env": {
+        "DATAWRAPPER_ACCESS_TOKEN": "${DATAWRAPPER_ACCESS_TOKEN}"
+      }
+    }
+  }
+}

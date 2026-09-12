@@ -93,7 +93,19 @@ development — see [issue #57](https://github.com/palewire/datawrapper-mcp/issu
 
 ## Claude Code
 
-**Using uvx (recommended)**
+**Using the plugin marketplace (recommended)**
+
+```bash
+claude plugin marketplace add palewire/datawrapper-mcp
+claude plugin install datawrapper-mcp@datawrapper-mcp
+```
+
+Set `DATAWRAPPER_ACCESS_TOKEN` in your environment before starting Claude
+Code, or edit the installed plugin's `.mcp.json` to set it directly. See
+[`.claude-plugin/`](.claude-plugin/) in this repository for what gets
+installed.
+
+**Using uvx**
 
 Add this to `.mcp.json` in your project root:
 

@@ -1,0 +1,17 @@
+{
+  "name": "datawrapper-mcp",
+  "owner": {
+    "name": "Ben Welsh",
+    "email": "b@palewi.re"
+  },
+  "metadata": {
+    "description": "Create, update and publish Datawrapper charts from an AI assistant"
+  },
+  "plugins": [
+    {
+      "name": "datawrapper-mcp",
+      "source": "./",
+      "description": "Create, update and publish Datawrapper charts from an AI assistant"
+    }
+  ]
+}
