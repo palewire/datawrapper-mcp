@@ -8,7 +8,7 @@ COVERAGE_FAIL_UNDER ?= 80
 TEST_ARGS ?=
 RUN = $(if $(UV_PYTHON),UV_PYTHON=$(UV_PYTHON)) $(UV) run
 
-.PHONY: all help bootstrap install install-all install-dev install-test install-test-extras check verify diff-check lint format-check format fix type-check dependency-check workflow-check manifest-check test test-serial test-parallel coverage build package-check package-verify docker-image docker-clean hooks clean
+.PHONY: all help bootstrap install install-all install-dev install-test install-test-extras check verify diff-check lint format-check format fix type-check dependency-check workflow-check manifest-check test test-serial test-parallel coverage build package-check package-verify docker-image docker-clean update-schema-snapshot hooks clean
 
 help: ## Show available commands
 	@awk 'BEGIN {FS = ":.*## "}; /^[a-zA-Z0-9_-]+:.*## / {printf "%-18s %s\n", $$1, $$2}' $(MAKEFILE_LIST)
@@ -98,6 +98,9 @@ docker-image: ## Build and save the Docker image as a tarball
 
 docker-clean: ## Remove the saved Docker image tarball
 	rm -f datawrapper-mcp.tar
+
+update-schema-snapshot: ## Regenerate the golden MCP tool/resource schema snapshot
+	$(RUN) python scripts/update_schema_snapshot.py
 
 hooks: ## Run all pre-commit hooks (may modify files)
 	$(RUN) pre-commit run --all-files
