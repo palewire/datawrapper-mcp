@@ -6,6 +6,14 @@ A Model Context Protocol (MCP) server and app for creating Datawrapper charts us
 
 <!-- mcp-name: io.github.palewire/datawrapper-mcp -->
 
+> **Status: early and experimental.** This project — including its Claude
+> Code/Desktop plugin and marketplace listing — is under active development,
+> and behavior can change between releases. In particular, the
+> plugin/marketplace install path has known gaps (see
+> [issue #78](https://github.com/palewire/datawrapper-mcp/issues/78)) — don't
+> treat it yet as a finished, zero-maintenance install path for a wider
+> rollout.
+
 ## Example Usage
 
 You can provide a data file and simply ask for the chart you want. The draft will soon appear in the panel.
