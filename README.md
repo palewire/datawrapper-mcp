@@ -109,6 +109,20 @@ You can also pass `access_token` directly as a tool argument, which takes preced
 over the header. When neither is provided, the server falls back to its
 `DATAWRAPPER_ACCESS_TOKEN` environment variable.
 
+### Custom Instructions
+
+Set `DATAWRAPPER_MCP_INSTRUCTIONS` to have the server hand your own free-text
+guidance to connecting MCP clients (many, including Claude, fold this into
+the model's context). Use it for house style rules — required fields, naming
+conventions, and the like — without forking the server:
+
+```json
+"env": {
+  "DATAWRAPPER_ACCESS_TOKEN": "your-token-here",
+  "DATAWRAPPER_MCP_INSTRUCTIONS": "Every chart needs alt text and a CMS slug in its notes field."
+}
+```
+
 ### Supported Clients
 
 | Client          | Config file                  | Transport                |
