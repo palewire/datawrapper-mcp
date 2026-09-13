@@ -2,6 +2,7 @@
 
 import contextlib
 import json
+import os
 from collections.abc import Sequence
 from typing import Any, cast
 
@@ -51,6 +52,10 @@ MAX_PREVIEW_BYTES = 200_000
 # off it, and TimingMiddleware sits innermost to time the tool call alone.
 mcp = FastMCP(
     "datawrapper-mcp",
+    # Lets whoever installs the server hand the model house-style guidance
+    # (e.g. required custom fields, naming conventions) without any code
+    # change here — the MCP client folds this into the model's context.
+    instructions=os.environ.get("DATAWRAPPER_MCP_INSTRUCTIONS"),
     middleware=[
         ErrorHandlingMiddleware(),
         BearerTokenMiddleware(
