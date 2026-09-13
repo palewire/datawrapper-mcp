@@ -6,6 +6,14 @@ A Model Context Protocol (MCP) server and app for creating Datawrapper charts us
 
 <!-- mcp-name: io.github.palewire/datawrapper-mcp -->
 
+> **Status: early and experimental.** This project — including its Claude
+> Code/Desktop plugin and marketplace listing — is under active development,
+> and behavior can change between releases. In particular, the
+> plugin/marketplace install path has known gaps (see
+> [issue #78](https://github.com/palewire/datawrapper-mcp/issues/78)) — don't
+> treat it yet as a finished, zero-maintenance install path for a wider
+> rollout.
+
 ## Example Usage
 
 You can provide a data file and simply ask for the chart you want. The draft will soon appear in the panel.
@@ -91,6 +99,14 @@ Use `list_chart_types` to see descriptions, then `get_chart_schema` to explore c
 ```
 
 For other clients (Claude Desktop, Claude.ai, Cursor, VS Code Copilot, ChatGPT, OpenAI Codex, OpenClaw) and Kubernetes deployment, see the [installation guide](INSTALLATION.md).
+
+> **Installing via a plugin marketplace/directory (Claude Desktop's plugin
+> browser, ClawHub, etc.) is still experimental.** These interactive install
+> flows currently have no working way to collect required environment
+> variables like `DATAWRAPPER_ACCESS_TOKEN` — see
+> [issue #78](https://github.com/palewire/datawrapper-mcp/issues/78) for
+> details. The manually-edited config shown above (and throughout the
+> [installation guide](INSTALLATION.md)) is the reliable path today.
 
 ### Using Your Own Token (Hosted Deployments)
 

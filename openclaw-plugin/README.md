@@ -5,6 +5,11 @@ maps and tables that look good on any website, used by newsrooms around the worl
 
 This plugin lets your AI assistant build, update and publish Datawrapper charts for you, right from a chat.
 
+> **Status: early and experimental.** This ClawHub listing is under active
+> development and behavior can change between releases. See the known issue
+> below before assuming "enabled" in the Control UI means the server is
+> actually running.
+
 ## What you need
 
 - A Datawrapper account
