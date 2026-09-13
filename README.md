@@ -92,6 +92,14 @@ Use `list_chart_types` to see descriptions, then `get_chart_schema` to explore c
 
 For other clients (Claude Desktop, Claude.ai, Cursor, VS Code Copilot, ChatGPT, OpenAI Codex, OpenClaw) and Kubernetes deployment, see the [installation guide](INSTALLATION.md).
 
+> **Installing via a plugin marketplace/directory (Claude Desktop's plugin
+> browser, ClawHub, etc.) is still experimental.** These interactive install
+> flows currently have no working way to collect required environment
+> variables like `DATAWRAPPER_ACCESS_TOKEN` — see
+> [issue #78](https://github.com/palewire/datawrapper-mcp/issues/78) for
+> details. The manually-edited config shown above (and throughout the
+> [installation guide](INSTALLATION.md)) is the reliable path today.
+
 ### Using Your Own Token (Hosted Deployments)
 
 When connecting to a hosted instance of the server over HTTP, you can authenticate
