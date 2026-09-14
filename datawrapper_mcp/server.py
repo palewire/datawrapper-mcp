@@ -6,13 +6,14 @@ import os
 from collections.abc import Sequence
 from typing import Any, cast
 
-from fastmcp import FastMCP
+from fastmcp import Context, FastMCP
 from fastmcp.tools import ToolResult
 from mcp.types import ImageContent, TextContent, ToolAnnotations
 from prefab_ui.app import PrefabApp
 from prefab_ui.components import Column, Image, Text
 
 from .config import CHART_CLASSES
+from .elicitation import TOKEN_SETTINGS_URL, elicit_datawrapper_token
 from .handlers import (
     check_datawrapper_connection as check_datawrapper_connection_handler,
 )
@@ -207,6 +208,52 @@ async def check_datawrapper_connection(access_token: str | None = None) -> str:
         "CheckDatawrapperConnectionArgs",
         {"access_token": access_token} if access_token else {},
     )
+    result = await check_datawrapper_connection_handler(arguments)
+    return result[0].text
+
+
+@mcp.tool(
+    annotations=ToolAnnotations(
+        read_only_hint=True,
+        destructive_hint=False,
+        idempotent_hint=False,
+        open_world_hint=True,
+    )
+)
+async def login_to_datawrapper(ctx: Context) -> str:
+    """⚠️ DATAWRAPPER MCP TOOL ⚠️
+    This is part of the Datawrapper MCP server integration.
+
+    ---
+
+    🧪 PROTOTYPE: connect your personal Datawrapper account via an in-chat
+    prompt, instead of configuring an Authorization header or environment
+    variable up front.
+
+    Uses the MCP elicitation primitive to ask the client to pop a small form
+    asking for your Datawrapper API token, verifies it against the
+    Datawrapper API, and reports the account it resolves to - the same
+    check check_datawrapper_connection() performs, just token-first instead
+    of config-first.
+
+    Elicitation is only supported by a minority of MCP clients today (see
+    docs/proposals/march-2026-upgrades.md). If the client declines to show
+    the prompt, or the user cancels it, this returns guidance to use
+    check_datawrapper_connection(access_token=...) or the BYOK header instead.
+
+    Returns:
+        The authenticated account's email, name, and ID as JSON, or
+        guidance if no token was obtained.
+    """
+    token = await elicit_datawrapper_token(ctx)
+    if token is None:
+        return (
+            "No token received - either this client doesn't support MCP "
+            "elicitation prompts, or the prompt was declined/cancelled. "
+            f"Create a token at {TOKEN_SETTINGS_URL} and pass it directly "
+            "instead, e.g. check_datawrapper_connection(access_token='...')."
+        )
+    arguments = cast("CheckDatawrapperConnectionArgs", {"access_token": token})
     result = await check_datawrapper_connection_handler(arguments)
     return result[0].text
 

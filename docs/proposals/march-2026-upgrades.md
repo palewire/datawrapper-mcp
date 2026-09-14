@@ -352,6 +352,17 @@ Monitor for stabilization in the ~June 2026 spec release.
 (e.g. "Which column should be the X axis?"). Only 11% of clients support it today.
 Worth adding once Claude Desktop and Cursor ship support.
 
+A login-focused prototype exists on `feat/elicitation-login-prototype`
+(`login_to_datawrapper`, `datawrapper_mcp/elicitation.py`): instead of a header
+or env var, the server elicits the user's Datawrapper API token as an in-chat
+form and verifies it on the spot. It's a much smaller footprint than the
+OAuth-shaped broker on `feat/linked-account-oauth` (issue #57) - no
+authorization server, PKCE, or token storage - but it inherits elicitation's
+client-support gap, and doesn't (yet) persist the token for reuse by other
+tools in the same session; each call to a write tool would need its own
+prompt unless that's wired up separately. Revisit once elicitation adoption
+improves.
+
 **Per-user Datawrapper authentication:** Allowing individual users to bring their own
 Datawrapper API keys (rather than sharing a single server-wide token). See
 [per-user-authentication.md](per-user-authentication.md) for detailed options and

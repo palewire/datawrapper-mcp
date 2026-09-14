@@ -461,6 +461,39 @@
       "name": "list_chart_types",
       "title": "List Chart Types"
     },
+    "login_to_datawrapper": {
+      "annotations": {
+        "destructive_hint": false,
+        "idempotent_hint": false,
+        "open_world_hint": true,
+        "read_only_hint": true
+      },
+      "description": "\u26a0\ufe0f DATAWRAPPER MCP TOOL \u26a0\ufe0f\nThis is part of the Datawrapper MCP server integration.\n\n---\n\n\ud83e\uddea PROTOTYPE: connect your personal Datawrapper account via an in-chat\nprompt, instead of configuring an Authorization header or environment\nvariable up front.\n\nUses the MCP elicitation primitive to ask the client to pop a small form\nasking for your Datawrapper API token, verifies it against the\nDatawrapper API, and reports the account it resolves to - the same\ncheck check_datawrapper_connection() performs, just token-first instead\nof config-first.\n\nElicitation is only supported by a minority of MCP clients today (see\ndocs/proposals/march-2026-upgrades.md). If the client declines to show\nthe prompt, or the user cancels it, this returns guidance to use\ncheck_datawrapper_connection(access_token=...) or the BYOK header instead.\n\nReturns:\n    The authenticated account's email, name, and ID as JSON, or\n    guidance if no token was obtained.",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {},
+        "type": "object"
+      },
+      "meta": {
+        "fastmcp": {
+          "tags": []
+        }
+      },
+      "name": "login_to_datawrapper",
+      "output_schema": {
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "x-fastmcp-wrap-result": true
+      },
+      "title": "Login To Datawrapper"
+    },
     "publish_chart": {
       "annotations": {
         "destructive_hint": false,
