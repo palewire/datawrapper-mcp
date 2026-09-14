@@ -150,6 +150,12 @@ ignore = [
 "datawrapper_mcp/server.py" = [
     "TC001",   # These types are consumed at runtime by FastMCP's schema introspection
 ]
+"datawrapper_mcp/url_elicitation.py" = [
+    "BLE001",  # The /connect handler can't re-raise into a caller - it must
+               # render an error page - so it catches broadly like whoami's
+               # 401/403 handling does, just without the "from e" re-raise
+               # that would otherwise satisfy this rule.
+]
 
 [tool.ruff.format]
 docstring-code-format = true

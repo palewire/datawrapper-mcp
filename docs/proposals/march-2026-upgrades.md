@@ -352,6 +352,31 @@ Monitor for stabilization in the ~June 2026 spec release.
 (e.g. "Which column should be the X axis?"). Only 11% of clients support it today.
 Worth adding once Claude Desktop and Cursor ship support.
 
+A login-focused prototype exists on `feat/elicitation-login-prototype`
+(`login_to_datawrapper`, `datawrapper_mcp/url_elicitation.py`): instead of a
+header or env var, the server elicits the user's Datawrapper API token
+through *URL-mode* elicitation (added 2025-11-25, tightened 2026-07-28) -
+the client consents to open a link, and a page this server hosts collects
+and verifies the token directly, out of band from the MCP client. This isn't
+optional stylistically: the spec explicitly prohibits collecting secrets like
+API tokens via *form*-mode elicitation (an earlier version of this prototype
+did exactly that, before we caught the requirement) precisely because form
+data passes through the client/LLM context. URL mode also implies the modern
+multi-round-trip protocol (SEP-2322) rather than the older imperative
+`ctx.elicit()` push channel - the tool is written as an explicit guard
+(`login_guard` in `url_elicitation.py`) that checks `ctx.input_responses` /
+`ctx.request_state` each round, rather than blocking on a single call.
+
+It's still a much smaller footprint than the OAuth-shaped broker on
+`feat/linked-account-oauth` (issue #57) - no DCR, PKCE, or authorization
+server - but it inherits the same client-support gap (URL-mode elicitation is
+brand new; few clients implement it yet), doesn't persist the verified token
+for reuse by other tools in the same session, and doesn't bind the connect
+link to a real per-user identity beyond "whoever holds this one-time link" -
+the same limitation the OAuth broker's own docs call out for itself. Revisit
+once elicitation adoption improves, and lean on `feat/linked-account-oauth`'s
+storage layer if this needs to persist tokens for real.
+
 **Per-user Datawrapper authentication:** Allowing individual users to bring their own
 Datawrapper API keys (rather than sharing a single server-wide token). See
 [per-user-authentication.md](per-user-authentication.md) for detailed options and

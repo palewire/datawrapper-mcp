@@ -6,9 +6,14 @@ import os
 from collections.abc import Sequence
 from typing import Any, cast
 
-from fastmcp import FastMCP
+from fastmcp import Context, FastMCP
 from fastmcp.tools import ToolResult
-from mcp.types import ImageContent, TextContent, ToolAnnotations
+from mcp.types import (
+    ImageContent,
+    InputRequiredResult,
+    TextContent,
+    ToolAnnotations,
+)
 from prefab_ui.app import PrefabApp
 from prefab_ui.components import Column, Image, Text
 
@@ -40,6 +45,7 @@ from .types import (
     PublishChartArgs,
     UpdateChartArgs,
 )
+from .url_elicitation import login_guard
 
 # Maximum base64 PNG size (bytes) to include inline in PrefabUI view.
 # structuredContent has a 25,000 token limit; 200KB base64 ≈ 67K tokens.
@@ -209,6 +215,44 @@ async def check_datawrapper_connection(access_token: str | None = None) -> str:
     )
     result = await check_datawrapper_connection_handler(arguments)
     return result[0].text
+
+
+@mcp.tool(
+    annotations=ToolAnnotations(
+        read_only_hint=True,
+        destructive_hint=False,
+        idempotent_hint=False,
+        open_world_hint=True,
+    )
+)
+async def login_to_datawrapper(ctx: Context) -> str | InputRequiredResult:
+    """⚠️ DATAWRAPPER MCP TOOL ⚠️
+    This is part of the Datawrapper MCP server integration.
+
+    ---
+
+    🧪 PROTOTYPE: connect your personal Datawrapper account through a link
+    you open yourself, instead of configuring an Authorization header or
+    environment variable up front.
+
+    Uses MCP's *URL-mode* elicitation: the client asks your consent to open a
+    link, then a page this server hosts collects and verifies your
+    Datawrapper API token directly - the token itself never passes through
+    this chat or the MCP client. (Per the MCP spec, servers are prohibited
+    from collecting secrets like API tokens via *form*-mode elicitation for
+    exactly this reason.) See docs/proposals/march-2026-upgrades.md for the
+    fuller writeup, including this prototype's known limitations.
+
+    URL-mode elicitation is only supported by a minority of MCP clients
+    today. If the client doesn't support it, or the prompt is declined or
+    cancelled, this returns guidance to use
+    check_datawrapper_connection(access_token=...) or the BYOK header instead.
+
+    Returns:
+        The authenticated account's email, name, and ID as JSON once you've
+        completed the linked page, or guidance if no connection was made.
+    """
+    return await login_guard(ctx.input_responses, ctx.request_state)
 
 
 @mcp.tool(

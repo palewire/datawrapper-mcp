@@ -461,6 +461,39 @@
       "name": "list_chart_types",
       "title": "List Chart Types"
     },
+    "login_to_datawrapper": {
+      "annotations": {
+        "destructive_hint": false,
+        "idempotent_hint": false,
+        "open_world_hint": true,
+        "read_only_hint": true
+      },
+      "description": "\u26a0\ufe0f DATAWRAPPER MCP TOOL \u26a0\ufe0f\nThis is part of the Datawrapper MCP server integration.\n\n---\n\n\ud83e\uddea PROTOTYPE: connect your personal Datawrapper account through a link\nyou open yourself, instead of configuring an Authorization header or\nenvironment variable up front.\n\nUses MCP's *URL-mode* elicitation: the client asks your consent to open a\nlink, then a page this server hosts collects and verifies your\nDatawrapper API token directly - the token itself never passes through\nthis chat or the MCP client. (Per the MCP spec, servers are prohibited\nfrom collecting secrets like API tokens via *form*-mode elicitation for\nexactly this reason.) See docs/proposals/march-2026-upgrades.md for the\nfuller writeup, including this prototype's known limitations.\n\nURL-mode elicitation is only supported by a minority of MCP clients\ntoday. If the client doesn't support it, or the prompt is declined or\ncancelled, this returns guidance to use\ncheck_datawrapper_connection(access_token=...) or the BYOK header instead.\n\nReturns:\n    The authenticated account's email, name, and ID as JSON once you've\n    completed the linked page, or guidance if no connection was made.",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {},
+        "type": "object"
+      },
+      "meta": {
+        "fastmcp": {
+          "tags": []
+        }
+      },
+      "name": "login_to_datawrapper",
+      "output_schema": {
+        "properties": {
+          "result": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "result"
+        ],
+        "type": "object",
+        "x-fastmcp-wrap-result": true
+      },
+      "title": "Login To Datawrapper"
+    },
     "publish_chart": {
       "annotations": {
         "destructive_hint": false,
