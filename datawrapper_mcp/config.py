@@ -61,3 +61,25 @@ API_TYPE_TO_SIMPLIFIED: dict[str, str] = {
     "d3-lines": "line",
     "d3-scatter-plot": "scatter",
 }
+
+# Types whose height follows their content (a row per bar, dot or table row),
+# which the Datawrapper editor resizes to fit whenever it renders them. Other
+# types keep the height they are given. /v3/visualizations lists these with a
+# fixed height and without supportsFitHeight.
+FIT_CONTENT_TYPES = {
+    "d3-arrow-plot",
+    "d3-bars",
+    "d3-bars-bullet",
+    "d3-bars-grouped",
+    "d3-bars-split",
+    "d3-bars-stacked",
+    "d3-dot-plot",
+    "d3-range-plot",
+    "tables",
+}
+
+
+def fits_content(chart_type: str) -> bool:
+    """Whether a type, by simplified name or API id, is sized to its content."""
+    api_types = {name: api for api, name in API_TYPE_TO_SIMPLIFIED.items()}
+    return api_types.get(chart_type, chart_type) in FIT_CONTENT_TYPES
