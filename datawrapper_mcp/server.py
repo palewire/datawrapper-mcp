@@ -16,6 +16,7 @@ from .config import CHART_CLASSES
 from .handlers import (
     check_datawrapper_connection as check_datawrapper_connection_handler,
 )
+from .handlers import copy_chart as copy_chart_handler
 from .handlers import create_chart as create_chart_handler
 from .handlers import delete_chart as delete_chart_handler
 from .handlers import export_chart_png as export_chart_png_handler
@@ -32,6 +33,7 @@ from .middleware import (
 )
 from .types import (
     CheckDatawrapperConnectionArgs,
+    CopyChartArgs,
     CreateChartArgs,
     DeleteChartArgs,
     ExportChartPngArgs,
@@ -68,6 +70,7 @@ mcp = FastMCP(
                     "delete_chart",
                     "export_chart_png",
                     "check_datawrapper_connection",
+                    "copy_chart",
                 }
             ),
         ),
@@ -720,6 +723,55 @@ async def export_chart_png(
         args["timeout"] = timeout
 
     return await export_chart_png_handler(cast("ExportChartPngArgs", args))
+
+
+@mcp.tool(
+    annotations=ToolAnnotations(
+        read_only_hint=False,
+        destructive_hint=False,
+        idempotent_hint=False,
+        open_world_hint=True,
+    )
+)
+async def copy_chart(
+    chart_id: str,
+    title: str | None = None,
+    folder_id: int | None = None,
+    access_token: str | None = None,
+) -> list[TextContent | ImageContent]:
+    """⚠️ DATAWRAPPER MCP TOOL ⚠️
+    This is part of the Datawrapper MCP server integration.
+
+    ---
+
+    Copy a Datawrapper chart, as the editor's "Duplicate" does. The copy keeps
+    everything: data (including cells edited in the editor), styling, number
+    formats, annotations, theme and size. Use it to start a new chart from one
+    already made, then change it with update_chart. To make a chart of the same
+    kind with different data from scratch, use create_chart instead.
+
+    Args:
+        chart_id: ID of the chart to copy
+        title: Title for the copy (optional; Datawrapper adds "(Copy)" to the
+               original's title otherwise)
+        folder_id: ID of the folder to put the copy in (optional; it stays
+                   next to the original otherwise)
+        access_token: Optional Datawrapper API token. When provided, uses the
+                      caller's account. When omitted, falls back to the server's
+                      DATAWRAPPER_ACCESS_TOKEN env var.
+
+    Returns:
+        The copy's chart_id, title, folder_id and editor URL as JSON, and an
+        inline PNG preview image (if export succeeds)
+    """
+    args: dict[str, Any] = {"chart_id": chart_id}
+    if title is not None:
+        args["title"] = title
+    if folder_id is not None:
+        args["folder_id"] = folder_id
+    if access_token:
+        args["access_token"] = access_token
+    return await copy_chart_handler(cast("CopyChartArgs", args))
 
 
 def main() -> None:  # pragma: no cover - trivial stdio entry point

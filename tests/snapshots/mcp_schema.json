@@ -110,6 +110,71 @@
       },
       "title": "Check Datawrapper Connection"
     },
+    "copy_chart": {
+      "annotations": {
+        "destructive_hint": false,
+        "idempotent_hint": false,
+        "open_world_hint": true,
+        "read_only_hint": false
+      },
+      "description": "\u26a0\ufe0f DATAWRAPPER MCP TOOL \u26a0\ufe0f\nThis is part of the Datawrapper MCP server integration.\n\n---\n\nCopy a Datawrapper chart, as the editor's \"Duplicate\" does. The copy keeps\neverything: data (including cells edited in the editor), styling, number\nformats, annotations, theme and size. Use it to start a new chart from one\nalready made, then change it with update_chart. To make a chart of the same\nkind with different data from scratch, use create_chart instead.",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "access_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Optional Datawrapper API token. When provided, uses the\n          caller's account. When omitted, falls back to the server's\n          DATAWRAPPER_ACCESS_TOKEN env var."
+          },
+          "chart_id": {
+            "description": "ID of the chart to copy",
+            "type": "string"
+          },
+          "folder_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "ID of the folder to put the copy in (optional; it stays\n       next to the original otherwise)"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "description": "Title for the copy (optional; Datawrapper adds \"(Copy)\" to the\n   original's title otherwise)"
+          }
+        },
+        "required": [
+          "chart_id"
+        ],
+        "type": "object"
+      },
+      "meta": {
+        "fastmcp": {
+          "tags": []
+        }
+      },
+      "name": "copy_chart",
+      "title": "Copy Chart"
+    },
     "create_chart": {
       "annotations": {
         "destructive_hint": false,

@@ -61,6 +61,7 @@ Here's a more complete example showing how to create, publish, update, and displ
 | `get_chart`        | Retrieve a chart's configuration and metadata      |
 | `delete_chart`     | Permanently delete a chart                         |
 | `export_chart_png` | Export a chart as a PNG image                      |
+| `copy_chart`       | Copy a chart, optionally with a new title or folder |
 
 ## Chart Types
 

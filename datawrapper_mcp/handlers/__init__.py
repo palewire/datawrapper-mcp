@@ -1,5 +1,6 @@
 """Handler functions for MCP tool implementations."""
 
+from .copy import copy_chart
 from .create import create_chart
 from .delete import delete_chart
 from .export import export_chart_png
@@ -11,6 +12,7 @@ from .whoami import check_datawrapper_connection
 
 __all__ = [
     "check_datawrapper_connection",
+    "copy_chart",
     "create_chart",
     "delete_chart",
     "export_chart_png",

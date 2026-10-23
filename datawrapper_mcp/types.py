@@ -60,6 +60,15 @@ class CheckDatawrapperConnectionArgs(TypedDict):
     access_token: NotRequired[str]
 
 
+class CopyChartArgs(TypedDict):
+    """Arguments for copy_chart handler."""
+
+    chart_id: str
+    title: NotRequired[str]
+    folder_id: NotRequired[int]
+    access_token: NotRequired[str]
+
+
 class ExportChartPngArgs(TypedDict):
     """Arguments for export_chart_png handler."""
 

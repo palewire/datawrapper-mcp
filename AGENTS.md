@@ -82,6 +82,7 @@ datawrapper_mcp/
 | `delete_chart` | Delete a chart |
 | `publish_chart` | Publish chart (only on explicit user request) |
 | `export_chart_png` | Export as PNG (only on explicit user request) |
+| `copy_chart` | Copy a chart, optionally with a new title or folder |
 
 **Important**: `publish_chart` and `export_chart_png` should ONLY be used when explicitly requested by the user.
 
