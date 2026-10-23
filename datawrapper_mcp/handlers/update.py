@@ -3,6 +3,7 @@
 import asyncio
 from typing import Any
 
+import pandas as pd
 from datawrapper import get_chart
 from mcp.types import ImageContent
 
@@ -28,10 +29,14 @@ async def update_chart(
     # (see export.py/preview.py).
     chart = await asyncio.to_thread(get_chart, chart_id, access_token=token)
 
-    # Update data if provided
+    # Update data if provided. Otherwise leave the chart's data alone: empty
+    # data isn't uploaded, while sending back what get_chart parsed would
+    # rewrite it (blank header cells come back as "Unnamed: 1", and so on).
     if "data" in arguments:
         df = json_to_dataframe(arguments["data"])
         chart.data = df
+    else:
+        chart.data = pd.DataFrame()
 
     # Update config if provided
     if "chart_config" in arguments:
