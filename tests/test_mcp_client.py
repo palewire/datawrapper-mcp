@@ -249,6 +249,24 @@ class TestCreateChart:
         assert not result.is_error
         assert "abc123" in result.content[0].text
 
+    async def test_creates_chart_in_folder(
+        self, client, mock_api_token, mock_create_flow
+    ):
+        result = await client.call_tool(
+            "create_chart",
+            {
+                "data": [{"year": 2020, "value": 100}],
+                "chart_type": "bar",
+                "chart_config": {"title": "Test Chart"},
+                "folder_id": 201,
+            },
+        )
+
+        assert not result.is_error
+        mock_create_flow.create.assert_called_once_with(
+            access_token=None, folder_id=201
+        )
+
     async def test_includes_inline_preview_when_available(
         self, client, mock_api_token, mock_create_flow_with_preview
     ):
@@ -492,6 +510,63 @@ class TestCheckDatawrapperConnection:
                 await client.call_tool(
                     "check_datawrapper_connection", {"access_token": "bad"}
                 )
+
+
+class TestFolders:
+    """list_folders, create_folder and move_chart through the full MCP stack."""
+
+    @pytest.fixture
+    def mock_folder_client(self):
+        client = MagicMock()
+        with patch(
+            "datawrapper_mcp.handlers.folders.Datawrapper", return_value=client
+        ) as mock_class:
+            yield mock_class, client
+
+    async def test_list_folders(self, client, mock_api_token, mock_folder_client):
+        _, dw = mock_folder_client
+        dw.get_folders.return_value = {
+            "list": [
+                {
+                    "type": "team",
+                    "id": "team1",
+                    "name": "Newsroom",
+                    "charts": [],
+                    "folders": [{"id": 7, "name": "Budget", "charts": []}],
+                }
+            ]
+        }
+
+        result = await client.call_tool("list_folders", {})
+
+        assert not result.is_error
+        data = json.loads(result.content[0].text)
+        assert data["folders"][0]["path"] == "Newsroom / Budget"
+
+    async def test_create_folder(self, client, mock_api_token, mock_folder_client):
+        _, dw = mock_folder_client
+        dw.create_folder.return_value = {"id": 8, "name": "New", "teamId": "team1"}
+
+        result = await client.call_tool(
+            "create_folder", {"name": "New", "team_id": "team1"}
+        )
+
+        assert not result.is_error
+        dw.create_folder.assert_called_once_with("New", parent_id=None, team_id="team1")
+        assert json.loads(result.content[0].text)["id"] == 8
+
+    async def test_move_chart_forwards_explicit_token(self, client, mock_folder_client):
+        mock_class, dw = mock_folder_client
+        dw.move_chart.return_value = {"id": "abc123", "folderId": 7}
+
+        result = await client.call_tool(
+            "move_chart",
+            {"chart_id": "abc123", "folder_id": 7, "access_token": "explicit_xyz"},
+        )
+
+        assert not result.is_error
+        dw.move_chart.assert_called_once_with("abc123", 7)
+        mock_class.assert_called_once_with(access_token="explicit_xyz")
 
 
 class TestExportChartPng:

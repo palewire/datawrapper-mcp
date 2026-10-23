@@ -61,6 +61,9 @@ Here's a more complete example showing how to create, publish, update, and displ
 | `get_chart`        | Retrieve a chart's configuration and metadata      |
 | `delete_chart`     | Permanently delete a chart                         |
 | `export_chart_png` | Export a chart as a PNG image                      |
+| `list_folders`     | List personal and team folders, optionally with their charts |
+| `create_folder`    | Create a folder, optionally inside another folder or a team |
+| `move_chart`       | Move a chart into a folder                         |
 
 ## Chart Types
 

@@ -68,6 +68,7 @@ datawrapper_mcp/
     ├── publish.py       # Chart publishing handler
     ├── export.py        # Chart export handler
     ├── retrieve.py      # Chart retrieval handler
+    ├── folders.py       # Folder listing/creation and chart moving handlers
     └── schema.py        # Schema retrieval handler
 ```
 
@@ -82,6 +83,9 @@ datawrapper_mcp/
 | `delete_chart` | Delete a chart |
 | `publish_chart` | Publish chart (only on explicit user request) |
 | `export_chart_png` | Export as PNG (only on explicit user request) |
+| `list_folders` | List personal and team folders (optionally with their charts) |
+| `create_folder` | Create a folder |
+| `move_chart` | Move a chart into a folder |
 
 **Important**: `publish_chart` and `export_chart_png` should ONLY be used when explicitly requested by the user.
 

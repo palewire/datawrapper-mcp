@@ -3,6 +3,7 @@
 from .create import create_chart
 from .delete import delete_chart
 from .export import export_chart_png
+from .folders import create_folder, list_folders, move_chart
 from .publish import publish_chart
 from .retrieve import get_chart_info
 from .schema import get_chart_schema
@@ -12,10 +13,13 @@ from .whoami import check_datawrapper_connection
 __all__ = [
     "check_datawrapper_connection",
     "create_chart",
+    "create_folder",
     "delete_chart",
     "export_chart_png",
     "get_chart_info",
     "get_chart_schema",
+    "list_folders",
+    "move_chart",
     "publish_chart",
     "update_chart",
 ]

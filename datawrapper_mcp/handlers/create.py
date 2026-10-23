@@ -44,7 +44,9 @@ async def create_chart(
 
     # Create chart using Pydantic instance method. Synchronous and
     # network-bound, so run it off the event loop (see export.py/preview.py).
-    await asyncio.to_thread(chart.create, access_token=token)
+    await asyncio.to_thread(
+        chart.create, access_token=token, folder_id=arguments.get("folder_id")
+    )
 
     metadata: dict[str, Any] = {
         "chart_id": chart.chart_id,

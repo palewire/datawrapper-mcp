@@ -17,10 +17,13 @@ from .handlers import (
     check_datawrapper_connection as check_datawrapper_connection_handler,
 )
 from .handlers import create_chart as create_chart_handler
+from .handlers import create_folder as create_folder_handler
 from .handlers import delete_chart as delete_chart_handler
 from .handlers import export_chart_png as export_chart_png_handler
 from .handlers import get_chart_info as get_chart_info_handler
 from .handlers import get_chart_schema as get_chart_schema_handler
+from .handlers import list_folders as list_folders_handler
+from .handlers import move_chart as move_chart_handler
 from .handlers import publish_chart as publish_chart_handler
 from .handlers import update_chart as update_chart_handler
 from .handlers.schema import clean_chart_schema
@@ -33,10 +36,13 @@ from .middleware import (
 from .types import (
     CheckDatawrapperConnectionArgs,
     CreateChartArgs,
+    CreateFolderArgs,
     DeleteChartArgs,
     ExportChartPngArgs,
     GetChartArgs,
     GetChartSchemaArgs,
+    ListFoldersArgs,
+    MoveChartArgs,
     PublishChartArgs,
     UpdateChartArgs,
 )
@@ -68,6 +74,9 @@ mcp = FastMCP(
                     "delete_chart",
                     "export_chart_png",
                     "check_datawrapper_connection",
+                    "list_folders",
+                    "create_folder",
+                    "move_chart",
                 }
             ),
         ),
@@ -225,6 +234,7 @@ async def create_chart(
     chart_type: str,
     chart_config: dict[str, Any] | str,
     access_token: str | None = None,
+    folder_id: int | None = None,
 ) -> ToolResult:
     """⚠️ THIS IS THE DATAWRAPPER INTEGRATION ⚠️
     Use this MCP tool for ALL Datawrapper chart creation.
@@ -309,6 +319,9 @@ async def create_chart(
         access_token: Optional Datawrapper API token. When provided, charts are
                       created in the caller's account (recommended). When omitted,
                       falls back to the server's DATAWRAPPER_ACCESS_TOKEN env var.
+        folder_id: Optional ID of the folder to create the chart in. Use
+                   list_folders to find it. When omitted, the chart is created
+                   outside any folder.
 
     Returns:
         Chart ID, editor URL, and an inline PNG preview image (if export succeeds)
@@ -329,6 +342,8 @@ async def create_chart(
     }
     if access_token:
         args["access_token"] = access_token
+    if folder_id is not None:
+        args["folder_id"] = folder_id
     arguments = cast("CreateChartArgs", args)
     chart_data, images = await create_chart_handler(arguments)
 
@@ -720,6 +735,127 @@ async def export_chart_png(
         args["timeout"] = timeout
 
     return await export_chart_png_handler(cast("ExportChartPngArgs", args))
+
+
+@mcp.tool(
+    annotations=ToolAnnotations(
+        read_only_hint=True,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
+    )
+)
+async def list_folders(
+    include_charts: bool = False, access_token: str | None = None
+) -> str:
+    """⚠️ DATAWRAPPER MCP TOOL ⚠️
+    This is part of the Datawrapper MCP server integration.
+
+    ---
+
+    List the folders in the Datawrapper account: the personal folders and the
+    folders of every team the account belongs to, flattened into one list.
+
+    Use this to find the folder_id for create_chart or move_chart, or, with
+    include_charts, to find which charts a folder holds.
+
+    Args:
+        include_charts: If true, also list each folder's charts (id, title, type)
+        access_token: Optional Datawrapper API token. When provided, uses the
+                      caller's account. When omitted, falls back to the server's
+                      DATAWRAPPER_ACCESS_TOKEN env var.
+
+    Returns:
+        JSON with the roots (personal charts and each team) and every folder's
+        id, name, full path, team_id and chart count
+    """
+    args: dict[str, Any] = {"include_charts": include_charts}
+    if access_token:
+        args["access_token"] = access_token
+    result = await list_folders_handler(cast("ListFoldersArgs", args))
+    return result[0].text
+
+
+@mcp.tool(
+    annotations=ToolAnnotations(
+        read_only_hint=False,
+        destructive_hint=False,
+        idempotent_hint=False,
+        open_world_hint=True,
+    )
+)
+async def create_folder(
+    name: str,
+    parent_id: int | None = None,
+    team_id: str | None = None,
+    access_token: str | None = None,
+) -> str:
+    """⚠️ DATAWRAPPER MCP TOOL ⚠️
+    This is part of the Datawrapper MCP server integration.
+
+    ---
+
+    Create a folder in Datawrapper. Use list_folders first to check whether a
+    suitable folder already exists, and to find parent and team IDs.
+
+    Args:
+        name: Name of the new folder
+        parent_id: Optional ID of the folder to create this one inside
+        team_id: Optional ID of the team that owns the folder. When omitted,
+                 the folder belongs to the account's personal charts.
+        access_token: Optional Datawrapper API token. When provided, uses the
+                      caller's account. When omitted, falls back to the server's
+                      DATAWRAPPER_ACCESS_TOKEN env var.
+
+    Returns:
+        The new folder's id, name, parent_id and team_id as JSON
+    """
+    args: dict[str, Any] = {"name": name}
+    if parent_id is not None:
+        args["parent_id"] = parent_id
+    if team_id:
+        args["team_id"] = team_id
+    if access_token:
+        args["access_token"] = access_token
+    result = await create_folder_handler(cast("CreateFolderArgs", args))
+    return result[0].text
+
+
+@mcp.tool(
+    annotations=ToolAnnotations(
+        read_only_hint=False,
+        destructive_hint=False,
+        idempotent_hint=True,
+        open_world_hint=True,
+    )
+)
+async def move_chart(
+    chart_id: str, folder_id: int, access_token: str | None = None
+) -> str:
+    """⚠️ DATAWRAPPER MCP TOOL ⚠️
+    This is part of the Datawrapper MCP server integration.
+
+    ---
+
+    Move a Datawrapper chart into a folder. Moving into a team's folder also
+    moves the chart into that team; moving into a personal folder takes it out.
+    Use list_folders to find the folder_id.
+
+    Args:
+        chart_id: ID of the chart to move
+        folder_id: ID of the destination folder
+        access_token: Optional Datawrapper API token. When provided, uses the
+                      caller's account. When omitted, falls back to the server's
+                      DATAWRAPPER_ACCESS_TOKEN env var.
+
+    Returns:
+        The chart's id with its new folder_id and team_id as JSON
+    """
+    args: dict[str, Any] = {"chart_id": chart_id, "folder_id": folder_id}
+    if access_token:
+        args["access_token"] = access_token
+    result = await move_chart_handler(cast("MoveChartArgs", args))
+    return result[0].text
 
 
 def main() -> None:  # pragma: no cover - trivial stdio entry point
