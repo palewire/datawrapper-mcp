@@ -118,7 +118,7 @@ async def list_chart_types() -> Sequence[TextContent | ImageContent]:
         "area": "Area chart - filled line chart for emphasizing magnitude",
         "arrow": "Arrow chart - shows before/after comparisons with arrows",
         "column": "Vertical column chart - classic bar chart orientation",
-        "multiple_column": "Grouped column chart - compare multiple series side-by-side",
+        "multiple_column": "Small multiples of column charts - one panel per series, in a grid",
         "scatter": "Scatter plot - visualize correlations between two variables",
         "stacked_bar": "Stacked bar chart - show part-to-whole relationships",
     }
