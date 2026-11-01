@@ -10,7 +10,7 @@ dependencies = [
     "datawrapper>=2.0.14",
     "fastmcp[apps]==4.0.3",
     "mcp>=2.0.0,<3.0.0",
-    "prefab-ui==0.20.2",
+    "prefab-ui==0.21.1",
     "pandas>=2.0.0",
     "starlette>=1.0.1",
     'exceptiongroup; python_version<"3.11"',
