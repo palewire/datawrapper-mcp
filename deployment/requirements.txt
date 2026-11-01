@@ -1,5 +1,5 @@
 # Core MCP server dependencies
-fastmcp[apps]==4.0.3
+fastmcp[apps]==4.1.4
 mcp>=2.0.0,<3.0.0
 
 # Datawrapper API integration
